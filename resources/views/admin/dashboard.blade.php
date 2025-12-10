@@ -34,7 +34,7 @@
 
                 <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Artigos</h3>
-                    <p class="text-3xl font-bold text-yellow-800 mb-2">0</p>
+                    <p class="text-3xl font-bold text-yellow-800 mb-2">{{ \App\Models\Article::where('published', true)->count() }}</p>
                     <p class="text-gray-600 text-sm">Artigos publicados</p>
                 </div>
             </div>
@@ -49,8 +49,14 @@
                         <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
                             Criar Nova Edição →
                         </a>
-                        <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
+                        <a href="{{ route('admin.articles.create') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Publicar Artigo →
+                        </a>
+                        <a href="{{ route('admin.articles.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
+                            Gerenciar Artigos →
+                        </a>
+                        <a href="{{ route('admin.categories.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
+                            Gerenciar Categorias →
                         </a>
                         <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
                             Configurações →

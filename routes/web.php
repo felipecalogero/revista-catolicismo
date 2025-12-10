@@ -7,9 +7,12 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/artigos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -28,4 +31,6 @@ Route::middleware('auth')->group(function () {
 // Rotas de administrador
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('articles', AdminArticleController::class);
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 });
