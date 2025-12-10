@@ -4,9 +4,11 @@
             {{-- Logo --}}
             <div class="flex items-center">
                 <a href="{{ route('home') }}" class="flex items-center">
-                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight font-serif">
-                        Catolicismo
-                    </h1>
+                    <img 
+                        src="{{ asset('img/logo.png') }}" 
+                        alt="Catolicismo" 
+                        class="h-12 md:h-16 object-contain"
+                    >
                 </a>
             </div>
 
@@ -62,7 +64,7 @@
             </nav>
 
             {{-- Menu Mobile Button --}}
-            <button 
+            <button
                 id="mobile-menu-button"
                 class="lg:hidden p-2 text-gray-700 hover:text-red-800 transition-colors"
                 aria-label="Menu"
