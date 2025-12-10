@@ -112,7 +112,7 @@
                 <div class="w-20 h-1 bg-red-800"></div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @php
                     $destaques = [
                         [
@@ -167,7 +167,7 @@
                         <p class="text-gray-600 text-sm">As principais notícias e análises do momento</p>
                     </div>
                     
-                    <div class="space-y-8">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                         @php
                             $noticias = [
                                 [
@@ -217,24 +217,102 @@
                                     'category' => 'Brasil',
                                     'author' => 'Equipe Editorial',
                                     'date' => now()->subDays(5)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'A Doutrina Social da Igreja',
+                                    'excerpt' => 'Como os princípios católicos orientam a ação social e política no mundo contemporâneo.',
+                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Política',
+                                    'author' => 'Prof. Fernando',
+                                    'date' => now()->subDays(6)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Liturgia Tradicional',
+                                    'excerpt' => 'A importância da preservação dos ritos tradicionais da Igreja Católica.',
+                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Igreja',
+                                    'author' => 'Pe. Antônio',
+                                    'date' => now()->subDays(7)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Declaração do Vaticano sobre Questões Contemporâneas',
+                                    'excerpt' => 'O Vaticano emite nova declaração abordando temas relevantes da sociedade moderna e a posição da Igreja Católica.',
+                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Política',
+                                    'author' => 'Correspondente Vaticano',
+                                    'date' => now()->subDays(0)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Celebração da Missa Tridentina em Cidades Brasileiras',
+                                    'excerpt' => 'Cresce o número de paróquias que oferecem a Missa no rito tradicional, refletindo o interesse pela liturgia clássica.',
+                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Igreja',
+                                    'author' => 'Pe. João Batista',
+                                    'date' => now()->subDays(1)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Exposição de Arte Sacra em Museu Nacional',
+                                    'excerpt' => 'Museu inaugura exposição com peças históricas da arte sacra brasileira dos séculos XVII e XVIII.',
+                                    'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Cultura',
+                                    'author' => 'Crítico de Arte',
+                                    'date' => now()->subDays(2)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Iniciativas Católicas de Apoio às Famílias',
+                                    'excerpt' => 'Organizações católicas lançam programas de apoio familiar em diversas regiões do país.',
+                                    'image' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Sociedade',
+                                    'author' => 'Reporter Social',
+                                    'date' => now()->subDays(3)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Opinião: A Crise de Valores na Sociedade Moderna',
+                                    'excerpt' => 'Colunista analisa os desafios morais e éticos enfrentados pela sociedade contemporânea sob a perspectiva católica.',
+                                    'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Opinião',
+                                    'author' => 'Prof. Fernando Costa',
+                                    'date' => now()->subDays(4)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Brasil: Crescimento de Vocações Religiosas',
+                                    'excerpt' => 'Dados mostram aumento no número de jovens que ingressam em seminários e conventos em todo o território nacional.',
+                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Brasil',
+                                    'author' => 'Equipe Editorial',
+                                    'date' => now()->subDays(5)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'A Doutrina Social da Igreja',
+                                    'excerpt' => 'Como os princípios católicos orientam a ação social e política no mundo contemporâneo.',
+                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Política',
+                                    'author' => 'Prof. Fernando',
+                                    'date' => now()->subDays(6)->format('d/m/Y')
+                                ],
+                                [
+                                    'title' => 'Liturgia Tradicional',
+                                    'excerpt' => 'A importância da preservação dos ritos tradicionais da Igreja Católica.',
+                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
+                                    'category' => 'Igreja',
+                                    'author' => 'Pe. Antônio',
+                                    'date' => now()->subDays(7)->format('d/m/Y')
                                 ]
+                                
                             ];
                         @endphp
                         @foreach($noticias as $index => $noticia)
-                            <article class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                                <x-article-card 
-                                    :article="$noticia"
-                                    size="horizontal"
-                                />
-                            </article>
+                            <x-article-card 
+                                :article="$noticia"
+                            />
                         @endforeach
-                        
-                        {{-- Botão Ver Mais --}}
-                        <div class="text-center pt-4">
-                            <a href="#" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                                Ver Todas as Notícias
-                            </a>
-                        </div>
+                    </div>
+                    
+                    {{-- Botão Ver Mais --}}
+                    <div class="text-center pt-2">
+                        <a href="#" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                            Ver Todas as Notícias
+                        </a>
                     </div>
                 </div>
 
