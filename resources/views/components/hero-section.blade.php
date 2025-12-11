@@ -8,8 +8,8 @@
                 <article class="group cursor-pointer">
                     <a href="#" class="block">
                         <div class="relative overflow-hidden rounded-lg mb-4">
-                            <img 
-                                src="{{ $article['image'] ?? 'https://via.placeholder.com/1200x800?text=Revista+Catolicismo' }}" 
+                            <img
+                                src="{{ $article['image'] ?? 'https://via.placeholder.com/1200x800?text=Revista+Catolicismo' }}"
                                 alt="{{ $article['title'] ?? '' }}"
                                 class="w-full h-[500px] object-cover transition-transform duration-300 group-hover:scale-105"
                             >
@@ -59,8 +59,8 @@
                         <a href="#" class="block">
                             <div class="flex gap-4">
                                 <div class="w-24 h-24 flex-shrink-0 rounded overflow-hidden">
-                                    <img 
-                                        src="{{ $destaque['image'] }}" 
+                                    <img
+                                        src="{{ $destaque['image'] }}"
                                         alt="{{ $destaque['title'] }}"
                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                     >
@@ -81,4 +81,3 @@
         </div>
     </div>
 </section>
-

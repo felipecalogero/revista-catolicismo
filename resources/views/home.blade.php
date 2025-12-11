@@ -31,78 +31,7 @@
     </section>
 
     {{-- Slider de Revistas Compacto --}}
-    <x-revista-slider :revistas="[
-        [
-            'titulo' => 'Edição 297 - A Vez da Segurança Pública',
-            'edicao' => 'Edição 297',
-            'data' => '21/11/2025',
-            'capa' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=600&fit=crop&q=80',
-            'destaque' => true
-        ],
-        [
-            'titulo' => 'Edição 296 - Tradição e Modernidade',
-            'edicao' => 'Edição 296',
-            'data' => '21/10/2025',
-            'capa' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 295 - A Doutrina Social da Igreja',
-            'edicao' => 'Edição 295',
-            'data' => '21/09/2025',
-            'capa' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 294 - Família e Valores Cristãos',
-            'edicao' => 'Edição 294',
-            'data' => '21/08/2025',
-            'capa' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 293 - Arte Sacra Brasileira',
-            'edicao' => 'Edição 293',
-            'data' => '21/07/2025',
-            'capa' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 292 - Política e Valores Católicos',
-            'edicao' => 'Edição 292',
-            'data' => '21/06/2025',
-            'capa' => 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 291 - O Papado e a Unidade',
-            'edicao' => 'Edição 291',
-            'data' => '21/05/2025',
-            'capa' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 290 - Vocações Religiosas',
-            'edicao' => 'Edição 290',
-            'data' => '21/04/2025',
-            'capa' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 289 - A Renovação Litúrgica',
-            'edicao' => 'Edição 289',
-            'data' => '21/03/2025',
-            'capa' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ],
-        [
-            'titulo' => 'Edição 288 - Direitos Humanos e Igreja',
-            'edicao' => 'Edição 288',
-            'data' => '21/02/2025',
-            'capa' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=600&fit=crop&q=80',
-            'destaque' => false
-        ]
-    ]" />
+    <x-revista-slider :revistas="$revistas ?? []" />
 
     {{-- Grid de Destaques --}}
     <section class="bg-white py-16 border-t border-gray-200">

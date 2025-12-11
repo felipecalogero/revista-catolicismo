@@ -16,25 +16,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Usuários</h3>
-                    <p class="text-3xl font-bold text-red-800 mb-2">0</p>
+                    <p class="text-3xl font-bold text-red-800 mb-2">{{ $totalUsers }}</p>
                     <p class="text-gray-600 text-sm">Total de usuários</p>
                 </div>
 
                 <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Assinaturas</h3>
-                    <p class="text-3xl font-bold text-blue-800 mb-2">0</p>
+                    <p class="text-3xl font-bold text-blue-800 mb-2">{{ $totalSubscriptions }}</p>
                     <p class="text-gray-600 text-sm">Assinaturas ativas</p>
                 </div>
 
                 <div class="bg-green-50 p-6 rounded-lg border border-green-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Edições</h3>
-                    <p class="text-3xl font-bold text-green-800 mb-2">0</p>
+                    <p class="text-3xl font-bold text-green-800 mb-2">{{ $totalEditions }}</p>
                     <p class="text-gray-600 text-sm">Edições publicadas</p>
                 </div>
 
                 <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Artigos</h3>
-                    <p class="text-3xl font-bold text-yellow-800 mb-2">{{ \App\Models\Article::where('published', true)->count() }}</p>
+                    <p class="text-3xl font-bold text-yellow-800 mb-2">{{ $totalArticles }}</p>
                     <p class="text-gray-600 text-sm">Artigos publicados</p>
                 </div>
             </div>
@@ -46,8 +46,11 @@
                         <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
                             Gerenciar Usuários →
                         </a>
-                        <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
+                        <a href="{{ route('admin.editions.create') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Criar Nova Edição →
+                        </a>
+                        <a href="{{ route('admin.editions.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
+                            Gerenciar Edições →
                         </a>
                         <a href="{{ route('admin.articles.create') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Publicar Artigo →

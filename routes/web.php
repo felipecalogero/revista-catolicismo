@@ -8,11 +8,14 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\EditionController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/artigos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
+Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
+Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download');
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -31,6 +34,8 @@ Route::middleware('auth')->group(function () {
 // Rotas de administrador
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/csrf-token', [\App\Http\Controllers\Admin\CsrfTokenController::class, 'getToken'])->name('csrf-token');
     Route::resource('articles', AdminArticleController::class);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::resource('editions', \App\Http\Controllers\Admin\EditionController::class);
 });

@@ -43,10 +43,11 @@
                         <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                             Admin
                         </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                            Dashboard
+                        </a>
                     @endif
-                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                        Dashboard
-                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
@@ -107,10 +108,11 @@
                         <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                             Admin
                         </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                            Dashboard
+                        </a>
                     @endif
-                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                        Dashboard
-                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="w-full text-left text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">

@@ -11,13 +11,13 @@
         <div class="relative">
             <div id="revista-slider" class="overflow-hidden">
                 <div class="flex transition-transform duration-500 ease-in-out" id="slider-container" style="transform: translateX(0%)">
-                    @foreach(array_slice($revistas, 0, 10) as $index => $revista)
-                        <div class="min-w-[200px] md:min-w-[250px] lg:min-w-[200px] px-2 slider-item flex-shrink-0" data-index="{{ $index }}">
-                            <a href="#" class="block group">
+                    @forelse(array_slice($revistas, 0, 10) as $index => $revista)
+                        <div class="w-[calc(50%-8px)] md:w-[calc(33.333%-10.67px)] lg:w-[calc(20%-8px)] px-2 slider-item flex-shrink-0" data-index="{{ $index }}">
+                            <a href="{{ isset($revista['slug']) ? route('editions.show', $revista['slug']) : '#' }}" class="block group">
                                 <div class="relative overflow-hidden rounded shadow-md hover:shadow-xl transition-shadow">
                                     <img 
-                                        src="{{ $revista['capa'] }}" 
-                                        alt="{{ $revista['titulo'] }}"
+                                        src="{{ $revista['capa'] ?? 'https://via.placeholder.com/400x600?text=Sem+Capa' }}" 
+                                        alt="{{ $revista['titulo'] ?? 'Edição' }}"
                                         class="w-full h-[280px] md:h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
                                     >
                                     @if(isset($revista['destaque']) && $revista['destaque'])
@@ -32,7 +32,11 @@
                                 </div>
                             </a>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="w-full text-center py-8 text-gray-500">
+                            <p>Nenhuma edição publicada ainda.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
             
@@ -75,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const items = document.querySelectorAll('.slider-item');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    const indicators = document.querySelectorAll('.slider-indicator');
     
     let currentIndex = 0;
     const totalItems = items.length;
@@ -96,14 +99,27 @@ document.addEventListener('DOMContentLoaded', function() {
             currentIndex = maxIndex;
         }
         
-        // Garantir que não há espaço em branco
+        // Se todos os itens cabem na tela, não mover
         if (totalItems <= itemsPerView) {
             currentIndex = 0;
+            container.style.transform = 'translateX(0%)';
+        } else {
+            // Calcular a porcentagem de deslocamento
+            // Cada item ocupa 100% / itemsPerView da largura visível
+            const itemWidthPercent = 100 / itemsPerView;
+            
+            // Calcular o máximo de deslocamento possível
+            // O último item visível deve ser o último item do array
+            const maxTranslatePercent = -((totalItems - itemsPerView) * itemWidthPercent);
+            
+            // Calcular o deslocamento atual
+            const translateX = -(currentIndex * itemWidthPercent);
+            
+            // Garantir que não ultrapasse o limite (não deixe espaço em branco)
+            const finalTranslateX = Math.max(translateX, maxTranslatePercent);
+            
+            container.style.transform = `translateX(${finalTranslateX}%)`;
         }
-        
-        const itemWidth = 100 / itemsPerView;
-        const translateX = -(currentIndex * itemWidth);
-        container.style.transform = `translateX(${translateX}%)`;
         
         // Desabilitar botões quando necessário
         if (prevBtn && nextBtn) {
@@ -133,21 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (currentIndex < maxIndex) {
             currentIndex++;
-        } else {
-            // Não voltar ao início, apenas parar no último
-            currentIndex = maxIndex;
         }
         updateSlider();
     }
     
     function prevSlide() {
-        const itemsPerView = getItemsPerView();
-        const maxIndex = Math.max(0, totalItems - itemsPerView);
-        
         if (currentIndex > 0) {
             currentIndex--;
-        } else {
-            currentIndex = maxIndex > 0 ? maxIndex : 0;
         }
         updateSlider();
     }
@@ -156,15 +164,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const itemsPerView = getItemsPerView();
         const maxIndex = Math.max(0, totalItems - itemsPerView);
         
-        // Só inicia autoplay se houver mais itens do que o visível
+        // Só inicia autoplay se houver mais itens do que o visível e não estiver no último
         if (totalItems > itemsPerView && currentIndex < maxIndex) {
-            autoplay = setInterval(nextSlide, 4000);
+            stopAutoplay();
+            autoplay = setInterval(() => {
+                const itemsPerView = getItemsPerView();
+                const maxIndex = Math.max(0, totalItems - itemsPerView);
+                if (currentIndex < maxIndex) {
+                    nextSlide();
+                } else {
+                    stopAutoplay();
+                }
+            }, 4000);
         }
     }
     
     function stopAutoplay() {
         if (autoplay) {
             clearInterval(autoplay);
+            autoplay = null;
         }
     }
     
@@ -203,6 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
         resizeTimeout = setTimeout(() => {
             currentIndex = 0;
             updateSlider();
+            stopAutoplay();
+            startAutoplay();
         }, 250);
     });
     
