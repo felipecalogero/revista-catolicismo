@@ -182,6 +182,47 @@ class EditionController extends Controller
     }
 
     /**
+     * Publish the specified edition.
+     */
+    public function publish(string $id)
+    {
+        $edition = Edition::findOrFail($id);
+
+        if ($edition->published) {
+            return redirect()->route('admin.editions.index')
+                ->with('error', 'Esta edição já está publicada.');
+        }
+
+        $edition->update([
+            'published' => true,
+            'published_at' => $edition->published_at ?? now(),
+        ]);
+
+        return redirect()->route('admin.editions.index')
+            ->with('success', 'Edição publicada com sucesso!');
+    }
+
+    /**
+     * Unpublish the specified edition (change to draft).
+     */
+    public function unpublish(string $id)
+    {
+        $edition = Edition::findOrFail($id);
+
+        if (!$edition->published) {
+            return redirect()->route('admin.editions.index')
+                ->with('error', 'Esta edição já está como rascunho.');
+        }
+
+        $edition->update([
+            'published' => false,
+        ]);
+
+        return redirect()->route('admin.editions.index')
+            ->with('success', 'Edição alterada para rascunho com sucesso!');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
