@@ -57,3 +57,197 @@
         @apply text-gray-700 hover:text-red-800 transition-colors;
     }
 }
+
+/* Estilos personalizados para o editor Quill WYSIWYG */
+#content-editor {
+    font-family: serif;
+}
+
+#content-editor .ql-container {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-family: serif;
+    font-size: 1rem;
+    min-height: 400px;
+}
+
+#content-editor .ql-editor {
+    padding: 0.5rem 1rem;
+    min-height: 400px;
+}
+
+#content-editor .ql-editor.ql-blank::before {
+    font-style: normal;
+    color: #9ca3af;
+    font-family: serif;
+}
+
+#content-editor .ql-toolbar {
+    border: 1px solid #d1d5db;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom: none;
+    background-color: #f9fafb;
+}
+
+#content-editor .ql-container.ql-snow {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#content-editor .ql-editor:focus {
+    outline: none;
+}
+
+#content-editor:focus-within .ql-container {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(127, 29, 29, 1);
+}
+
+/* Estilos para o editor de descrição de edições */
+#description-editor .ql-container {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    min-height: 120px;
+}
+
+#description-editor .ql-editor {
+    padding: 0.5rem 1rem;
+    min-height: 120px;
+}
+
+#description-editor .ql-editor.ql-blank::before {
+    font-style: normal;
+    color: #9ca3af;
+}
+
+#description-editor .ql-toolbar {
+    border: 1px solid #d1d5db;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom: none;
+    background-color: #f9fafb;
+}
+
+#description-editor .ql-container.ql-snow {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#description-editor .ql-editor:focus {
+    outline: none;
+}
+
+#description-editor:focus-within .ql-container {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(127, 29, 29, 1);
+}
+
+/* Estilos para conteúdo renderizado do Quill nas páginas públicas */
+.quill-content {
+    font-family: serif;
+}
+
+.quill-content h1,
+.quill-content h2,
+.quill-content h3,
+.quill-content h4,
+.quill-content h5,
+.quill-content h6 {
+    font-family: serif;
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.2;
+}
+
+.quill-content h1 {
+    font-size: 2.25em;
+}
+
+.quill-content h2 {
+    font-size: 1.875em;
+}
+
+.quill-content h3 {
+    font-size: 1.5em;
+}
+
+.quill-content h4 {
+    font-size: 1.25em;
+}
+
+.quill-content h5 {
+    font-size: 1.125em;
+}
+
+.quill-content h6 {
+    font-size: 1em;
+}
+
+.quill-content p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+.quill-content ul,
+.quill-content ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+.quill-content li {
+    margin-bottom: 0.5em;
+}
+
+.quill-content a {
+    color: #7f1d1d;
+    text-decoration: underline;
+}
+
+.quill-content a:hover {
+    color: #991b1b;
+}
+
+.quill-content strong {
+    font-weight: 700;
+}
+
+.quill-content em {
+    font-style: italic;
+}
+
+.quill-content u {
+    text-decoration: underline;
+}
+
+.quill-content s {
+    text-decoration: line-through;
+}
+
+.quill-content .ql-align-center {
+    text-align: center;
+}
+
+.quill-content .ql-align-right {
+    text-align: right;
+}
+
+.quill-content .ql-align-justify {
+    text-align: justify;
+}
+
+.quill-content .ql-align-left {
+    text-align: left;
+}
+
+.quill-content blockquote {
+    border-left: 4px solid #d1d5db;
+    padding-left: 1em;
+    margin: 1em 0;
+    font-style: italic;
+    color: #6b7280;
+}

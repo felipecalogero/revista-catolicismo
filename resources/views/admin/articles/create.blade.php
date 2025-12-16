@@ -66,7 +66,7 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent font-serif"
                         placeholder="Digite o conteúdo completo do artigo"
                     >{{ old('content') }}</textarea>
-                    <p class="mt-1 text-sm text-gray-500">Você pode usar HTML básico para formatação</p>
+                    <p class="mt-1 text-sm text-gray-500">Use as ferramentas de formatação acima do campo para formatar o texto</p>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -206,39 +206,67 @@
     </div>
 </div>
 
+@push('styles')
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="{{ asset('js/quill-editor.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Quill no campo de conteúdo
+    const contentEditor = initQuillEditor('content', 'content-editor', {
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'align': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                ['link'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Digite o conteúdo completo do artigo'
+    }, 400);
+
+    if (contentEditor) {
+        const contentTextarea = document.querySelector('#content');
+        setupQuillFormValidation(null, [
+            { editor: contentEditor, textarea: contentTextarea, fieldName: 'o conteúdo do artigo' }
+        ]);
+    }
+
+    // Código para categoria
     const categorySelect = document.getElementById('category_id');
     const newCategoryContainer = document.getElementById('new-category-container');
     const newCategoryInput = document.getElementById('new_category');
-    const form = categorySelect.closest('form');
 
-    categorySelect.addEventListener('change', function() {
-        if (this.value === 'new') {
-            newCategoryContainer.classList.remove('hidden');
-            newCategoryInput.required = true;
-            categorySelect.value = ''; // Limpar o select para que não seja enviado
-        } else {
-            newCategoryContainer.classList.add('hidden');
-            newCategoryInput.required = false;
-            newCategoryInput.value = '';
-        }
-    });
-
-    // Interceptar submit do formulário para garantir que category_id não seja "new"
-    form.addEventListener('submit', function(e) {
-        if (categorySelect.value === 'new') {
-            categorySelect.value = '';
-        }
-    });
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            if (this.value === 'new') {
+                newCategoryContainer.classList.remove('hidden');
+                newCategoryInput.required = true;
+                categorySelect.value = ''; // Limpar o select para que não seja enviado
+            } else {
+                newCategoryContainer.classList.add('hidden');
+                newCategoryInput.required = false;
+                newCategoryInput.value = '';
+            }
+        });
+    }
 
     // Verificar se já estava selecionado "nova categoria" (após erro de validação)
-    if (newCategoryInput.value) {
+    if (newCategoryInput && newCategoryInput.value) {
         newCategoryContainer.classList.remove('hidden');
         newCategoryInput.required = true;
-        categorySelect.value = '';
+        if (categorySelect) {
+            categorySelect.value = '';
+        }
     }
 });
 </script>
+@endpush
 @endsection
 

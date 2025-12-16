@@ -29,9 +29,9 @@
                             <span>Publicada em {{ $edition->published_at->format('d/m/Y') }}</span>
                         @endif
                     </div>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-6">
-                        {{ $edition->description }}
-                    </p>
+                    <div class="text-lg text-gray-700 leading-relaxed mb-6">
+                        {!! $edition->description !!}
+                    </div>
 
                     {{-- Botão de Download --}}
                     @auth

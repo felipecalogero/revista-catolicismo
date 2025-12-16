@@ -149,11 +149,35 @@
     </div>
 </div>
 
+@push('styles')
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="{{ asset('js/quill-editor.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('edition-form');
-    if (!form) {
-        return;
+    // Inicializar Quill no campo de descrição
+    const descriptionEditor = initQuillEditor('description', 'description-editor', {
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'align': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Descreva brevemente o conteúdo desta edição'
+    }, 120);
+
+    if (descriptionEditor) {
+        const descriptionTextarea = document.querySelector('#description');
+        setupQuillFormValidation('edition-form', [
+            { editor: descriptionEditor, textarea: descriptionTextarea, fieldName: 'a descrição da edição' }
+        ]);
     }
 
     const progressDiv = document.getElementById('upload-progress');
@@ -466,4 +490,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endpush
 @endsection

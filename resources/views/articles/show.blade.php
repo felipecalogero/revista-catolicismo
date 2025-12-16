@@ -33,9 +33,9 @@
                 </h1>
 
                 @if($article->description)
-                    <p class="text-xl text-gray-600 font-serif mb-6 leading-relaxed">
-                        {{ $article->description }}
-                    </p>
+                    <div class="text-xl text-gray-600 font-serif mb-6 leading-relaxed">
+                        {!! $article->description !!}
+                    </div>
                 @endif
 
                 <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 border-b border-gray-200 pb-6">
@@ -82,51 +82,49 @@
                         }
                     }
 
-                    // Dividir conteúdo em parágrafos (por quebras de linha duplas)
-                    $paragraphs = preg_split('/\n\s*\n/', $content);
-                    $totalParagraphs = count(array_filter($paragraphs, function($p) {
-                        return trim($p) !== '';
-                    }));
-
-                    // Inserir vídeo na metade do conteúdo
-                    $contentParts = [];
-                    $videoInserted = false;
-                    $currentIndex = 0;
-
-                    foreach ($paragraphs as $index => $paragraph) {
-                        if (trim($paragraph) !== '') {
-                            $contentParts[] = $paragraph;
-                            $currentIndex++;
-
+                    // Inserir vídeo no meio do conteúdo HTML
+                    if ($embedUrl) {
+                        // Encontrar o primeiro parágrafo com conteúdo significativo
+                        preg_match_all('/<p[^>]*>.*?<\/p>/is', $content, $paragraphMatches);
+                        $paragraphs = $paragraphMatches[0];
+                        
+                        if (count($paragraphs) > 1) {
                             // Inserir vídeo após a metade dos parágrafos
-                            if ($embedUrl && !$videoInserted && $currentIndex >= ceil($totalParagraphs / 2)) {
-                                $contentParts[] = 'VIDEO_PLACEHOLDER';
-                                $videoInserted = true;
-                            }
+                            $splitIndex = ceil(count($paragraphs) / 2);
+                            $firstPart = implode('', array_slice($paragraphs, 0, $splitIndex));
+                            $secondPart = implode('', array_slice($paragraphs, $splitIndex));
+                            
+                            // Encontrar a posição do split no conteúdo original
+                            $firstPartEnd = strpos($content, $paragraphs[$splitIndex - 1]) + strlen($paragraphs[$splitIndex - 1]);
+                            $contentBefore = substr($content, 0, $firstPartEnd);
+                            $contentAfter = substr($content, $firstPartEnd);
+                        } else {
+                            // Se houver apenas um parágrafo ou nenhum, dividir pela metade do conteúdo
+                            $splitPosition = strlen($content) / 2;
+                            $contentBefore = substr($content, 0, $splitPosition);
+                            $contentAfter = substr($content, $splitPosition);
                         }
                     }
-
-                    $content = implode("\n\n", $contentParts);
                 @endphp
 
-                <div class="text-gray-800 leading-relaxed text-lg">
-                    @foreach(explode("\n\n", $content) as $paragraph)
-                        @if($paragraph === 'VIDEO_PLACEHOLDER' && $embedUrl)
-                            <div class="my-12">
-                                <div class="relative w-full" style="padding-bottom: 56.25%;">
-                                    <iframe
-                                        class="absolute top-0 left-0 w-full h-full rounded-lg"
-                                        src="{{ htmlspecialchars($embedUrl) }}"
-                                        frameborder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen
-                                    ></iframe>
-                                </div>
+                <div class="text-gray-800 leading-relaxed text-lg quill-content">
+                    @if($embedUrl && isset($contentBefore) && isset($contentAfter))
+                        {!! $contentBefore !!}
+                        <div class="my-12">
+                            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                <iframe
+                                    class="absolute top-0 left-0 w-full h-full rounded-lg"
+                                    src="{{ htmlspecialchars($embedUrl) }}"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                ></iframe>
                             </div>
-                        @elseif(trim($paragraph) !== '')
-                            <p class="mb-6">{{ $paragraph }}</p>
-                        @endif
-                    @endforeach
+                        </div>
+                        {!! $contentAfter !!}
+                    @else
+                        {!! $content !!}
+                    @endif
                 </div>
             </div>
 
