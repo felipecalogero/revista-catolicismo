@@ -14,9 +14,15 @@
                 </div>
                 <div class="flex items-center gap-3">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
-                            Dashboard
-                        </a>
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
+                                Admin
+                            </a>
+                        @else
+                            <a href="{{ route('dashboard') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
+                                Dashboard
+                            </a>
+                        @endif
                     @else
                         <a href="{{ route('login') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
                             Entrar

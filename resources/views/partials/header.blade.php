@@ -39,21 +39,23 @@
                     Mundo
                 </a>
                 @auth
-                    @if(Auth::user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Admin
-                        </a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Dashboard
-                        </a>
-                    @endif
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Sair
-                        </button>
-                    </form>
+                    <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300">
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="bg-red-800 text-white px-3 py-1.5 rounded-md hover:bg-red-900 font-medium text-sm transition-colors shadow-sm">
+                                Admin
+                            </a>
+                        @else
+                            <a href="{{ route('dashboard') }}" class="bg-red-800 text-white px-3 py-1.5 rounded-md hover:bg-red-900 font-medium text-sm transition-colors shadow-sm">
+                                Dashboard
+                            </a>
+                        @endif
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 font-medium text-sm transition-colors shadow-sm">
+                                Sair
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
@@ -104,21 +106,23 @@
                     Mundo
                 </a>
                 @auth
-                    @if(Auth::user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Admin
-                        </a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Dashboard
-                        </a>
-                    @endif
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="w-full text-left text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                            Sair
-                        </button>
-                    </form>
+                    <div class="flex flex-col space-y-2 mt-2 pt-3 border-t border-gray-300">
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="bg-red-800 text-white px-4 py-2 rounded-md hover:bg-red-900 font-medium text-sm transition-colors shadow-sm text-center">
+                                Admin
+                            </a>
+                        @else
+                            <a href="{{ route('dashboard') }}" class="bg-red-800 text-white px-4 py-2 rounded-md hover:bg-red-900 font-medium text-sm transition-colors shadow-sm text-center">
+                                Dashboard
+                            </a>
+                        @endif
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 font-medium text-sm transition-colors shadow-sm">
+                                Sair
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
