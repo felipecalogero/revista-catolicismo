@@ -48,45 +48,11 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                @php
-                    $destaques = [
-                        [
-                            'title' => 'Ação Política e Valores Católicos no Brasil',
-                            'excerpt' => 'Análise sobre como os valores católicos influenciam as decisões políticas e a formação da sociedade brasileira.',
-                            'image' => 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=400&fit=crop&q=80',
-                            'category' => 'Política',
-                            'author' => 'Prof. Carlos Mendes',
-                            'date' => now()->subDays(0)->format('d/m/Y')
-                        ],
-                        [
-                            'title' => 'O Papel da Igreja na Formação da Juventude',
-                            'excerpt' => 'Reflexão sobre a importância da educação católica e da formação espiritual dos jovens na sociedade contemporânea.',
-                            'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600&h=400&fit=crop&q=80',
-                            'category' => 'Igreja',
-                            'author' => 'Dom Maria Santos',
-                            'date' => now()->subDays(1)->format('d/m/Y')
-                        ],
-                        [
-                            'title' => 'Arte Sacra e Tradição Cultural',
-                            'excerpt' => 'Explorando a rica tradição da arte sacra católica e sua influência na cultura brasileira ao longo dos séculos.',
-                            'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=400&fit=crop&q=80',
-                            'category' => 'Cultura',
-                            'author' => 'Dra. Ana Paula',
-                            'date' => now()->subDays(2)->format('d/m/Y')
-                        ],
-                        [
-                            'title' => 'Família e Valores Cristãos na Sociedade Moderna',
-                            'excerpt' => 'Discussão sobre a importância da família como base da sociedade e os desafios enfrentados na atualidade.',
-                            'image' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=400&fit=crop&q=80',
-                            'category' => 'Sociedade',
-                            'author' => 'Pe. Roberto Alves',
-                            'date' => now()->subDays(3)->format('d/m/Y')
-                        ]
-                    ];
-                @endphp
-                @foreach($destaques as $destaque)
+                @forelse($destaques ?? [] as $destaque)
                     <x-article-card :article="$destaque" />
-                @endforeach
+                @empty
+                    <p class="col-span-full text-center text-gray-500 py-8">Nenhum destaque disponível no momento.</p>
+                @endforelse
             </div>
         </div>
     </section>
@@ -103,144 +69,13 @@
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                        @php
-                            $noticias = [
-                                [
-                                    'title' => 'Declaração do Vaticano sobre Questões Contemporâneas',
-                                    'excerpt' => 'O Vaticano emite nova declaração abordando temas relevantes da sociedade moderna e a posição da Igreja Católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Política',
-                                    'author' => 'Correspondente Vaticano',
-                                    'date' => now()->subDays(0)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Celebração da Missa Tridentina em Cidades Brasileiras',
-                                    'excerpt' => 'Cresce o número de paróquias que oferecem a Missa no rito tradicional, refletindo o interesse pela liturgia clássica.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Igreja',
-                                    'author' => 'Pe. João Batista',
-                                    'date' => now()->subDays(1)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Exposição de Arte Sacra em Museu Nacional',
-                                    'excerpt' => 'Museu inaugura exposição com peças históricas da arte sacra brasileira dos séculos XVII e XVIII.',
-                                    'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Cultura',
-                                    'author' => 'Crítico de Arte',
-                                    'date' => now()->subDays(2)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Iniciativas Católicas de Apoio às Famílias',
-                                    'excerpt' => 'Organizações católicas lançam programas de apoio familiar em diversas regiões do país.',
-                                    'image' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Sociedade',
-                                    'author' => 'Reporter Social',
-                                    'date' => now()->subDays(3)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Opinião: A Crise de Valores na Sociedade Moderna',
-                                    'excerpt' => 'Colunista analisa os desafios morais e éticos enfrentados pela sociedade contemporânea sob a perspectiva católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Opinião',
-                                    'author' => 'Prof. Fernando Costa',
-                                    'date' => now()->subDays(4)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Brasil: Crescimento de Vocações Religiosas',
-                                    'excerpt' => 'Dados mostram aumento no número de jovens que ingressam em seminários e conventos em todo o território nacional.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Brasil',
-                                    'author' => 'Equipe Editorial',
-                                    'date' => now()->subDays(5)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'A Doutrina Social da Igreja',
-                                    'excerpt' => 'Como os princípios católicos orientam a ação social e política no mundo contemporâneo.',
-                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Política',
-                                    'author' => 'Prof. Fernando',
-                                    'date' => now()->subDays(6)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Liturgia Tradicional',
-                                    'excerpt' => 'A importância da preservação dos ritos tradicionais da Igreja Católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Igreja',
-                                    'author' => 'Pe. Antônio',
-                                    'date' => now()->subDays(7)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Declaração do Vaticano sobre Questões Contemporâneas',
-                                    'excerpt' => 'O Vaticano emite nova declaração abordando temas relevantes da sociedade moderna e a posição da Igreja Católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Política',
-                                    'author' => 'Correspondente Vaticano',
-                                    'date' => now()->subDays(0)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Celebração da Missa Tridentina em Cidades Brasileiras',
-                                    'excerpt' => 'Cresce o número de paróquias que oferecem a Missa no rito tradicional, refletindo o interesse pela liturgia clássica.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Igreja',
-                                    'author' => 'Pe. João Batista',
-                                    'date' => now()->subDays(1)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Exposição de Arte Sacra em Museu Nacional',
-                                    'excerpt' => 'Museu inaugura exposição com peças históricas da arte sacra brasileira dos séculos XVII e XVIII.',
-                                    'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Cultura',
-                                    'author' => 'Crítico de Arte',
-                                    'date' => now()->subDays(2)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Iniciativas Católicas de Apoio às Famílias',
-                                    'excerpt' => 'Organizações católicas lançam programas de apoio familiar em diversas regiões do país.',
-                                    'image' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Sociedade',
-                                    'author' => 'Reporter Social',
-                                    'date' => now()->subDays(3)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Opinião: A Crise de Valores na Sociedade Moderna',
-                                    'excerpt' => 'Colunista analisa os desafios morais e éticos enfrentados pela sociedade contemporânea sob a perspectiva católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Opinião',
-                                    'author' => 'Prof. Fernando Costa',
-                                    'date' => now()->subDays(4)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Brasil: Crescimento de Vocações Religiosas',
-                                    'excerpt' => 'Dados mostram aumento no número de jovens que ingressam em seminários e conventos em todo o território nacional.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Brasil',
-                                    'author' => 'Equipe Editorial',
-                                    'date' => now()->subDays(5)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'A Doutrina Social da Igreja',
-                                    'excerpt' => 'Como os princípios católicos orientam a ação social e política no mundo contemporâneo.',
-                                    'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Política',
-                                    'author' => 'Prof. Fernando',
-                                    'date' => now()->subDays(6)->format('d/m/Y')
-                                ],
-                                [
-                                    'title' => 'Liturgia Tradicional',
-                                    'excerpt' => 'A importância da preservação dos ritos tradicionais da Igreja Católica.',
-                                    'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop&q=80',
-                                    'category' => 'Igreja',
-                                    'author' => 'Pe. Antônio',
-                                    'date' => now()->subDays(7)->format('d/m/Y')
-                                ]
-                                
-                            ];
-                        @endphp
-                        @foreach($noticias as $index => $noticia)
+                        @forelse($noticias ?? [] as $index => $noticia)
                             <x-article-card 
                                 :article="$noticia"
                             />
-                        @endforeach
+                        @empty
+                            <p class="col-span-full text-center text-gray-500 py-8">Nenhuma notícia disponível no momento.</p>
+                        @endforelse
                     </div>
                     
                     {{-- Botão Ver Mais --}}
@@ -284,39 +119,32 @@
                             </h3>
                         </div>
                         <div class="space-y-5">
-                            @php
-                                $maisLidas = [
-                                    ['title' => 'A Doutrina Social da Igreja e o Mundo Contemporâneo', 'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=150&fit=crop&q=80', 'date' => now()->subDays(0)->format('d/m/Y')],
-                                    ['title' => 'Tradição e Modernidade: O Equilíbrio da Fé Católica', 'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=150&h=150&fit=crop&q=80', 'date' => now()->subDays(1)->format('d/m/Y')],
-                                    ['title' => 'O Papado e os Desafios do Século XXI', 'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=150&h=150&fit=crop&q=80', 'date' => now()->subDays(2)->format('d/m/Y')],
-                                    ['title' => 'Família: Base da Sociedade Segundo a Doutrina Católica', 'image' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=150&h=150&fit=crop&q=80', 'date' => now()->subDays(3)->format('d/m/Y')],
-                                    ['title' => 'A Beleza da Liturgia Tradicional', 'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=150&h=150&fit=crop&q=80', 'date' => now()->subDays(4)->format('d/m/Y')]
-                                ];
-                            @endphp
-                            @foreach($maisLidas as $index => $artigo)
+                            @forelse($maisLidas ?? [] as $index => $artigo)
                                 <article class="group cursor-pointer pb-5 {{ !$loop->last ? 'border-b border-gray-100' : '' }}">
-                                    <a href="#" class="block">
+                                    <a href="{{ isset($artigo['slug']) && isset($artigo['category_slug']) ? route('articles.show', [$artigo['category_slug'], $artigo['slug']]) : '#' }}" class="block">
                                         <div class="flex gap-4">
                                             <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
                                                 <img 
-                                                    src="{{ $artigo['image'] }}" 
-                                                    alt="{{ $artigo['title'] }}"
+                                                    src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}" 
+                                                    alt="{{ $artigo['title'] ?? '' }}"
                                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                 >
                                             </div>
                                             <div class="flex-1">
                                                 <div class="text-xs font-bold text-red-800 mb-1">{{ $index + 1 }}º</div>
                                                 <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-3 group-hover:text-red-800 transition-colors font-serif leading-snug">
-                                                    {{ $artigo['title'] }}
+                                                    {{ $artigo['title'] ?? 'Título do Artigo' }}
                                                 </h4>
                                                 <p class="text-xs text-gray-500">
-                                                    {{ $artigo['date'] }}
+                                                    {{ $artigo['date'] ?? '' }}
                                                 </p>
                                             </div>
                                         </div>
                                     </a>
                                 </article>
-                            @endforeach
+                            @empty
+                                <p class="text-center text-gray-500 py-4 text-sm">Nenhum artigo disponível no momento.</p>
+                            @endforelse
                         </div>
                     </div>
 
@@ -331,40 +159,34 @@
     </section>
 
     {{-- Seções por Categoria --}}
+    @if(isset($artigosPolitica) && count($artigosPolitica) > 0)
     <section class="bg-white py-16 border-t border-gray-200">
         <x-section-block 
             title="Política" 
-            :articles="[
-                ['title' => 'A Influência dos Valores Católicos na Política Brasileira', 'excerpt' => 'Análise sobre como os princípios da doutrina social da Igreja influenciam as decisões políticas e a formação de políticas públicas no Brasil.', 'image' => 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=400&fit=crop&q=80', 'category' => 'Política', 'author' => 'Prof. Carlos Mendes', 'date' => now()->format('d/m/Y')],
-                ['title' => 'O Voto Consciente e a Responsabilidade Cristã', 'excerpt' => 'Reflexão sobre a importância do voto consciente baseado em valores cristãos e o papel do católico na vida política.', 'image' => 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&h=400&fit=crop&q=80', 'category' => 'Política', 'author' => 'Dr. Paulo Roberto', 'date' => now()->subDays(1)->format('d/m/Y')],
-                ['title' => 'Direitos Humanos e Doutrina Social da Igreja', 'excerpt' => 'Como a doutrina social católica fundamenta a defesa dos direitos humanos e a promoção da justiça social.', 'image' => 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=600&h=400&fit=crop&q=80', 'category' => 'Política', 'author' => 'Dra. Maria Silva', 'date' => now()->subDays(2)->format('d/m/Y')],
-            ]"
+            :articles="$artigosPolitica"
             :columns="3"
         />
     </section>
+    @endif
 
+    @if(isset($artigosIgreja) && count($artigosIgreja) > 0)
     <section class="bg-gray-50 py-16 border-t border-gray-200">
         <x-section-block 
             title="Igreja" 
-            :articles="[
-                ['title' => 'A Renovação Litúrgica e a Tradição', 'excerpt' => 'Explorando o equilíbrio entre a renovação litúrgica e a preservação das tradições sagradas da Igreja Católica.', 'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600&h=400&fit=crop&q=80', 'category' => 'Igreja', 'author' => 'Dom João Silva', 'date' => now()->format('d/m/Y')],
-                ['title' => 'O Papado e a Unidade da Igreja', 'excerpt' => 'Reflexão sobre o papel do Papa como sucessor de Pedro e guardião da unidade e da doutrina católica.', 'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop&q=80', 'category' => 'Igreja', 'author' => 'Pe. Antônio Costa', 'date' => now()->subDays(1)->format('d/m/Y')],
-                ['title' => 'Vocações Religiosas no Brasil Contemporâneo', 'excerpt' => 'Análise do crescimento das vocações religiosas e o papel dos seminários na formação dos futuros sacerdotes.', 'image' => 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600&h=400&fit=crop&q=80', 'category' => 'Igreja', 'author' => 'Dom Maria Santos', 'date' => now()->subDays(2)->format('d/m/Y')],
-            ]"
+            :articles="$artigosIgreja"
             :columns="3"
         />
     </section>
+    @endif
 
+    @if(isset($artigosCultura) && count($artigosCultura) > 0)
     <section class="bg-white py-16 border-t border-gray-200">
         <x-section-block 
             title="Cultura" 
-            :articles="[
-                ['title' => 'Arte Sacra Brasileira: Patrimônio Cultural', 'excerpt' => 'Explorando a rica tradição da arte sacra no Brasil, desde o período colonial até os dias atuais.', 'image' => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=400&fit=crop&q=80', 'category' => 'Cultura', 'author' => 'Dra. Ana Paula', 'date' => now()->format('d/m/Y')],
-                ['title' => 'Música Sacra e Tradição Litúrgica', 'excerpt' => 'A importância da música sacra na liturgia católica e sua evolução ao longo dos séculos.', 'image' => 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop&q=80', 'category' => 'Cultura', 'author' => 'Maestro Roberto', 'date' => now()->subDays(1)->format('d/m/Y')],
-                ['title' => 'Literatura Católica e Formação Intelectual', 'excerpt' => 'Como a literatura católica contribui para a formação intelectual e espiritual dos fiéis.', 'image' => 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop&q=80', 'category' => 'Cultura', 'author' => 'Prof. Fernando', 'date' => now()->subDays(2)->format('d/m/Y')],
-            ]"
+            :articles="$artigosCultura"
             :columns="3"
         />
     </section>
+    @endif
 @endsection
 

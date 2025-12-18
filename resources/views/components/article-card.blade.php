@@ -27,7 +27,7 @@
 @endphp
 
 <article class="{{ $sizeClasses[$size] }} {{ $cardClasses[$size] }} group cursor-pointer">
-    <a href="#" class="block h-full flex flex-col">
+    <a href="{{ isset($article['slug']) && isset($article['category_slug']) ? route('articles.show', [$article['category_slug'], $article['slug']]) : '#' }}" class="block h-full flex flex-col">
         <div class="relative overflow-hidden {{ $size === 'horizontal' ? '' : 'rounded-t-lg' }}">
             <img 
                 src="{{ $article['image'] ?? 'https://via.placeholder.com/800x600?text=Revista+Catolicismo' }}" 
