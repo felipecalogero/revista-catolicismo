@@ -40,8 +40,8 @@
                         @forelse($articles as $article)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($article->image)
-                                        <img src="{{ Storage::url($article->image) }}" alt="{{ $article->title }}" class="w-16 h-16 object-cover rounded">
+                                    @if($article->image_url)
+                                        <img src="{{ $article->image_url }}" alt="{{ $article->title }}" class="w-16 h-16 object-cover rounded">
                                     @else
                                         <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
                                             <span class="text-gray-400 text-xs">Sem imagem</span>

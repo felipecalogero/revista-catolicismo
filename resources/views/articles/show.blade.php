@@ -5,10 +5,10 @@
 @section('content')
 <article class="bg-white">
     {{-- Imagem Principal --}}
-    @if($article->image)
+    @if($article->image_url)
         <div class="w-full h-[500px] md:h-[600px] relative overflow-hidden">
             <img
-                src="{{ Storage::url($article->image) }}"
+                src="{{ $article->image_url }}"
                 alt="{{ $article->title }}"
                 class="w-full h-full object-cover"
             >

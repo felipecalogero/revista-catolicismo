@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Article extends Model
@@ -53,6 +54,24 @@ class Article extends Model
     public function getCategoryNameAttribute(): ?string
     {
         return $this->categoryRelation ? $this->categoryRelation->name : $this->category;
+    }
+
+    /**
+     * Acessor para obter a URL da imagem (suporta URLs externas e arquivos locais)
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // Se a imagem começa com http:// ou https://, é uma URL externa
+        if (Str::startsWith($this->image, ['http://', 'https://'])) {
+            return $this->image;
+        }
+
+        // Caso contrário, é um arquivo local no storage
+        return Storage::url($this->image);
     }
 
     /**

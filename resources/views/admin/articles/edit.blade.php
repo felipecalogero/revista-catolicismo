@@ -74,12 +74,12 @@
                 </div>
 
                 {{-- Imagem Atual --}}
-                @if($article->image)
+                @if($article->image_url)
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Imagem Atual
                         </label>
-                        <img src="{{ Storage::url($article->image) }}" alt="{{ $article->title }}" class="w-64 h-48 object-cover rounded-lg border border-gray-200">
+                        <img src="{{ $article->image_url }}" alt="{{ $article->title }}" class="w-64 h-48 object-cover rounded-lg border border-gray-200">
                     </div>
                 @endif
 
