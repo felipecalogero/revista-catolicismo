@@ -17,27 +17,11 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Política
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Igreja
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Cultura
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Sociedade
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Opinião
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Brasil
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Mundo
-                </a>
+                @foreach($categories ?? [] as $category)
+                    <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                        {{ $category->name }}
+                    </a>
+                @endforeach
                 @auth
                     <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300">
                         @if(Auth::user()->isAdmin())
@@ -84,27 +68,11 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Política
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Igreja
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Cultura
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Sociedade
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Opinião
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Brasil
-                </a>
-                <a href="#" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                    Mundo
-                </a>
+                @foreach($categories ?? [] as $category)
+                    <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                        {{ $category->name }}
+                    </a>
+                @endforeach
                 @auth
                     <div class="flex flex-col space-y-2 mt-2 pt-3 border-t border-gray-300">
                         @if(Auth::user()->isAdmin())

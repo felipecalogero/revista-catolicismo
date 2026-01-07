@@ -17,13 +17,9 @@
             <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">Categorias</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Política</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Igreja</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Cultura</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Sociedade</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Opinião</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Brasil</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Mundo</a></li>
+                    @foreach($categories ?? [] as $category)
+                        <li><a href="{{ route('categories.show', $category->slug) }}" class="hover:text-red-800 transition-colors">{{ $category->name }}</a></li>
+                    @endforeach
                 </ul>
             </div>
 
