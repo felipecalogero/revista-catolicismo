@@ -43,7 +43,7 @@
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">Ações Rápidas</h3>
                     <div class="space-y-3">
-                        <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
+                        <a href="{{ route('admin.users.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Gerenciar Usuários →
                         </a>
                         <a href="{{ route('admin.editions.create') }}" class="block text-red-800 hover:text-red-900 font-medium">
