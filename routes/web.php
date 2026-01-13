@@ -11,6 +11,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\SettingsController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -30,6 +31,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Configurações do usuário
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
 });
 
 // Rotas de administrador

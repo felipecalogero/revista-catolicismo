@@ -61,7 +61,7 @@
                         <a href="{{ route('admin.categories.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Gerenciar Categorias →
                         </a>
-                        <a href="#" class="block text-red-800 hover:text-red-900 font-medium">
+                        <a href="{{ route('settings.index') }}" class="block text-red-800 hover:text-red-900 font-medium">
                             Configurações →
                         </a>
                     </div>

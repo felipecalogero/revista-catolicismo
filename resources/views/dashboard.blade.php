@@ -31,10 +31,10 @@
                 </div>
 
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Perfil</h3>
-                    <p class="text-gray-600 text-sm mb-4">Atualize suas informações</p>
-                    <a href="#" class="text-red-800 hover:text-red-900 font-medium text-sm">
-                        Editar perfil →
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Configurações</h3>
+                    <p class="text-gray-600 text-sm mb-4">Atualize suas informações pessoais</p>
+                    <a href="{{ route('settings.index') }}" class="text-red-800 hover:text-red-900 font-medium text-sm">
+                        Editar configurações →
                     </a>
                 </div>
             </div>
