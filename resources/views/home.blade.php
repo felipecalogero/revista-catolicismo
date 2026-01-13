@@ -158,35 +158,17 @@
         </div>
     </section>
 
-    {{-- Seções por Categoria --}}
-    @if(isset($artigosPolitica) && count($artigosPolitica) > 0)
-    <section class="bg-white py-16 border-t border-gray-200">
-        <x-section-block 
-            title="Política" 
-            :articles="$artigosPolitica"
-            :columns="3"
-        />
-    </section>
-    @endif
-
-    @if(isset($artigosIgreja) && count($artigosIgreja) > 0)
-    <section class="bg-gray-50 py-16 border-t border-gray-200">
-        <x-section-block 
-            title="Igreja" 
-            :articles="$artigosIgreja"
-            :columns="3"
-        />
-    </section>
-    @endif
-
-    @if(isset($artigosCultura) && count($artigosCultura) > 0)
-    <section class="bg-white py-16 border-t border-gray-200">
-        <x-section-block 
-            title="Cultura" 
-            :articles="$artigosCultura"
-            :columns="3"
-        />
-    </section>
+    {{-- Seções por Categoria - 3 Categorias Mais Visitadas --}}
+    @if(isset($categoriasMaisVisitadas) && count($categoriasMaisVisitadas) > 0)
+        @foreach($categoriasMaisVisitadas as $index => $categoria)
+        <section class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }} py-16 border-t border-gray-200">
+            <x-section-block 
+                :title="$categoria['name']" 
+                :articles="$categoria['articles']"
+                :columns="3"
+            />
+        </section>
+        @endforeach
     @endif
 @endsection
 

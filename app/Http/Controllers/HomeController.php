@@ -31,11 +31,32 @@ class HomeController extends Controller
             ];
         })->toArray();
 
-        // Buscar artigos publicados do banco de dados
+        // Buscar artigos em destaque: artigos recentes (últimos 30 dias) com mais visualizações
+        // Se não houver artigos recentes suficientes, complementa com os mais visualizados
         $destaques = Article::where('published', true)
+            ->where('published_at', '>=', now()->subDays(30))
+            ->orderBy('views', 'desc')
             ->orderBy('published_at', 'desc')
             ->limit(4)
-            ->get()
+            ->get();
+
+        // Se não houver 4 artigos dos últimos 30 dias, complementa com os mais visualizados de todos os tempos
+        if ($destaques->count() < 4) {
+            $destaquesAntigos = Article::where('published', true)
+                ->where(function ($query) {
+                    $query->where('published_at', '<', now()->subDays(30))
+                        ->orWhereNull('published_at');
+                })
+                ->whereNotIn('id', $destaques->pluck('id'))
+                ->orderBy('views', 'desc')
+                ->orderBy('published_at', 'desc')
+                ->limit(4 - $destaques->count())
+                ->get();
+            
+            $destaques = $destaques->merge($destaquesAntigos);
+        }
+        
+        $destaques = $destaques->take(4)
             ->map(function ($article) {
                 $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
                 return [
@@ -69,6 +90,7 @@ class HomeController extends Controller
             })->toArray();
 
         $maisLidas = Article::where('published', true)
+            ->orderBy('views', 'desc')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get()
@@ -83,87 +105,58 @@ class HomeController extends Controller
                 ];
             })->toArray();
 
-        // Artigos por categoria
-        $artigosPolitica = Article::where('published', true)
-            ->where(function ($query) {
-                $query->where('category', 'Política')
-                    ->orWhereHas('categoryRelation', function ($q) {
-                        $q->where('name', 'Política');
-                    });
-            })
-            ->orderBy('published_at', 'desc')
+        // Buscar as 3 categorias mais visitadas (baseado na soma de views dos artigos)
+        $topCategories = Category::withCount(['articles' => function ($query) {
+                $query->where('published', true);
+            }])
+            ->withSum(['articles' => function ($query) {
+                $query->where('published', true);
+            }], 'views')
+            ->having('articles_count', '>', 0)
+            ->orderByRaw('COALESCE(articles_sum_views, 0) DESC')
             ->limit(3)
-            ->get()
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'excerpt' => $article->description,
-                    'image' => $article->image,
-                    'category' => $article->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $article->author,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
-                ];
-            })->toArray();
+            ->get();
 
-        $artigosIgreja = Article::where('published', true)
-            ->where(function ($query) {
-                $query->where('category', 'Igreja')
-                    ->orWhereHas('categoryRelation', function ($q) {
-                        $q->where('name', 'Igreja');
-                    });
-            })
-            ->orderBy('published_at', 'desc')
-            ->limit(3)
-            ->get()
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'excerpt' => $article->description,
-                    'image' => $article->image,
-                    'category' => $article->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $article->author,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
-                ];
-            })->toArray();
+        // Buscar artigos para cada uma das 3 categorias mais visitadas
+        $categoriasMaisVisitadas = [];
+        foreach ($topCategories as $category) {
+            $artigos = Article::where('published', true)
+                ->where(function ($query) use ($category) {
+                    $query->where('category_id', $category->id)
+                        ->orWhere('category', $category->name);
+                })
+                ->orderBy('published_at', 'desc')
+                ->limit(3)
+                ->get()
+                ->map(function ($article) {
+                    $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
+                    return [
+                        'title' => $article->title,
+                        'excerpt' => $article->description,
+                        'image' => $article->image,
+                        'category' => $article->category_name,
+                        'category_slug' => $categorySlug,
+                        'author' => $article->author,
+                        'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
+                        'slug' => $article->slug,
+                    ];
+                })->toArray();
 
-        $artigosCultura = Article::where('published', true)
-            ->where(function ($query) {
-                $query->where('category', 'Cultura')
-                    ->orWhereHas('categoryRelation', function ($q) {
-                        $q->where('name', 'Cultura');
-                    });
-            })
-            ->orderBy('published_at', 'desc')
-            ->limit(3)
-            ->get()
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'excerpt' => $article->description,
-                    'image' => $article->image,
-                    'category' => $article->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $article->author,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
+            if (count($artigos) > 0) {
+                $categoriasMaisVisitadas[] = [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'articles' => $artigos,
                 ];
-            })->toArray();
+            }
+        }
 
         return view('home', compact(
             'revistas',
             'destaques',
             'noticias',
             'maisLidas',
-            'artigosPolitica',
-            'artigosIgreja',
-            'artigosCultura'
+            'categoriasMaisVisitadas'
         ));
     }
 }

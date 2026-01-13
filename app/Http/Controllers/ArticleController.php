@@ -28,6 +28,8 @@ class ArticleController extends Controller
             })
             ->firstOrFail();
 
+        $article->increment('views');
+
         return view('articles.show', compact('article'));
     }
 }
