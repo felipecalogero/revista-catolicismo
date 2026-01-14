@@ -15,7 +15,6 @@ use App\Http\Controllers\SettingsController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/categoria/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
 Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download');
 
@@ -49,6 +48,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/editions/{id}/publish', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
     Route::post('/editions/{id}/unpublish', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');
 });
+
+// Rota de categorias (deve vir antes da rota de artigos)
+Route::get('/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Rota genérica de artigos (deve ser a última para evitar conflitos)
 Route::get('/{category}/{slug}', [ArticleController::class, 'show'])->name('articles.show');
