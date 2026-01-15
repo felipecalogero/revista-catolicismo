@@ -29,7 +29,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagem</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-80">Título</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visualizações</th>
@@ -49,9 +49,11 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ Str::limit($article->title, 50) }}</div>
-                                    <div class="text-sm text-gray-500">{{ Str::limit($article->description, 60) }}</div>
+                                <td class="px-6 py-4 w-80">
+                                    <div class="text-sm font-medium text-gray-900 mb-1">{{ Str::limit($article->title, 45) }}</div>
+                                    <div class="text-sm text-gray-500 leading-relaxed break-words" style="word-break: break-word; max-width: 20rem;">
+                                        {{ Str::limit(strip_tags($article->description ?? ''), 70) }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">

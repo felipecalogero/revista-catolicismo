@@ -36,7 +36,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capa</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Descrição</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visualizações</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
@@ -58,8 +58,10 @@
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ Str::limit($edition->title, 50) }}</div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-500">{{ Str::limit($edition->description, 80) }}</div>
+                                <td class="px-6 py-4 w-64">
+                                    <div class="text-sm text-gray-500 leading-relaxed break-words" style="word-break: break-word; max-width: 16rem;">
+                                        {{ Str::limit(strip_tags($edition->description ?? ''), 75) }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($edition->published)
