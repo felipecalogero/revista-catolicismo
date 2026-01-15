@@ -46,7 +46,7 @@
                 <h2 class="text-3xl font-bold text-gray-900 font-serif mb-3">Destaques</h2>
                 <div class="w-20 h-1 bg-red-800"></div>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @forelse($destaques ?? [] as $destaque)
                     <x-article-card :article="$destaque" />
@@ -67,20 +67,20 @@
                         <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Últimas Notícias</h2>
                         <p class="text-gray-600 text-sm">As principais notícias e análises do momento</p>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                         @forelse($noticias ?? [] as $index => $noticia)
-                            <x-article-card 
+                            <x-article-card
                                 :article="$noticia"
                             />
                         @empty
                             <p class="col-span-full text-center text-gray-500 py-8">Nenhuma notícia disponível no momento.</p>
                         @endforelse
                     </div>
-                    
+
                     {{-- Botão Ver Mais --}}
                     <div class="text-center pt-2">
-                        <a href="#" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                        <a href="{{ route('articles.index') }}" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
                             Ver Todas as Notícias
                         </a>
                     </div>
@@ -97,13 +97,13 @@
                             </p>
                         </div>
                         <form class="space-y-3">
-                            <input 
-                                type="email" 
-                                placeholder="Seu e-mail" 
+                            <input
+                                type="email"
+                                placeholder="Seu e-mail"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent text-sm"
                             >
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 class="w-full bg-red-800 text-white px-4 py-3 rounded-lg hover:bg-red-900 transition-colors text-sm font-medium"
                             >
                                 Assinar Newsletter
@@ -124,8 +124,8 @@
                                     <a href="{{ isset($artigo['slug']) && isset($artigo['category_slug']) ? route('articles.show', [$artigo['category_slug'], $artigo['slug']]) : '#' }}" class="block">
                                         <div class="flex gap-4">
                                             <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
-                                                <img 
-                                                    src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}" 
+                                                <img
+                                                    src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}"
                                                     alt="{{ $artigo['title'] ?? '' }}"
                                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                 >
@@ -162,10 +162,11 @@
     @if(isset($categoriasMaisVisitadas) && count($categoriasMaisVisitadas) > 0)
         @foreach($categoriasMaisVisitadas as $index => $categoria)
         <section class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }} py-16 border-t border-gray-200">
-            <x-section-block 
-                :title="$categoria['name']" 
+            <x-section-block
+                :title="$categoria['name']"
                 :articles="$categoria['articles']"
                 :columns="3"
+                :slug="$categoria['slug']"
             />
         </section>
         @endforeach

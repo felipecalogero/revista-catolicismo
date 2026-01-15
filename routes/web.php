@@ -15,6 +15,7 @@ use App\Http\Controllers\SettingsController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
 Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download');
 

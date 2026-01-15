@@ -1,4 +1,4 @@
-@props(['title', 'articles', 'columns' => 3])
+@props(['title', 'articles', 'columns' => 3, 'slug' => null])
 
 @php
     $gridClasses = [
@@ -23,10 +23,12 @@
         @endforeach
     </div>
     
-    <div class="text-center mt-10">
-        <a href="#" class="inline-block text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
-            Ver todas as notícias de {{ $title }} →
-        </a>
-    </div>
+    @if($slug)
+        <div class="text-center mt-10">
+            <a href="{{ route('categories.show', $slug) }}" class="inline-block text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
+                Ver todas as notícias de {{ $title }} →
+            </a>
+        </div>
+    @endif
 </div>
 
