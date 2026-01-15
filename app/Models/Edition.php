@@ -20,6 +20,7 @@ class Edition extends Model
         'pdf_file',
         'published',
         'published_at',
+        'views',
     ];
 
     protected $casts = [

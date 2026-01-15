@@ -69,7 +69,43 @@
 
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">Atividades Recentes</h3>
-                    <p class="text-gray-600 text-sm">Nenhuma atividade recente</p>
+                    <div class="space-y-4 max-h-96 overflow-y-auto">
+                        @forelse($activities ?? [] as $activity)
+                            <div class="flex items-start gap-3 pb-3 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                <div class="text-2xl flex-shrink-0">{{ $activity['icon'] ?? '📌' }}</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 mb-1">
+                                        @if(isset($activity['url']))
+                                            <a href="{{ $activity['url'] }}" class="hover:text-red-800 transition-colors">
+                                                {{ $activity['title'] }}
+                                            </a>
+                                        @else
+                                            {{ $activity['title'] }}
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-gray-600">
+                                        @php
+                                            $typeLabels = [
+                                                'article_created' => 'Artigo criado',
+                                                'article_published' => 'Artigo publicado',
+                                                'edition_created' => 'Edição criada',
+                                                'edition_published' => 'Edição publicada',
+                                                'user_created' => 'Usuário criado',
+                                                'category_created' => 'Categoria criada',
+                                            ];
+                                            $label = $typeLabels[$activity['type']] ?? 'Atividade';
+                                        @endphp
+                                        {{ $label }} por {{ $activity['user'] }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        {{ $activity['date']->diffForHumans() }}
+                                    </p>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-gray-600 text-sm">Nenhuma atividade recente</p>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 

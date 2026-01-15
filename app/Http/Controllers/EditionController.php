@@ -17,6 +17,8 @@ class EditionController extends Controller
             ->where('published', true)
             ->firstOrFail();
 
+        $edition->increment('views');
+
         return view('editions.show', compact('edition'));
     }
 

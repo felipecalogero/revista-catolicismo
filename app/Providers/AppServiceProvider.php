@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configurar locale para português
+        \Carbon\Carbon::setLocale('pt_BR');
+        app()->setLocale('pt_BR');
+        
         // Compartilhar categorias com todas as views
         View::composer('partials.header', function ($view) {
             $categories = Category::orderBy('name')->get();
