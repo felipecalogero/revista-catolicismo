@@ -12,12 +12,18 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\PagBankWebhookController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
-Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download');
+Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download')
+    ->middleware('subscription');
+
+// Rotas de assinatura (públicas para visualização de planos)
+Route::get('/assinaturas/planos', [SubscriptionController::class, 'plans'])->name('subscriptions.plans');
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
@@ -36,7 +42,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+    
+    // Rotas de assinatura
+    Route::prefix('assinaturas')->name('subscriptions.')->group(function () {
+        Route::post('/criar', [SubscriptionController::class, 'create'])->name('create');
+        Route::get('/minha-assinatura', [SubscriptionController::class, 'show'])->name('show');
+        Route::post('/ativar', [SubscriptionController::class, 'activate'])->name('activate');
+        Route::post('/suspender', [SubscriptionController::class, 'suspend'])->name('suspend');
+        Route::post('/cancelar', [SubscriptionController::class, 'cancel'])->name('cancel');
+        Route::get('/retorno-pagbank', [SubscriptionController::class, 'returnFromPagBank'])->name('return');
+    });
 });
+
+// Webhook do PagBank (sem autenticação)
+Route::post('/webhook/pagbank', [PagBankWebhookController::class, 'handle'])->name('webhook.pagbank');
 
 // Rotas de administrador
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

@@ -14,10 +14,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
         ]);
 
         // Remover validação de tamanho de POST para permitir uploads maiores
         $middleware->remove(ValidatePostSize::class);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhook/pagbank',
+            'webhook/pagbank/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

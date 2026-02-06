@@ -17,7 +17,12 @@
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Minha Assinatura</h3>
                     <p class="text-gray-600 text-sm mb-4">Gerencie sua assinatura da revista</p>
-                    <a href="#" class="text-red-800 hover:text-red-900 font-medium text-sm">
+                    @if(Auth::user()->hasActiveSubscription())
+                        <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mb-2">Ativa</span>
+                    @else
+                        <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mb-2">Sem assinatura</span>
+                    @endif
+                    <a href="{{ route('subscriptions.show') }}" class="text-red-800 hover:text-red-900 font-medium text-sm block mt-2">
                         Ver detalhes →
                     </a>
                 </div>

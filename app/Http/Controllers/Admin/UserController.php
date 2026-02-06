@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(15);
+        $users = User::with('subscriptions')->orderBy('created_at', 'desc')->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
@@ -37,10 +37,6 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:user,admin',
-            'subscription_active' => 'boolean',
-            'subscription_start_date' => 'nullable|date',
-            'subscription_end_date' => 'nullable|date|after_or_equal:subscription_start_date',
-            'subscription_plan' => 'nullable|in:monthly,yearly',
         ]);
 
         $user = User::create([
@@ -48,10 +44,6 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'subscription_active' => $request->has('subscription_active'),
-            'subscription_start_date' => $validated['subscription_start_date'] ?? null,
-            'subscription_end_date' => $validated['subscription_end_date'] ?? null,
-            'subscription_plan' => $validated['subscription_plan'] ?? null,
         ]);
 
         return redirect()->route('admin.users.index')
@@ -63,7 +55,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('subscriptions')->findOrFail($id);
         return view('admin.users.show', compact('user'));
     }
 
@@ -72,7 +64,7 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('subscriptions')->findOrFail($id);
         return view('admin.users.edit', compact('user'));
     }
 
@@ -88,20 +80,12 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:user,admin',
-            'subscription_active' => 'boolean',
-            'subscription_start_date' => 'nullable|date',
-            'subscription_end_date' => 'nullable|date|after_or_equal:subscription_start_date',
-            'subscription_plan' => 'nullable|in:monthly,yearly',
         ]);
 
         $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
-            'subscription_active' => $request->has('subscription_active'),
-            'subscription_start_date' => $validated['subscription_start_date'] ?? null,
-            'subscription_end_date' => $validated['subscription_end_date'] ?? null,
-            'subscription_plan' => $validated['subscription_plan'] ?? null,
         ];
 
         // Atualizar senha apenas se fornecida

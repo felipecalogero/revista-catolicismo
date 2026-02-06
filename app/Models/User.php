@@ -22,10 +22,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'subscription_active',
-        'subscription_start_date',
-        'subscription_end_date',
-        'subscription_plan',
     ];
 
     /**
@@ -65,5 +61,46 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Relação com assinaturas
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Obtém a assinatura ativa do usuário
+     */
+    public function activeSubscription()
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Verifica se o usuário tem assinatura ativa
+     */
+    public function hasActiveSubscription(): bool
+    {
+        $activeSubscription = $this->activeSubscription();
+        return $activeSubscription !== null;
+    }
+
+    /**
+     * Verifica se o usuário pode acessar edições
+     */
+    public function canAccessEditions(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->hasActiveSubscription();
     }
 }

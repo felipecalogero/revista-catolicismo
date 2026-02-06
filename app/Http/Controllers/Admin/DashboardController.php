@@ -7,8 +7,7 @@ use App\Models\User;
 use App\Models\Article;
 use App\Models\Edition;
 use App\Models\Category;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+use App\Models\Subscription;
 
 class DashboardController extends Controller
 {
@@ -24,17 +23,9 @@ class DashboardController extends Controller
         $totalArticles = Article::where('published', true)->count();
 
         // Contagem de assinaturas ativas
-        $totalSubscriptions = 0;
-        if (Schema::hasTable('subscriptions')) {
-            $totalSubscriptions = DB::table('subscriptions')
-                ->where(function($query) {
-                    $query->where('status', 'active')
-                          ->orWhere('status', 'ativa')
-                          ->orWhere('active', true)
-                          ->orWhereNull('status'); // Se não houver campo status, conta todos
-                })
-                ->count();
-        }
+        $totalSubscriptions = Subscription::where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->count();
 
         // Contagem de edições publicadas
         $totalEditions = Edition::where('published', true)->count();

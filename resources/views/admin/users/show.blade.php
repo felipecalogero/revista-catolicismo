@@ -55,52 +55,56 @@
                 {{-- Informações de Assinatura --}}
                 <div class="bg-gray-50 rounded-lg p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4 font-serif">Assinatura</h2>
+                    @php
+                        $activeSubscription = $user->activeSubscription();
+                        $latestSubscription = $user->subscriptions()->latest()->first();
+                    @endphp
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Status</dt>
                             <dd class="mt-1">
-                                @if($user->subscription_active)
+                                @if($activeSubscription)
                                     <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">Ativa</span>
                                 @else
                                     <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">Inativa</span>
                                 @endif
                             </dd>
                         </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Plano</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if($user->subscription_plan)
-                                    {{ $user->subscription_plan === 'monthly' ? 'Mensal' : 'Anual' }}
-                                @else
-                                    <span class="text-gray-400">Não definido</span>
-                                @endif
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Data de Início</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if($user->subscription_start_date)
-                                    {{ \Carbon\Carbon::parse($user->subscription_start_date)->format('d/m/Y') }}
-                                @else
-                                    <span class="text-gray-400">Não definida</span>
-                                @endif
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Data de Término</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if($user->subscription_end_date)
-                                    {{ \Carbon\Carbon::parse($user->subscription_end_date)->format('d/m/Y') }}
-                                    @if(\Carbon\Carbon::parse($user->subscription_end_date)->isPast())
-                                        <span class="ml-2 text-xs text-red-600">(Expirada)</span>
-                                    @elseif(\Carbon\Carbon::parse($user->subscription_end_date)->diffInDays(now()) <= 7)
-                                        <span class="ml-2 text-xs text-yellow-600">(Expira em breve)</span>
+                        @if($latestSubscription)
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Tipo de Plano</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {{ $latestSubscription->plan_type === 'physical' ? 'Física' : 'Virtual' }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Data de Início</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    @if($latestSubscription->start_date)
+                                        {{ \Carbon\Carbon::parse($latestSubscription->start_date)->format('d/m/Y') }}
+                                    @else
+                                        <span class="text-gray-400">Não definida</span>
                                     @endif
-                                @else
-                                    <span class="text-gray-400">Não definida</span>
-                                @endif
-                            </dd>
-                        </div>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Data de Término</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    @if($latestSubscription->end_date)
+                                        {{ \Carbon\Carbon::parse($latestSubscription->end_date)->format('d/m/Y') }}
+                                        @if(\Carbon\Carbon::parse($latestSubscription->end_date)->isPast())
+                                            <span class="ml-2 text-xs text-red-600">(Expirada)</span>
+                                        @endif
+                                    @else
+                                        <span class="text-gray-400">Não definida</span>
+                                    @endif
+                                </dd>
+                            </div>
+                        @else
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Nenhuma assinatura encontrada</dt>
+                            </div>
+                        @endif
                     </dl>
                 </div>
             </div>

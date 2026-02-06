@@ -31,10 +31,18 @@ class EditionController extends Controller
             ->where('published', true)
             ->firstOrFail();
 
-        // TODO: Verificar se o usuário tem assinatura ativa
-        // Por enquanto, permite download para usuários autenticados
-        if (!auth()->check()) {
-            return redirect()->route('login')->with('error', 'Você precisa estar logado e ter uma assinatura ativa para baixar esta edição.');
+        $user = auth()->user();
+
+        // Verifica se o usuário está autenticado
+        if (!$user) {
+            return redirect()->route('login')
+                ->with('error', 'Você precisa estar logado para baixar esta edição.');
+        }
+
+        // Verifica se o usuário pode acessar edições (tem assinatura ativa ou é admin)
+        if (!$user->canAccessEditions()) {
+            return redirect()->route('subscriptions.plans')
+                ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
         }
 
         if (!$edition->pdf_file || !Storage::disk('public')->exists($edition->pdf_file)) {

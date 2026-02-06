@@ -60,11 +60,14 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($user->subscription_active)
+                                    @php
+                                        $activeSubscription = $user->activeSubscription();
+                                    @endphp
+                                    @if($activeSubscription)
                                         <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">Ativa</span>
-                                        @if($user->subscription_end_date)
+                                        @if($activeSubscription->end_date)
                                             <div class="text-xs text-gray-500 mt-1">
-                                                Até {{ \Carbon\Carbon::parse($user->subscription_end_date)->format('d/m/Y') }}
+                                                Até {{ \Carbon\Carbon::parse($activeSubscription->end_date)->format('d/m/Y') }}
                                             </div>
                                         @endif
                                     @else
@@ -72,9 +75,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($user->subscription_plan)
+                                    @if($activeSubscription)
                                         <span class="text-sm text-gray-900">
-                                            {{ $user->subscription_plan === 'monthly' ? 'Mensal' : 'Anual' }}
+                                            {{ $activeSubscription->plan_type === 'physical' ? 'Física' : 'Virtual' }}
                                         </span>
                                     @else
                                         <span class="text-sm text-gray-400">-</span>
