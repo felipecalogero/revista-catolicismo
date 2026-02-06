@@ -75,4 +75,40 @@ class EditionController extends Controller
 
         return Storage::disk('public')->download($edition->pdf_file, $edition->slug . '.pdf');
     }
+
+    /**
+     * Visualiza o PDF da edição em formato revista
+     */
+    public function viewMagazine(string $slug)
+    {
+        $edition = Edition::where('slug', $slug)
+            ->where('published', true)
+            ->firstOrFail();
+
+        $user = auth()->user();
+
+        // Verifica se o usuário está autenticado
+        if (!$user) {
+            return redirect()->route('login')
+                ->with('error', 'Você precisa estar logado para visualizar esta edição.');
+        }
+
+        // Se a edição foi publicada há mais de 5 meses, qualquer usuário autenticado pode visualizar
+        if ($edition->canBeAccessedByNonSubscribers()) {
+            // Permite visualização para qualquer usuário autenticado
+        } else {
+            // Para edições recentes, apenas assinantes podem visualizar
+            if (!$user->canAccessEditions()) {
+                return redirect()->route('subscriptions.plans')
+                    ->with('error', 'Você precisa de uma assinatura ativa para visualizar esta edição.');
+            }
+        }
+
+        // Verifica se o PDF existe
+        if (!$edition->pdf_file || !Storage::disk('public')->exists($edition->pdf_file)) {
+            abort(404, 'Arquivo PDF não encontrado.');
+        }
+
+        return view('editions.magazine', compact('edition'));
+    }
 }

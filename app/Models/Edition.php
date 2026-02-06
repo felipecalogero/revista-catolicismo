@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Edition extends Model
@@ -58,6 +59,24 @@ class Edition extends Model
     {
         $fiveMonthsAgo = now()->subMonths(5);
         return $query->where('published_at', '<=', $fiveMonthsAgo);
+    }
+
+    /**
+     * Acessor para obter a URL do arquivo PDF
+     */
+    public function getPdfFileUrlAttribute(): ?string
+    {
+        if (!$this->pdf_file) {
+            return null;
+        }
+
+        // Se o arquivo começa com http:// ou https://, é uma URL externa
+        if (Str::startsWith($this->pdf_file, ['http://', 'https://'])) {
+            return $this->pdf_file;
+        }
+
+        // Caso contrário, é um arquivo local no storage
+        return Storage::url($this->pdf_file);
     }
 
     /**

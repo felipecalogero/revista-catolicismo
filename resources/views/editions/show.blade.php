@@ -33,14 +33,22 @@
                         {!! $edition->description !!}
                     </div>
 
-                    {{-- Botão de Download --}}
+                    {{-- Botões de Ação --}}
                     @if($canDownload)
-                        <a
-                            href="{{ route('editions.download', $edition->slug) }}"
-                            class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium"
-                        >
-                            Baixar PDF
-                        </a>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a
+                                href="{{ route('editions.magazine', $edition->slug) }}"
+                                class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium text-center"
+                            >
+                                Visualizar Revista
+                            </a>
+                            <a
+                                href="{{ route('editions.download', $edition->slug) }}"
+                                class="inline-block bg-white text-red-800 border-2 border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium text-center"
+                            >
+                                Baixar PDF
+                            </a>
+                        </div>
                     @else
                         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                             @if($hasFullAccess)
