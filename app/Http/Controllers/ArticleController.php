@@ -30,9 +30,24 @@ class ArticleController extends Controller
             })
             ->firstOrFail();
 
+        // Verifica acesso do usuário
+        $user = auth()->user();
+        
+        // Se o artigo foi publicado há mais de 5 meses, todos têm acesso completo
+        if ($article->canBeAccessedByNonSubscribers()) {
+            $hasFullAccess = true;
+        } else {
+            // Artigos recentes: apenas assinantes têm acesso completo
+            if ($user) {
+                $hasFullAccess = $user->canAccessArticle($article);
+            } else {
+                $hasFullAccess = false; // Não-assinantes veem apenas prévia
+            }
+        }
+
         $article->increment('views');
 
-        return view('articles.show', compact('article'));
+        return view('articles.show', compact('article', 'hasFullAccess'));
     }
 
     /**

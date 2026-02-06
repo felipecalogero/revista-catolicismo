@@ -37,6 +37,30 @@ class Edition extends Model
     }
 
     /**
+     * Verifica se a edição pode ser acessada por não-assinantes
+     * Não-assinantes só podem acessar edições publicadas há mais de 5 meses
+     */
+    public function canBeAccessedByNonSubscribers(): bool
+    {
+        if (!$this->published_at) {
+            return false;
+        }
+
+        // Verifica se foi publicada há mais de 5 meses
+        $fiveMonthsAgo = now()->subMonths(5);
+        return $this->published_at->lte($fiveMonthsAgo);
+    }
+
+    /**
+     * Scope para filtrar edições acessíveis por não-assinantes
+     */
+    public function scopeAccessibleByNonSubscribers($query)
+    {
+        $fiveMonthsAgo = now()->subMonths(5);
+        return $query->where('published_at', '<=', $fiveMonthsAgo);
+    }
+
+    /**
      * Boot do modelo
      */
     protected static function boot()

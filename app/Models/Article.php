@@ -76,6 +76,62 @@ class Article extends Model
     }
 
     /**
+     * Verifica se o artigo pode ser acessado por não-assinantes
+     * Não-assinantes só podem acessar artigos publicados há mais de 5 meses
+     */
+    public function canBeAccessedByNonSubscribers(): bool
+    {
+        if (!$this->published_at) {
+            return false;
+        }
+
+        $fiveMonthsAgo = now()->subMonths(5);
+        return $this->published_at->lte($fiveMonthsAgo);
+    }
+
+    /**
+     * Scope para filtrar artigos acessíveis por não-assinantes
+     */
+    public function scopeAccessibleByNonSubscribers($query)
+    {
+        $fiveMonthsAgo = now()->subMonths(5);
+        return $query->where('published_at', '<=', $fiveMonthsAgo);
+    }
+
+    /**
+     * Retorna uma prévia do conteúdo (primeiros parágrafos ou caracteres)
+     */
+    public function getPreview(int $maxParagraphs = 3): string
+    {
+        $content = strip_tags($this->content, '<p><br><strong><em><b><i><u>');
+        
+        // Tenta pegar os primeiros parágrafos
+        preg_match_all('/<p[^>]*>.*?<\/p>/is', $content, $paragraphMatches);
+        $paragraphs = $paragraphMatches[0];
+        
+        if (count($paragraphs) > $maxParagraphs) {
+            $preview = implode('', array_slice($paragraphs, 0, $maxParagraphs));
+            // Adiciona "..." no final
+            $preview .= '<p class="text-gray-500 italic">...</p>';
+            return $preview;
+        }
+        
+        // Se não houver parágrafos suficientes, limita por caracteres
+        $plainText = strip_tags($content);
+        if (strlen($plainText) > 500) {
+            $preview = substr($plainText, 0, 500);
+            // Tenta cortar em uma palavra completa
+            $lastSpace = strrpos($preview, ' ');
+            if ($lastSpace !== false) {
+                $preview = substr($preview, 0, $lastSpace);
+            }
+            return '<p>' . nl2br(htmlspecialchars($preview)) . '...</p>';
+        }
+        
+        return $content;
+    }
+
+    /**
      * Boot do modelo
      */
     protected static function boot()

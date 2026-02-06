@@ -83,7 +83,7 @@
                     }
 
                     // Inserir vídeo no meio do conteúdo HTML
-                    if ($embedUrl) {
+                    if ($embedUrl && $hasFullAccess) {
                         // Encontrar o primeiro parágrafo com conteúdo significativo
                         preg_match_all('/<p[^>]*>.*?<\/p>/is', $content, $paragraphMatches);
                         $paragraphs = $paragraphMatches[0];
@@ -108,22 +108,52 @@
                 @endphp
 
                 <div class="text-gray-800 leading-relaxed text-lg quill-content">
-                    @if($embedUrl && isset($contentBefore) && isset($contentAfter))
-                        {!! $contentBefore !!}
-                        <div class="my-12">
-                            <div class="relative w-full" style="padding-bottom: 56.25%;">
-                                <iframe
-                                    class="absolute top-0 left-0 w-full h-full rounded-lg"
-                                    src="{{ htmlspecialchars($embedUrl) }}"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen
-                                ></iframe>
+                    @if($hasFullAccess)
+                        {{-- Conteúdo completo para assinantes --}}
+                        @if($embedUrl && isset($contentBefore) && isset($contentAfter))
+                            {!! $contentBefore !!}
+                            <div class="my-12">
+                                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                    <iframe
+                                        class="absolute top-0 left-0 w-full h-full rounded-lg"
+                                        src="{{ htmlspecialchars($embedUrl) }}"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen
+                                    ></iframe>
+                                </div>
+                            </div>
+                            {!! $contentAfter !!}
+                        @else
+                            {!! $content !!}
+                        @endif
+                    @else
+                        {{-- Prévia do conteúdo para não-assinantes --}}
+                        <div class="relative">
+                            {!! $article->getPreview(3) !!}
+                            
+                            {{-- Overlay com gradiente e call-to-action --}}
+                            <div class="relative mt-8 pt-8 border-t border-gray-200">
+                                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center">
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler o artigo completo?</h3>
+                                    <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todos os artigos e edições exclusivas.</p>
+                                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                        @auth
+                                            <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                                Assinar Agora
+                                            </a>
+                                        @else
+                                            <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                                Fazer Login
+                                            </a>
+                                            <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-8 py-3 rounded-lg border-2 border-red-800 hover:bg-red-50 transition-colors font-medium">
+                                                Assinar Agora
+                                            </a>
+                                        @endauth
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {!! $contentAfter !!}
-                    @else
-                        {!! $content !!}
                     @endif
                 </div>
             </div>

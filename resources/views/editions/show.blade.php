@@ -34,7 +34,7 @@
                     </div>
 
                     {{-- Botão de Download --}}
-                    @auth
+                    @if($canDownload)
                         <a
                             href="{{ route('editions.download', $edition->slug) }}"
                             class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium"
@@ -43,27 +43,64 @@
                         </a>
                     @else
                         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p class="text-red-800 font-medium mb-2">Assine para ter acesso completo</p>
-                            <p class="text-sm text-gray-700 mb-4">Faça login ou assine a revista para baixar esta edição em PDF.</p>
-                            <div class="flex gap-3">
-                                <a href="{{ route('login') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                    Entrar
+                            @if($hasFullAccess)
+                                {{-- Edição antiga: só precisa fazer login --}}
+                                <p class="text-red-800 font-medium mb-2">Faça login para baixar</p>
+                                <p class="text-sm text-gray-700 mb-4">Esta edição está disponível gratuitamente. Faça login para baixar o PDF.</p>
+                                <a href="{{ route('login') }}" class="inline-block bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                                    Fazer Login
                                 </a>
-                                <a href="#" class="bg-white text-red-800 px-6 py-2 rounded border border-red-800 hover:bg-red-50 transition-colors font-medium text-sm">
-                                    Assinar Agora
-                                </a>
-                            </div>
+                            @else
+                                {{-- Edição recente: precisa assinar --}}
+                                <p class="text-red-800 font-medium mb-2">Assine para ter acesso completo</p>
+                                <p class="text-sm text-gray-700 mb-4">Faça login ou assine a revista para baixar esta edição em PDF.</p>
+                                <div class="flex gap-3">
+                                    @auth
+                                        <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                                            Assinar Agora
+                                        </a>
+                                    @else
+                                        <a href="{{ route('login') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                                            Entrar
+                                        </a>
+                                        <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-6 py-2 rounded border border-red-800 hover:bg-red-50 transition-colors font-medium text-sm">
+                                            Assinar Agora
+                                        </a>
+                                    @endauth
+                                </div>
+                            @endif
                         </div>
-                    @endauth
+                    @endif
                 </div>
             </div>
         </div>
 
-        {{-- Conteúdo Adicional (pode ser expandido no futuro) --}}
+        {{-- Conteúdo Adicional --}}
         <div class="prose prose-lg max-w-none">
-            <p class="text-gray-600">
-                Esta edição está disponível para download em formato PDF. Assine a revista para ter acesso completo a todas as edições.
-            </p>
+            @if($hasFullAccess)
+                <p class="text-gray-600">
+                    Esta edição está disponível para download em formato PDF. Clique no botão acima para baixar.
+                </p>
+            @else
+                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler esta edição completa?</h3>
+                    <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todas as edições em PDF, além de artigos exclusivos e conteúdo premium.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        @auth
+                            <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                Assinar Agora
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                Fazer Login
+                            </a>
+                            <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-8 py-3 rounded-lg border-2 border-red-800 hover:bg-red-50 transition-colors font-medium">
+                                Assinar Agora
+                            </a>
+                        @endauth
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>

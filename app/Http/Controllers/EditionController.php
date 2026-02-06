@@ -17,13 +17,32 @@ class EditionController extends Controller
             ->where('published', true)
             ->firstOrFail();
 
+        // Verifica acesso do usuário
+        $user = auth()->user();
+        
+        // Se a edição foi publicada há mais de 5 meses, todos têm acesso completo
+        if ($edition->canBeAccessedByNonSubscribers()) {
+            $hasFullAccess = true;
+            // Para edições antigas, permitir download para usuários autenticados (não precisa ser assinante)
+            $canDownload = $user !== null;
+        } else {
+            // Edições recentes: apenas assinantes têm acesso completo e podem baixar
+            if ($user) {
+                $hasFullAccess = $user->canAccessEdition($edition);
+                $canDownload = $user->canAccessEditions(); // Pode baixar se tiver assinatura ativa
+            } else {
+                $hasFullAccess = false; // Não-assinantes veem apenas prévia
+                $canDownload = false;
+            }
+        }
+
         $edition->increment('views');
 
-        return view('editions.show', compact('edition'));
+        return view('editions.show', compact('edition', 'hasFullAccess', 'canDownload'));
     }
 
     /**
-     * Faz o download do PDF da edição (requer assinatura)
+     * Faz o download do PDF da edição
      */
     public function download(string $slug)
     {
@@ -39,10 +58,15 @@ class EditionController extends Controller
                 ->with('error', 'Você precisa estar logado para baixar esta edição.');
         }
 
-        // Verifica se o usuário pode acessar edições (tem assinatura ativa ou é admin)
-        if (!$user->canAccessEditions()) {
-            return redirect()->route('subscriptions.plans')
-                ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
+        // Se a edição foi publicada há mais de 5 meses, qualquer usuário autenticado pode baixar
+        if ($edition->canBeAccessedByNonSubscribers()) {
+            // Permite download para qualquer usuário autenticado
+        } else {
+            // Para edições recentes, apenas assinantes podem baixar
+            if (!$user->canAccessEditions()) {
+                return redirect()->route('subscriptions.plans')
+                    ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
+            }
         }
 
         if (!$edition->pdf_file || !Storage::disk('public')->exists($edition->pdf_file)) {

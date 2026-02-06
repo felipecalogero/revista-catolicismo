@@ -103,4 +103,46 @@ class User extends Authenticatable
 
         return $this->hasActiveSubscription();
     }
+
+    /**
+     * Verifica se o usuário pode acessar um artigo específico
+     * Assinantes têm acesso a todos os artigos
+     * Não-assinantes só têm acesso a artigos publicados há mais de 5 meses
+     */
+    public function canAccessArticle(\App\Models\Article $article): bool
+    {
+        // Administradores sempre têm acesso
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Assinantes têm acesso a todos os artigos
+        if ($this->hasActiveSubscription()) {
+            return true;
+        }
+
+        // Não-assinantes só têm acesso a artigos publicados há mais de 5 meses
+        return $article->canBeAccessedByNonSubscribers();
+    }
+
+    /**
+     * Verifica se o usuário pode acessar uma edição específica
+     * Assinantes têm acesso a todas as edições
+     * Não-assinantes só têm acesso a edições publicadas há mais de 5 meses
+     */
+    public function canAccessEdition(\App\Models\Edition $edition): bool
+    {
+        // Administradores sempre têm acesso
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Assinantes têm acesso a todas as edições
+        if ($this->hasActiveSubscription()) {
+            return true;
+        }
+
+        // Não-assinantes só têm acesso a edições publicadas há mais de 5 meses
+        return $edition->canBeAccessedByNonSubscribers();
+    }
 }
