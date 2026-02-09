@@ -319,16 +319,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             loadingStatus.textContent = 'Concluído!';
                             
                             setTimeout(function() {
-                                try {
-                                    const response = JSON.parse(xhr.responseText);
-                                    if (response.redirect) {
-                                        window.location.href = response.redirect;
-                                    } else {
-                                        window.location.href = '{{ route("admin.editions.index") }}';
-                                    }
-                                } catch {
-                                    window.location.href = '{{ route("admin.editions.index") }}';
-                                }
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            } else {
+                                window.location.href = '{{ route("admin.editions.index") }}';
+                            }
+                        } catch {
+                            window.location.href = '{{ route("admin.editions.index") }}';
+                        }
                             }, 500);
                         }, 3000);
                     } else if (xhr.status === 419) {
@@ -417,16 +417,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                             loadingStatus.textContent = 'Concluído!';
                                             
                                             setTimeout(function() {
-                                                try {
-                                                    const response = JSON.parse(retryXhr.responseText);
-                                                    if (response.redirect) {
-                                                        window.location.href = response.redirect;
-                                                    } else {
-                                                        window.location.href = '{{ route("admin.editions.index") }}';
-                                                    }
-                                                } catch {
-                                                    window.location.href = '{{ route("admin.editions.index") }}';
-                                                }
+                                        try {
+                                            const response = JSON.parse(retryXhr.responseText);
+                                            if (response.redirect) {
+                                                window.location.href = response.redirect;
+                                            } else {
+                                                window.location.href = '{{ route("admin.editions.index") }}';
+                                            }
+                                        } catch {
+                                            window.location.href = '{{ route("admin.editions.index") }}';
+                                        }
                                             }, 500);
                                         }, 3000);
                                     } else {

@@ -42,12 +42,12 @@
                             >
                                 Visualizar Revista
                             </a>
-                            <a
-                                href="{{ route('editions.download', $edition->slug) }}"
+                        <a
+                            href="{{ route('editions.download', $edition->slug) }}"
                                 class="inline-block bg-white text-red-800 border-2 border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium text-center"
-                            >
-                                Baixar PDF
-                            </a>
+                        >
+                            Baixar PDF
+                        </a>
                         </div>
                     @else
                         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -60,22 +60,22 @@
                                 </a>
                             @else
                                 {{-- Edição recente: precisa assinar --}}
-                                <p class="text-red-800 font-medium mb-2">Assine para ter acesso completo</p>
-                                <p class="text-sm text-gray-700 mb-4">Faça login ou assine a revista para baixar esta edição em PDF.</p>
-                                <div class="flex gap-3">
+                            <p class="text-red-800 font-medium mb-2">Assine para ter acesso completo</p>
+                            <p class="text-sm text-gray-700 mb-4">Faça login ou assine a revista para baixar esta edição em PDF.</p>
+                            <div class="flex gap-3">
                                     @auth
                                         <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
                                             Assinar Agora
                                         </a>
                                     @else
-                                        <a href="{{ route('login') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                            Entrar
-                                        </a>
-                                        <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-6 py-2 rounded border border-red-800 hover:bg-red-50 transition-colors font-medium text-sm">
-                                            Assinar Agora
-                                        </a>
+                                <a href="{{ route('login') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                                    Entrar
+                                </a>
+                                        <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                                    Assinar Agora
+                                </a>
                                     @endauth
-                                </div>
+                            </div>
                             @endif
                         </div>
                     @endif
@@ -86,7 +86,7 @@
         {{-- Conteúdo Adicional --}}
         <div class="prose prose-lg max-w-none">
             @if($hasFullAccess)
-                <p class="text-gray-600">
+            <p class="text-gray-600">
                     Esta edição está disponível para download em formato PDF. Clique no botão acima para baixar.
                 </p>
             @else
@@ -102,7 +102,7 @@
                             <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
                                 Fazer Login
                             </a>
-                            <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-8 py-3 rounded-lg border-2 border-red-800 hover:bg-red-50 transition-colors font-medium">
+                            <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
                                 Assinar Agora
                             </a>
                         @endauth

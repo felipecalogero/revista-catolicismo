@@ -44,7 +44,7 @@
                     <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
                     </a>
-                    <a href="#" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                    <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
                         Assinar
                     </a>
                 @endauth
@@ -95,7 +95,7 @@
                     <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
                     </a>
-                    <a href="#" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm text-center mt-2">
+                    <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm text-center mt-2">
                         Assinar
                     </a>
                 @endauth

@@ -28,7 +28,7 @@
                             Entrar
                         </a>
                     @endauth
-                    <a href="#" class="bg-white text-red-800 px-6 py-2 rounded font-bold hover:bg-gray-100 transition-colors whitespace-nowrap">
+                    <a href="{{ route('subscriptions.plans') }}" class="bg-white text-red-800 px-6 py-2 rounded font-bold hover:bg-gray-100 transition-colors whitespace-nowrap">
                         ASSINE AGORA
                     </a>
                 </div>
@@ -87,30 +87,7 @@
                 </div>
 
                 {{-- Sidebar --}}
-                <aside class="space-y-8">
-                    {{-- Newsletter --}}
-                    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="mb-4 pb-3 border-b border-gray-200">
-                            <h3 class="text-xl font-bold text-gray-900 mb-1 font-serif">Newsletter</h3>
-                            <p class="text-sm text-gray-600">
-                                Receba nossos artigos exclusivos e notícias diretamente em seu e-mail.
-                            </p>
-                        </div>
-                        <form class="space-y-3">
-                            <input
-                                type="email"
-                                placeholder="Seu e-mail"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent text-sm"
-                            >
-                            <button
-                                type="submit"
-                                class="w-full bg-red-800 text-white px-4 py-3 rounded-lg hover:bg-red-900 transition-colors text-sm font-medium"
-                            >
-                                Assinar Newsletter
-                            </button>
-                        </form>
-                    </div>
-
+                <aside class="space-y-8 self-start">
                     {{-- Mais Lidas --}}
                     <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                         <div class="mb-6 pb-3 border-b-2 border-red-800">
@@ -148,10 +125,36 @@
                         </div>
                     </div>
 
-                    {{-- Espaço para Anúncios --}}
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <p class="text-sm text-gray-500 font-medium">Espaço Publicitário</p>
-                        <p class="text-xs text-gray-400 mt-2">300x250</p>
+                    {{-- Categorias --}}
+                    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                        <div class="mb-6 pb-3 border-b-2 border-red-800">
+                            <h3 class="text-xl font-bold text-gray-900 font-serif">
+                                Categorias
+                            </h3>
+                        </div>
+                        <div class="space-y-2">
+                            @forelse($categorias ?? [] as $categoria)
+                                <a href="{{ route('categories.show', $categoria->slug) }}" class="block py-2 px-3 rounded-lg hover:bg-red-50 transition-colors group">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-800 transition-colors">
+                                            {{ $categoria->name }}
+                                        </span>
+                                        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-red-100 group-hover:text-red-800 transition-colors">
+                                            {{ $categoria->articles_count }}
+                                        </span>
+                                    </div>
+                                </a>
+                            @empty
+                                <p class="text-center text-gray-500 py-4 text-sm">Nenhuma categoria disponível no momento.</p>
+                            @endforelse
+                        </div>
+                        @if(isset($categorias) && $categorias->count() > 0)
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <a href="{{ route('articles.index') }}" class="block text-center text-sm text-red-800 hover:text-red-900 font-medium transition-colors">
+                                    Ver todas as categorias →
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </aside>
             </div>

@@ -151,12 +151,23 @@ class HomeController extends Controller
             }
         }
 
+        // Buscar categorias mais populares (com mais artigos) para a sidebar - limitado a 8
+        $categorias = Category::withCount(['articles' => function ($query) {
+                $query->where('published', true);
+            }])
+            ->having('articles_count', '>', 0)
+            ->orderBy('articles_count', 'desc')
+            ->orderBy('name', 'asc')
+            ->limit(6)
+            ->get();
+
         return view('home', compact(
             'revistas',
             'destaques',
             'noticias',
             'maisLidas',
-            'categoriasMaisVisitadas'
+            'categoriasMaisVisitadas',
+            'categorias'
         ));
     }
 }

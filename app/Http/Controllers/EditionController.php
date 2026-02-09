@@ -63,9 +63,9 @@ class EditionController extends Controller
             // Permite download para qualquer usuário autenticado
         } else {
             // Para edições recentes, apenas assinantes podem baixar
-            if (!$user->canAccessEditions()) {
-                return redirect()->route('subscriptions.plans')
-                    ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
+        if (!$user->canAccessEditions()) {
+            return redirect()->route('subscriptions.plans')
+                ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
             }
         }
 

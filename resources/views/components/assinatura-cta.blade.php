@@ -85,9 +85,9 @@
                 </div>
             </div>
             
-            <button class="bg-white text-red-800 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-colors shadow-lg">
+            <a href="{{ route('subscriptions.plans') }}" class="inline-block bg-white text-red-800 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-colors shadow-lg">
                 Assinar Agora
-            </button>
+            </a>
             
             <p class="mt-6 text-sm text-red-200">
                 Cancele quando quiser • Entrega em todo o Brasil
