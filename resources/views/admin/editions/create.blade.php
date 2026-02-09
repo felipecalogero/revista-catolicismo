@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
-    <div class="container mx-auto px-4 lg:px-8">
+    <div class="container mx-auto px-4 lg:px-8" id="page-content">
         <div class="bg-white rounded-lg shadow-md p-8">
             <div class="mb-6 pb-4 border-b-2 border-red-800">
                 <h1 class="text-3xl font-bold text-gray-900 font-serif mb-2">
@@ -16,16 +16,17 @@
             <form action="{{ route('admin.editions.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="edition-form">
                 @csrf
 
-                {{-- Indicador de Progresso --}}
-                <div id="upload-progress" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-800"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-blue-800">Enviando arquivo... Por favor, aguarde.</p>
-                            <p class="text-xs text-blue-600 mt-1">Não feche esta página durante o upload.</p>
-                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
-                                <div id="upload-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                {{-- Popup de Loading --}}
+                <div id="loading-popup" class="hidden fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
+                    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 border-2 border-red-800 pointer-events-auto" style="backdrop-filter: none; -webkit-backdrop-filter: none;">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-red-800 mx-auto mb-4"></div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2" id="loading-title">Processando...</h3>
+                            <p class="text-sm text-gray-600 mb-4" id="loading-message">Por favor, aguarde. Não feche esta página.</p>
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                <div id="loading-progress-bar" class="bg-red-800 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
                             </div>
+                            <p class="text-xs text-gray-500" id="loading-status">Iniciando...</p>
                         </div>
                     </div>
                 </div>
@@ -180,10 +181,15 @@ document.addEventListener('DOMContentLoaded', function() {
         ]);
     }
 
-    const progressDiv = document.getElementById('upload-progress');
-    const progressBar = document.getElementById('upload-progress-bar');
+    const loadingPopup = document.getElementById('loading-popup');
+    const pageContent = document.getElementById('page-content');
+    const loadingTitle = document.getElementById('loading-title');
+    const loadingMessage = document.getElementById('loading-message');
+    const loadingStatus = document.getElementById('loading-status');
+    const loadingProgressBar = document.getElementById('loading-progress-bar');
     const errorDiv = document.getElementById('upload-error');
     const errorMessage = document.getElementById('upload-error-message');
+    const form = document.getElementById('edition-form');
     const submitBtn = form.querySelector('button[type="submit"]');
 
     form.addEventListener('submit', async function(e) {
@@ -200,11 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Ocultar erro anterior
             errorDiv.classList.add('hidden');
 
-            // Mostrar indicador de progresso
-            progressDiv.classList.remove('hidden');
-            progressBar.style.width = '0%';
+            // Mostrar popup de loading e embaçar fundo
+            loadingPopup.classList.remove('hidden');
+            pageContent.classList.add('backdrop-blur-sm', 'opacity-50');
+            loadingTitle.textContent = 'Enviando arquivo...';
+            loadingMessage.textContent = 'Por favor, aguarde. Não feche esta página durante o upload.';
+            loadingStatus.textContent = 'Preparando upload...';
+            loadingProgressBar.style.width = '0%';
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Enviando...';
 
             try {
                 // Primeiro, obter um novo token CSRF e renovar a sessão
@@ -249,28 +258,65 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fazer upload via AJAX
                 const xhr = new XMLHttpRequest();
 
-                // Monitorar progresso
+                // Monitorar progresso do upload
                 xhr.upload.addEventListener('progress', function(e) {
                     if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        progressBar.style.width = percentComplete + '%';
+                        const uploadPercentComplete = (e.loaded / e.total) * 100;
+                        // Upload representa 60% do processo total (restante 40% é compressão)
+                        const totalProgress = Math.min(uploadPercentComplete * 0.6, 60);
+                        loadingProgressBar.style.width = totalProgress + '%';
+                        
+                        // Quando upload estiver completo, mostrar mensagem diferente
+                        if (uploadPercentComplete >= 100) {
+                            loadingStatus.textContent = 'Upload concluído. Iniciando compressão...';
+                        } else {
+                            loadingStatus.textContent = `Enviando: ${Math.round(uploadPercentComplete)}%`;
+                        }
                     }
                 });
 
                 // Tratar resposta
                 xhr.addEventListener('load', function() {
                     if (xhr.status === 200 || xhr.status === 302) {
-                        // Sucesso - redirecionar
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.redirect) {
-                                window.location.href = response.redirect;
+                        // Upload concluído, agora está comprimindo
+                        loadingTitle.textContent = 'Comprimindo PDF...';
+                        loadingMessage.textContent = 'O arquivo foi enviado. Agora estamos comprimindo para otimizar o tamanho. Isso pode levar alguns minutos.';
+                        loadingStatus.textContent = 'Processando compressão...';
+                        loadingProgressBar.style.width = '65%';
+                        
+                        // Simular progresso da compressão (60% a 95%)
+                        let compressProgress = 65;
+                        const compressInterval = setInterval(function() {
+                            compressProgress += 2;
+                            if (compressProgress < 95) {
+                                loadingProgressBar.style.width = compressProgress + '%';
+                                loadingStatus.textContent = `Comprimindo: ${compressProgress}%`;
                             } else {
-                                window.location.href = '{{ route("admin.editions.index") }}';
+                                clearInterval(compressInterval);
+                                loadingProgressBar.style.width = '95%';
+                                loadingStatus.textContent = 'Finalizando...';
                             }
-                        } catch {
-                            window.location.href = '{{ route("admin.editions.index") }}';
-                        }
+                        }, 500);
+                        
+                        // Aguardar um pouco e então redirecionar (o servidor está comprimindo)
+                        setTimeout(function() {
+                            clearInterval(compressInterval);
+                            loadingProgressBar.style.width = '100%';
+                            loadingStatus.textContent = 'Concluído!';
+                            
+                            setTimeout(function() {
+                                try {
+                                    const response = JSON.parse(xhr.responseText);
+                                    if (response.redirect) {
+                                        window.location.href = response.redirect;
+                                    } else {
+                                        window.location.href = '{{ route("admin.editions.index") }}';
+                                    }
+                                } catch {
+                                    window.location.href = '{{ route("admin.editions.index") }}';
+                                }
+                            }, 500);
+                        }, 3000);
                     } else if (xhr.status === 422) {
                         // Erro de validação - mostrar mensagem específica
                         try {
@@ -288,13 +334,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             errorMessage.textContent = 'Erro de validação. Verifique os dados e tente novamente.';
                         }
                         errorDiv.classList.remove('hidden');
-                        progressDiv.classList.add('hidden');
+                        loadingPopup.classList.add('hidden');
+                        pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Criar Edição';
                     } else if (xhr.status === 419) {
                         // Token CSRF expirado - tentar obter novo token e reenviar
-                        errorMessage.textContent = 'Sessão expirada. Tentando renovar...';
-                        errorDiv.classList.remove('hidden');
+                        loadingTitle.textContent = 'Renovando sessão...';
+                        loadingStatus.textContent = 'Sessão expirada. Tentando renovar...';
 
                         // Tentar obter novo token e reenviar
                         fetch('{{ route("admin.csrf-token") }}', {
@@ -333,23 +380,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 retryXhr.upload.addEventListener('progress', function(e) {
                                     if (e.lengthComputable) {
-                                        const percentComplete = (e.loaded / e.total) * 100;
-                                        progressBar.style.width = percentComplete + '%';
+                                        const uploadPercentComplete = (e.loaded / e.total) * 100;
+                                        const totalProgress = Math.min(uploadPercentComplete * 0.6, 60);
+                                        loadingProgressBar.style.width = totalProgress + '%';
+                                        
+                                        if (uploadPercentComplete >= 100) {
+                                            loadingStatus.textContent = 'Upload concluído. Iniciando compressão...';
+                                        } else {
+                                            loadingStatus.textContent = `Enviando: ${Math.round(uploadPercentComplete)}%`;
+                                        }
                                     }
                                 });
 
                                 retryXhr.addEventListener('load', function() {
                                     if (retryXhr.status === 200 || retryXhr.status === 302) {
-                                        try {
-                                            const response = JSON.parse(retryXhr.responseText);
-                                            if (response.redirect) {
-                                                window.location.href = response.redirect;
+                                        loadingTitle.textContent = 'Comprimindo PDF...';
+                                        loadingMessage.textContent = 'O arquivo foi enviado. Agora estamos comprimindo para otimizar o tamanho.';
+                                        loadingStatus.textContent = 'Processando compressão...';
+                                        loadingProgressBar.style.width = '65%';
+                                        
+                                        // Simular progresso da compressão
+                                        let compressProgress = 65;
+                                        const compressInterval = setInterval(function() {
+                                            compressProgress += 2;
+                                            if (compressProgress < 95) {
+                                                loadingProgressBar.style.width = compressProgress + '%';
+                                                loadingStatus.textContent = `Comprimindo: ${compressProgress}%`;
                                             } else {
-                                                window.location.href = '{{ route("admin.editions.index") }}';
+                                                clearInterval(compressInterval);
+                                                loadingProgressBar.style.width = '95%';
+                                                loadingStatus.textContent = 'Finalizando...';
                                             }
-                                        } catch {
-                                            window.location.href = '{{ route("admin.editions.index") }}';
-                                        }
+                                        }, 500);
+                                        
+                                        setTimeout(function() {
+                                            clearInterval(compressInterval);
+                                            loadingProgressBar.style.width = '100%';
+                                            loadingStatus.textContent = 'Concluído!';
+                                            
+                                            setTimeout(function() {
+                                                try {
+                                                    const response = JSON.parse(retryXhr.responseText);
+                                                    if (response.redirect) {
+                                                        window.location.href = response.redirect;
+                                                    } else {
+                                                        window.location.href = '{{ route("admin.editions.index") }}';
+                                                    }
+                                                } catch {
+                                                    window.location.href = '{{ route("admin.editions.index") }}';
+                                                }
+                                            }, 500);
+                                        }, 3000);
                                     } else {
                                         // Tentar obter mensagem de erro mais detalhada
                                         let errorMsg = 'Erro ao fazer upload após renovar sessão.';
@@ -366,7 +447,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         }
                                         errorMessage.textContent = errorMsg + ' Por favor, recarregue a página e tente novamente.';
                                         errorDiv.classList.remove('hidden');
-                                        progressDiv.classList.add('hidden');
+                                        loadingPopup.classList.add('hidden');
+                                        pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                                         submitBtn.disabled = false;
                                         submitBtn.textContent = 'Criar Edição';
                                     }
@@ -375,7 +457,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 retryXhr.addEventListener('error', function() {
                                     errorMessage.textContent = 'Erro de conexão durante o upload. Verifique sua conexão e tente novamente.';
                                     errorDiv.classList.remove('hidden');
-                                    progressDiv.classList.add('hidden');
+                                    loadingPopup.classList.add('hidden');
+                                    pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                                     submitBtn.disabled = false;
                                     submitBtn.textContent = 'Criar Edição';
                                 });
@@ -395,7 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             } else {
                                 errorMessage.textContent = 'Não foi possível renovar a sessão. Por favor, recarregue a página e tente novamente.';
                                 errorDiv.classList.remove('hidden');
-                                progressDiv.classList.add('hidden');
+                                loadingPopup.classList.add('hidden');
+                                pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                                 submitBtn.disabled = false;
                                 submitBtn.textContent = 'Criar Edição';
 
@@ -406,7 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }).catch(() => {
                             errorMessage.textContent = 'Erro ao renovar sessão. Por favor, recarregue a página e tente novamente.';
                             errorDiv.classList.remove('hidden');
-                            progressDiv.classList.add('hidden');
+                            loadingPopup.classList.add('hidden');
+                            pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                             submitBtn.disabled = false;
                             submitBtn.textContent = 'Criar Edição';
 
@@ -423,7 +508,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             errorMessage.textContent = 'Erro ao fazer upload. Por favor, tente novamente.';
                         }
                         errorDiv.classList.remove('hidden');
-                        progressDiv.classList.add('hidden');
+                        loadingPopup.classList.add('hidden');
+                        pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Criar Edição';
                     }
@@ -432,7 +518,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 xhr.addEventListener('error', function() {
                     errorMessage.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
                     errorDiv.classList.remove('hidden');
-                    progressDiv.classList.add('hidden');
+                    loadingPopup.classList.add('hidden');
+                    pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Criar Edição';
                 });
@@ -440,7 +527,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 xhr.addEventListener('abort', function() {
                     errorMessage.textContent = 'Upload cancelado.';
                     errorDiv.classList.remove('hidden');
-                    progressDiv.classList.add('hidden');
+                    loadingPopup.classList.add('hidden');
+                    pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Criar Edição';
                 });
@@ -462,7 +550,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 xhr.addEventListener('error', function() {
                     errorMessage.textContent = 'Erro de conexão durante o upload. Verifique sua conexão e tente novamente.';
                     errorDiv.classList.remove('hidden');
-                    progressDiv.classList.add('hidden');
+                    loadingPopup.classList.add('hidden');
+                    pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Criar Edição';
                 });
@@ -471,7 +560,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Erro:', error);
                 errorMessage.textContent = 'Erro ao processar upload. Por favor, tente novamente.';
                 errorDiv.classList.remove('hidden');
-                progressDiv.classList.add('hidden');
+                loadingPopup.classList.add('hidden');
+                pageContent.classList.remove('backdrop-blur-sm', 'opacity-50');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Criar Edição';
             }
@@ -483,7 +573,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 csrfInput.value = metaToken.getAttribute('content');
             }
 
-            progressDiv.classList.remove('hidden');
+            loadingPopup.classList.remove('hidden');
+            loadingTitle.textContent = 'Enviando...';
+            loadingMessage.textContent = 'Por favor, aguarde.';
+            loadingStatus.textContent = 'Processando formulário...';
+            loadingProgressBar.style.width = '50%';
+            pageContent.classList.add('backdrop-blur-sm', 'opacity-50');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Enviando...';
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Edition;
+use App\Services\PdfCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -47,6 +48,18 @@ class EditionController extends Controller
 
             // Upload do arquivo PDF
             $pdfFilePath = $request->file('pdf_file')->store('editions/pdfs', 'public');
+
+            // Comprimir PDF após upload (se falhar, mantém o original)
+            try {
+                $compressor = new PdfCompressor();
+                $compressor->compressStorageFile($pdfFilePath, 'public', 'ebook');
+            } catch (\Exception $e) {
+                // Se a compressão falhar, continua com o arquivo original
+                \Log::warning('Falha ao comprimir PDF, mantendo original', [
+                    'file' => $pdfFilePath,
+                    'error' => $e->getMessage()
+                ]);
+            }
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -142,6 +155,18 @@ class EditionController extends Controller
                 Storage::disk('public')->delete($edition->pdf_file);
             }
             $pdfFilePath = $request->file('pdf_file')->store('editions/pdfs', 'public');
+
+            // Comprimir PDF após upload (se falhar, mantém o original)
+            try {
+                $compressor = new PdfCompressor();
+                $compressor->compressStorageFile($pdfFilePath, 'public', 'ebook');
+            } catch (\Exception $e) {
+                // Se a compressão falhar, continua com o arquivo original
+                \Log::warning('Falha ao comprimir PDF, mantendo original', [
+                    'file' => $pdfFilePath,
+                    'error' => $e->getMessage()
+                ]);
+            }
         } else {
             $pdfFilePath = $edition->pdf_file;
         }
