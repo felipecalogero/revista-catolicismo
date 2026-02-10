@@ -28,9 +28,8 @@
                 <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">Institucional</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                     <li><a href="{{ route('subscriptions.plans') }}" class="hover:text-red-800 transition-colors">Assinaturas</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Anuncie</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Política de Privacidade</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Termos de Uso</a></li>
+                    <li><a href="{{ route('pages.privacy') }}" class="hover:text-red-800 transition-colors">Política de Privacidade</a></li>
+                    <li><a href="{{ route('pages.terms') }}" class="hover:text-red-800 transition-colors">Termos de Uso</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Edições Anteriores</a></li>
                 </ul>
             </div>

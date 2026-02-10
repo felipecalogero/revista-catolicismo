@@ -47,7 +47,42 @@ class ArticleController extends Controller
 
         $article->increment('views');
 
-        return view('articles.show', compact('article', 'hasFullAccess'));
+        // Buscar artigos relacionados (mesma categoria, excluindo o artigo atual)
+        $relatedArticles = Article::where('published', true)
+            ->where('id', '!=', $article->id)
+            ->where(function ($query) use ($category, $categoryModel, $article) {
+                if ($categoryModel) {
+                    $query->where(function ($q) use ($categoryModel, $article) {
+                        $q->where('category_id', $categoryModel->id)
+                            ->orWhere('category', $categoryModel->name);
+                    });
+                } else {
+                    $query->where('category', $category);
+                }
+            })
+            ->orderBy('published_at', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get()
+            ->map(function ($relatedArticle) {
+                $categorySlug = $relatedArticle->categoryRelation ? $relatedArticle->categoryRelation->slug : Str::slug($relatedArticle->category);
+                return [
+                    'title' => $relatedArticle->title,
+                    'excerpt' => $relatedArticle->description,
+                    'image' => $relatedArticle->image_url ?? $relatedArticle->image,
+                    'category' => $relatedArticle->category_name,
+                    'category_slug' => $categorySlug,
+                    'author' => $relatedArticle->author,
+                    'date' => $relatedArticle->published_at ? $relatedArticle->published_at->format('d/m/Y') : $relatedArticle->created_at->format('d/m/Y'),
+                    'slug' => $relatedArticle->slug,
+                ];
+            })
+            ->toArray();
+
+        // Obter o slug da categoria para o botão "Ver mais"
+        $categorySlug = $categoryModel ? $categoryModel->slug : Str::slug($article->category ?? $category);
+
+        return view('articles.show', compact('article', 'hasFullAccess', 'relatedArticles', 'categorySlug'));
     }
 
     /**

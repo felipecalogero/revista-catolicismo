@@ -18,6 +18,21 @@
 
     <div class="container mx-auto px-4 lg:px-8 py-12">
         <div class="max-w-4xl mx-auto">
+            {{-- Breadcrumbs --}}
+            <nav class="text-sm text-gray-600 mb-4">
+                <a href="{{ route('home') }}" class="hover:text-red-800 transition-colors">Início</a>
+                <span class="mx-2">/</span>
+                @if($article->categoryRelation)
+                    <a href="{{ route('categories.show', $article->categoryRelation->slug) }}" class="hover:text-red-800 transition-colors">
+                        {{ $article->categoryRelation->name }}
+                    </a>
+                @elseif($article->category)
+                    <span class="text-gray-900 font-medium">{{ $article->category }}</span>
+                @endif
+                <span class="mx-2">/</span>
+                <span class="text-gray-900 font-medium line-clamp-1">{{ $article->title }}</span>
+            </nav>
+
             {{-- Cabeçalho do Artigo --}}
             <header class="mb-8">
                 @if($article->categoryRelation || $article->category)
@@ -192,10 +207,24 @@
         <div class="mb-10 pb-4 border-b-2 border-red-800">
             <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Artigos Relacionados</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {{-- Aqui você pode adicionar artigos relacionados --}}
-            <p class="text-gray-600">Em breve: artigos relacionados</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            @forelse($relatedArticles ?? [] as $relatedArticle)
+                <x-article-card :article="$relatedArticle" />
+            @empty
+                <p class="col-span-full text-center text-gray-600 py-8">Nenhum artigo relacionado disponível no momento.</p>
+            @endforelse
         </div>
+        
+        @if(isset($relatedArticles) && count($relatedArticles) > 0 && isset($categorySlug))
+            <div class="text-center mt-8">
+                <a href="{{ route('categories.show', $categorySlug) }}" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
+                    Ver todos os artigos relacionados
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+        @endif
     </div>
 </section>
 @endsection

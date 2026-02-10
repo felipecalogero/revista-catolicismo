@@ -3,19 +3,19 @@
 @section('title', ($category->name ?? 'Categoria') . ' - Revista Catolicismo')
 
 @section('content')
-<section class="bg-white py-12 border-b border-gray-200">
+<section class="bg-white py-6 border-b border-gray-200">
     <div class="container mx-auto px-4 lg:px-8">
-        <div class="mb-8">
-            <nav class="text-sm text-gray-600 mb-4">
+        <div class="mb-4">
+            <nav class="text-sm text-gray-600 mb-3">
                 <a href="{{ route('home') }}" class="hover:text-red-800 transition-colors">Início</a>
                 <span class="mx-2">/</span>
                 <span class="text-gray-900 font-medium">{{ $category->name }}</span>
             </nav>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 font-serif mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 font-serif mb-3">
                 {{ $category->name }}
             </h1>
             @if($category->description)
-                <p class="text-lg text-gray-600 max-w-3xl">
+                <p class="text-base text-gray-600 max-w-3xl">
                     {{ $category->description }}
                 </p>
             @endif

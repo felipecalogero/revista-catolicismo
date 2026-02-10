@@ -17,11 +17,31 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
-                @foreach($categories ?? [] as $category)
+                @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         {{ $category->name }}
                     </a>
                 @endforeach
+                @if(isset($moreCategories) && $moreCategories->count() > 0)
+                    {{-- Dropdown de Mais Categorias --}}
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
+                            Mais
+                            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="py-2">
+                                @foreach($moreCategories as $category)
+                                    <a href="{{ route('categories.show', $category->slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
+                                        {{ $category->name }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 @auth
                     <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300">
                         @if(Auth::user()->isAdmin())
@@ -68,11 +88,29 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
-                @foreach($categories ?? [] as $category)
+                @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         {{ $category->name }}
                     </a>
                 @endforeach
+                @if(isset($moreCategories) && $moreCategories->count() > 0)
+                    {{-- Dropdown Mobile --}}
+                    <div>
+                        <button id="more-categories-btn" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1 w-full">
+                            Mais Categorias
+                            <svg id="more-categories-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="more-categories-menu" class="hidden pl-4 mt-2 space-y-2">
+                            @foreach($moreCategories as $category)
+                                <a href="{{ route('categories.show', $category->slug) }}" class="block text-gray-600 hover:text-red-800 font-medium text-sm transition-colors">
+                                    {{ $category->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 @auth
                     <div class="flex flex-col space-y-2 mt-2 pt-3 border-t border-gray-300">
                         @if(Auth::user()->isAdmin())
@@ -108,6 +146,16 @@
     document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
         const menu = document.getElementById('mobile-menu');
         menu.classList.toggle('hidden');
+    });
+
+    // Toggle dropdown de categorias no mobile
+    document.getElementById('more-categories-btn')?.addEventListener('click', function() {
+        const menu = document.getElementById('more-categories-menu');
+        const icon = document.getElementById('more-categories-icon');
+        if (menu && icon) {
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
     });
 </script>
 

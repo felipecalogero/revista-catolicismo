@@ -126,7 +126,7 @@ class HomeController extends Controller
                         ->orWhere('category', $category->name);
                 })
                 ->orderBy('published_at', 'desc')
-                ->limit(3)
+                ->limit(4)
                 ->get()
                 ->map(function ($article) {
                     $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);

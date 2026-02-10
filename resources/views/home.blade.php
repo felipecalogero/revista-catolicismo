@@ -168,7 +168,7 @@
             <x-section-block
                 :title="$categoria['name']"
                 :articles="$categoria['articles']"
-                :columns="3"
+                :columns="4"
                 :slug="$categoria['slug']"
             />
         </section>
