@@ -7,7 +7,9 @@
     <title>@yield('title', 'Revista Catolicismo')</title>
     <meta name="description" content="@yield('description', 'Revista Catolicismo - Jornalismo católico tradicional, sério e doutrinário')">
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     
     @stack('styles')
 </head>
