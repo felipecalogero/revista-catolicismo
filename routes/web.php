@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
@@ -15,6 +16,25 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PagBankWebhookController;
 use App\Http\Controllers\PageController;
+
+/*
+| Rota temporária para rodar migrações no servidor (Plesk sem SSH).
+| Acesse: https://seu-dominio.com/run-migrations?token=SEU_TOKEN
+| Defina MIGRATE_TOKEN no .env do servidor. Após usar, REMOVA esta rota e o token.
+*/
+Route::get('/run-migrations', function () {
+    $token = env('MIGRATE_TOKEN');
+    if (empty($token) || request()->query('token') !== $token) {
+        abort(404);
+    }
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+        return response('<pre>Migrações executadas com sucesso.\n\n' . $output . '</pre>', 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+    } catch (\Throwable $e) {
+        return response('<pre>Erro: ' . $e->getMessage() . "\n\n" . $e->getTraceAsString() . '</pre>', 500, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+})->name('run-migrations');
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
