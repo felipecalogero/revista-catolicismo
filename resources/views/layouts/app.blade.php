@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,10 +13,10 @@
     
     @stack('styles')
 </head>
-<body class="bg-white text-gray-900 font-serif antialiased">
+<body class="bg-white text-gray-900 font-serif antialiased h-full flex flex-col">
     @include('partials.header')
     
-    <main>
+    <main class="flex-grow flex flex-col">
         @yield('content')
     </main>
     

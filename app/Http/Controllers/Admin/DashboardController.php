@@ -131,8 +131,9 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Combinar todas as atividades e ordenar por data
-        $activities = $recentArticles
+        // Combinar todas as atividades usando uma coleção base para evitar problemas com Eloquent\Collection::merge
+        $activities = collect()
+            ->merge($recentArticles)
             ->merge($publishedArticles)
             ->merge($recentEditions)
             ->merge($publishedEditions)
