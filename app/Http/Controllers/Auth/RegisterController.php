@@ -7,7 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\WelcomeUserMail;
+use App\Mail\NewUserNotificationMail;
 
 class RegisterController extends Controller
 {
@@ -36,6 +39,13 @@ class RegisterController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'user', // Todos os registros são usuários comuns
         ]);
+
+        // Envia email de boas-vindas
+        Mail::to($user->email)->send(new WelcomeUserMail($user));
+
+        // Envia notificacao para o admin
+        $adminEmail = config('mail.from.address', 'admin@revistacatolicismo.com.br');
+        Mail::to($adminEmail)->send(new NewUserNotificationMail($user));
 
         Auth::login($user);
 

@@ -6,6 +6,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ArticleController;
@@ -16,25 +18,6 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PagBankWebhookController;
 use App\Http\Controllers\PageController;
-
-/*
-| Rota temporária para rodar migrações no servidor (Plesk sem SSH).
-| Acesse: https://seu-dominio.com/run-migrations?token=SEU_TOKEN
-| Defina MIGRATE_TOKEN no .env do servidor. Após usar, REMOVA esta rota e o token.
-*/
-Route::get('/run-migrations', function () {
-    $token = env('MIGRATE_TOKEN');
-    if (empty($token) || request()->query('token') !== $token) {
-        abort(404);
-    }
-    try {
-        Artisan::call('migrate', ['--force' => true]);
-        $output = Artisan::output();
-        return response('<pre>Migrações executadas com sucesso.\n\n' . $output . '</pre>', 200, ['Content-Type' => 'text/html; charset=UTF-8']);
-    } catch (\Throwable $e) {
-        return response('<pre>Erro: ' . $e->getMessage() . "\n\n" . $e->getTraceAsString() . '</pre>', 500, ['Content-Type' => 'text/html; charset=UTF-8']);
-    }
-})->name('run-migrations');
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -53,20 +36,26 @@ Route::get('/assinaturas/planos', [SubscriptionController::class, 'plans'])->nam
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::get('/cadastro', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/cadastro', [RegisterController::class, 'register']);
+
+    // Password Reset Routes
+    Route::get('/esqueci-minha-senha', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/esqueci-minha-senha', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/redefinir-senha/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/redefinir-senha', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Configurações do usuário
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
-    
+
     // Rotas de assinatura
     Route::prefix('assinaturas')->name('subscriptions.')->group(function () {
         Route::post('/criar', [SubscriptionController::class, 'create'])->name('create');
