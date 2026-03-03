@@ -32,13 +32,7 @@
         {{-- Planos --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
             @foreach($plans as $key => $plan)
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden border-2 {{ $key === 'physical' ? 'border-red-800' : 'border-gray-200' }} hover:shadow-xl transition-shadow">
-                    {{-- Badge Destaque --}}
-                    @if($key === 'physical')
-                        <div class="bg-red-800 text-white text-center py-2 text-sm font-bold">
-                            Mais Popular
-                        </div>
-                    @endif
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-200 hover:shadow-xl transition-shadow">
 
                     <div class="p-8">
                         {{-- Tipo de Plano --}}

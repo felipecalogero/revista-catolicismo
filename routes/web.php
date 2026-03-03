@@ -18,11 +18,14 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PagBankWebhookController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ContactController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/politica-de-privacidade', [PageController::class, 'privacy'])->name('pages.privacy');
 Route::get('/termos-de-uso', [PageController::class, 'terms'])->name('pages.terms');
+Route::get('/fale-conosco', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/fale-conosco', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
 Route::get('/edicoes/{slug}/revista', [EditionController::class, 'viewMagazine'])->name('editions.magazine');

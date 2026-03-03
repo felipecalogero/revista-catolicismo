@@ -9,7 +9,7 @@
                     <li><a href="#" class="hover:text-red-800 transition-colors">Nossa História</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Nossa Missão</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Equipe Editorial</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Fale Conosco</a></li>
+                    <li><a href="{{ route('contact.index') }}" class="hover:text-red-800 transition-colors">Fale Conosco</a></li>
                 </ul>
             </div>
 
@@ -30,7 +30,7 @@
                     <li><a href="{{ route('subscriptions.plans') }}" class="hover:text-red-800 transition-colors">Assinaturas</a></li>
                     <li><a href="{{ route('pages.privacy') }}" class="hover:text-red-800 transition-colors">Política de Privacidade</a></li>
                     <li><a href="{{ route('pages.terms') }}" class="hover:text-red-800 transition-colors">Termos de Uso</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Edições Anteriores</a></li>
+                    <li><a href="https://catolicismo.com.br/" target="_blank" class="hover:text-red-800 transition-colors">Edições Anteriores</a></li>
                 </ul>
             </div>
 
