@@ -27,6 +27,7 @@ Route::get('/termos-de-uso', [PageController::class, 'terms'])->name('pages.term
 Route::get('/fale-conosco', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/fale-conosco', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
+Route::get('/edicoes', [EditionController::class, 'index'])->name('editions.index');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
 Route::get('/edicoes/{slug}/revista', [EditionController::class, 'viewMagazine'])->name('editions.magazine');
 Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download')

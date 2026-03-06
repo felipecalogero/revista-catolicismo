@@ -49,35 +49,6 @@
                             Baixar PDF
                         </a>
                         </div>
-                    @else
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            @if($hasFullAccess)
-                                {{-- Edição antiga: só precisa fazer login --}}
-                                <p class="text-red-800 font-medium mb-2">Faça login para baixar</p>
-                                <p class="text-sm text-gray-700 mb-4">Esta edição está disponível gratuitamente. Faça login para baixar o PDF.</p>
-                                <a href="{{ route('login') }}" class="inline-block bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                    Fazer Login
-                                </a>
-                            @else
-                                {{-- Edição recente: precisa assinar --}}
-                            <p class="text-red-800 font-medium mb-2">Assine para ter acesso completo</p>
-                            <p class="text-sm text-gray-700 mb-4">Faça login ou assine a revista para baixar esta edição em PDF.</p>
-                            <div class="flex gap-3">
-                                    @auth
-                                        <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                            Assinar Agora
-                                        </a>
-                                    @else
-                                <a href="{{ route('login') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                    Entrar
-                                </a>
-                                        <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
-                                    Assinar Agora
-                                </a>
-                                    @endauth
-                            </div>
-                            @endif
-                        </div>
                     @endif
                 </div>
             </div>
@@ -111,5 +82,51 @@
             @endif
         </div>
     </div>
+
+    {{-- Outras Edições --}}
+    @if(isset($otherEditions) && count($otherEditions) > 0)
+        <section class="bg-gray-50 py-16 border-t border-gray-200">
+            <div class="container mx-auto px-4 lg:px-8">
+                <div class="mb-10 pb-4 border-b-2 border-red-800">
+                    <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Outras Edições</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    @foreach($otherEditions as $otherEdition)
+                        <div class="group">
+                            <a href="{{ route('editions.show', $otherEdition->slug) }}" class="block">
+                                <div class="relative overflow-hidden rounded shadow-sm hover:shadow-lg transition-shadow aspect-[3/4]">
+                                    @if($otherEdition->cover_image)
+                                        <img
+                                            src="{{ Storage::url($otherEdition->cover_image) }}"
+                                            alt="{{ $otherEdition->title }}"
+                                            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        >
+                                    @else
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-400 text-xs">Sem Capa</span>
+                                        </div>
+                                    @endif
+                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                        <div class="text-white text-sm font-medium line-clamp-1">{{ $otherEdition->title }}</div>
+                                        @if($otherEdition->published_at)
+                                            <div class="text-white/80 text-xs">{{ $otherEdition->published_at->format('m/Y') }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="text-center mt-10">
+                    <a href="{{ route('editions.index') }}" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
+                        Ver todas as edições
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
 </div>
 @endsection

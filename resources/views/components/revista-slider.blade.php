@@ -61,10 +61,9 @@
             </button>
         </div>
         
-        {{-- Link para Edições Anteriores --}}
         <div class="mt-8 text-center">
-            <a href="#" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
-                Ver todas as edições anteriores
+            <a href="{{ route('editions.index') }}" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
+                Ver todas as edições
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>

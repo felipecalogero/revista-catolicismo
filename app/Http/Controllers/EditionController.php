@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\Storage;
 class EditionController extends Controller
 {
     /**
+     * Lista todas as edições
+     */
+    public function index()
+    {
+        $editions = Edition::where('published', true)
+            ->orderBy('published_at', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return view('editions.index', compact('editions'));
+    }
+
+    /**
      * Exibe uma edição individual
      */
     public function show(string $slug)
@@ -38,7 +51,14 @@ class EditionController extends Controller
 
         $edition->increment('views');
 
-        return view('editions.show', compact('edition', 'hasFullAccess', 'canDownload'));
+        // Busca outras edições recentes
+        $otherEditions = Edition::where('published', true)
+            ->where('id', '!=', $edition->id)
+            ->orderBy('published_at', 'desc')
+            ->take(6)
+            ->get();
+
+        return view('editions.show', compact('edition', 'hasFullAccess', 'canDownload', 'otherEditions'));
     }
 
     /**
