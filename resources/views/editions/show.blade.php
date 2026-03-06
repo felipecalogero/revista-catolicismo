@@ -108,7 +108,9 @@
                                     @endif
                                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                                         <div class="text-white text-sm font-medium line-clamp-1">{{ $otherEdition->title }}</div>
-                                        @if($otherEdition->published_at)
+                                        @if($otherEdition->release_date)
+                                            <div class="text-white/80 text-xs">{{ $otherEdition->release_date->format('M Y') }}</div>
+                                        @elseif($otherEdition->published_at)
                                             <div class="text-white/80 text-xs">{{ $otherEdition->published_at->format('m/Y') }}</div>
                                         @endif
                                     </div>

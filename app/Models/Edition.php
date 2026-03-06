@@ -21,12 +21,14 @@ class Edition extends Model
         'pdf_file',
         'published',
         'published_at',
+        'release_date',
         'views',
     ];
 
     protected $casts = [
         'published' => 'boolean',
         'published_at' => 'datetime',
+        'release_date' => 'date',
     ];
 
     /**
@@ -43,13 +45,16 @@ class Edition extends Model
      */
     public function canBeAccessedByNonSubscribers(): bool
     {
-        if (!$this->published_at) {
+        // Usa release_date se disponível, caso contrário cai para published_at
+        $baseDate = $this->release_date ?? $this->published_at;
+
+        if (!$baseDate) {
             return false;
         }
 
         // Verifica se foi publicada há mais de 5 meses
         $fiveMonthsAgo = now()->subMonths(5);
-        return $this->published_at->lte($fiveMonthsAgo);
+        return $baseDate->lte($fiveMonthsAgo);
     }
 
     /**
@@ -58,7 +63,13 @@ class Edition extends Model
     public function scopeAccessibleByNonSubscribers($query)
     {
         $fiveMonthsAgo = now()->subMonths(5);
-        return $query->where('published_at', '<=', $fiveMonthsAgo);
+        return $query->where(function($q) use ($fiveMonthsAgo) {
+            $q->where('release_date', '<=', $fiveMonthsAgo)
+              ->orWhere(function($q2) use ($fiveMonthsAgo) {
+                  $q2->whereNull('release_date')
+                     ->where('published_at', '<=', $fiveMonthsAgo);
+              });
+        });
     }
 
     /**

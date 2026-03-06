@@ -14,8 +14,8 @@ class EditionController extends Controller
     public function index()
     {
         $editions = Edition::where('published', true)
+            ->orderBy('release_date', 'desc')
             ->orderBy('published_at', 'desc')
-            ->orderBy('created_at', 'desc')
             ->paginate(12);
 
         return view('editions.index', compact('editions'));
@@ -54,6 +54,7 @@ class EditionController extends Controller
         // Busca outras edições recentes
         $otherEditions = Edition::where('published', true)
             ->where('id', '!=', $edition->id)
+            ->orderBy('release_date', 'desc')
             ->orderBy('published_at', 'desc')
             ->take(6)
             ->get();

@@ -12,12 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn([
+            $columns = [
                 'subscription_active',
                 'subscription_start_date',
                 'subscription_end_date',
                 'subscription_plan',
-            ]);
+            ];
+
+            foreach ($columns as $column) {
+                if (Schema::hasColumn('users', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
         });
     }
 

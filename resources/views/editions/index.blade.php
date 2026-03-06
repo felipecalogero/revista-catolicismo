@@ -34,7 +34,9 @@
                             @endif
                             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                                 <div class="text-white text-sm font-bold mb-1 line-clamp-1">{{ $edition->title }}</div>
-                                @if($edition->published_at)
+                                @if($edition->release_date)
+                                    <div class="text-white/80 text-xs">{{ $edition->release_date->format('M Y') }}</div>
+                                @elseif($edition->published_at)
                                     <div class="text-white/80 text-xs">{{ $edition->published_at->format('M Y') }}</div>
                                 @endif
                             </div>

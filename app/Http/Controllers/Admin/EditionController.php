@@ -40,6 +40,8 @@ class EditionController extends Controller
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'pdf_file' => 'required|mimes:pdf|max:102400', // 100MB (102400 KB)
             'published' => 'boolean',
+            'release_month' => 'required|integer|min:1|max:12',
+            'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
         ]);
 
         try {
@@ -89,6 +91,7 @@ class EditionController extends Controller
             'pdf_file' => $pdfFilePath,
             'published' => $request->has('published'),
             'published_at' => $request->has('published') ? now() : null,
+            'release_date' => $validated['release_year'] . '-' . str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT) . '-01',
         ]);
 
         // Se for requisição AJAX, retornar JSON
@@ -135,6 +138,8 @@ class EditionController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'pdf_file' => 'nullable|mimes:pdf|max:102400', // 100MB (102400 KB)
             'published' => 'boolean',
+            'release_month' => 'required|integer|min:1|max:12',
+            'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
         ]);
 
         // Upload da nova imagem da capa se fornecida
@@ -191,6 +196,7 @@ class EditionController extends Controller
             'pdf_file' => $pdfFilePath,
             'published' => $request->has('published'),
             'published_at' => $request->has('published') && !$edition->published_at ? now() : $edition->published_at,
+            'release_date' => $validated['release_year'] . '-' . str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT) . '-01',
         ]);
 
         // Se for requisição AJAX, retornar JSON
