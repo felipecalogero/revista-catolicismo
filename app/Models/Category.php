@@ -18,6 +18,14 @@ class Category extends Model
     ];
 
     /**
+     * Acessor para obter o nome formatado (Title Case)
+     */
+    public function getNameAttribute($value): string
+    {
+        return Str::title($value);
+    }
+
+    /**
      * Relação com artigos
      */
     public function articles(): HasMany

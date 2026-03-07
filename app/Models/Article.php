@@ -54,7 +54,7 @@ class Article extends Model
      */
     public function getCategoryNameAttribute(): ?string
     {
-        return $this->categoryRelation ? $this->categoryRelation->name : $this->category;
+        return $this->categoryRelation ? $this->categoryRelation->name : Str::title($this->category);
     }
 
     /**

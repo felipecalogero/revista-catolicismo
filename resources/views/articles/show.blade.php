@@ -35,10 +35,10 @@
 
             {{-- Cabeçalho do Artigo --}}
             <header class="mb-8">
-                @if($article->categoryRelation || $article->category)
+                @if($article->category_name)
                     <div class="mb-4">
                         <span class="inline-block bg-red-800 text-white px-3 py-1 text-sm font-medium rounded">
-                            {{ $article->categoryRelation ? $article->categoryRelation->name : $article->category }}
+                            {{ $article->category_name }}
                         </span>
                     </div>
                 @endif
