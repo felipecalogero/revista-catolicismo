@@ -133,7 +133,7 @@
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                         >
-                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPEG, PNG, JPG, GIF, WEBP (máx. 5MB)</p>
+                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPEG, PNG, JPG, GIF, WEBP (máx. 10MB)</p>
                         @error('cover_image')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -152,7 +152,7 @@
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                         >
-                        <p class="mt-1 text-sm text-gray-500">Apenas arquivos PDF (máx. 100MB)</p>
+                        <p class="mt-1 text-sm text-gray-500">Apenas arquivos PDF (máx. 110MB)</p>
                         <p class="mt-1 text-xs text-amber-600">⚠️ Arquivos grandes podem levar alguns minutos para upload. Por favor, aguarde.</p>
                         @error('pdf_file')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

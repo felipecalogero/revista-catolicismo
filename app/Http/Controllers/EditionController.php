@@ -33,18 +33,25 @@ class EditionController extends Controller
         // Verifica acesso do usuário
         $user = auth()->user();
         
-        // Se a edição foi publicada há mais de 5 meses, todos têm acesso completo
+        // Se a edição foi lançada há mais de 5 meses, qualquer usuário LOGADO tem acesso completo
         if ($edition->canBeAccessedByNonSubscribers()) {
-            $hasFullAccess = true;
-            // Para edições antigas, permitir download para usuários autenticados (não precisa ser assinante)
-            $canDownload = $user !== null;
+            if ($user) {
+                $hasFullAccess = true;
+                $canDownload = true;
+            } else {
+                $hasFullAccess = false;
+                $canDownload = false;
+                // Flag especial para indicar que basta logar para ter acesso (sem precisar de assinatura)
+                $requiresLoginOnly = true;
+            }
         } else {
             // Edições recentes: apenas assinantes têm acesso completo e podem baixar
+            $requiresLoginOnly = false;
             if ($user) {
                 $hasFullAccess = $user->canAccessEdition($edition);
-                $canDownload = $user->canAccessEditions(); // Pode baixar se tiver assinatura ativa
+                $canDownload = $user->canAccessEditions();
             } else {
-                $hasFullAccess = false; // Não-assinantes veem apenas prévia
+                $hasFullAccess = false;
                 $canDownload = false;
             }
         }
@@ -59,7 +66,7 @@ class EditionController extends Controller
             ->take(6)
             ->get();
 
-        return view('editions.show', compact('edition', 'hasFullAccess', 'canDownload', 'otherEditions'));
+        return view('editions.show', compact('edition', 'hasFullAccess', 'canDownload', 'otherEditions', 'requiresLoginOnly'));
     }
 
     /**

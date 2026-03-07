@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -47,6 +48,20 @@ class ArticleController extends Controller
 
         // Upload da imagem
         $imagePath = $request->file('image')->store('articles', 'public');
+
+        // Processar Imagem (Comprimir e Converter para WebP)
+        try {
+            $imageService = new ImageService();
+            $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
+            if ($newImagePath) {
+                $imagePath = $newImagePath;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Falha ao otimizar imagem do artigo, mantendo original', [
+                'file' => $imagePath,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         // Gerar slug único
         $slug = Str::slug($validated['title']);
@@ -139,6 +154,20 @@ class ArticleController extends Controller
                 Storage::disk('public')->delete($article->image);
             }
             $imagePath = $request->file('image')->store('articles', 'public');
+
+            // Processar Imagem (Comprimir e Converter para WebP)
+            try {
+                $imageService = new ImageService();
+                $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
+                if ($newImagePath) {
+                    $imagePath = $newImagePath;
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Falha ao otimizar imagem do artigo, mantendo original', [
+                    'file' => $imagePath,
+                    'error' => $e->getMessage()
+                ]);
+            }
         } else {
             $imagePath = $article->image;
         }

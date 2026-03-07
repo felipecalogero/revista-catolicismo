@@ -149,24 +149,39 @@
                             
                             {{-- Overlay com gradiente e call-to-action --}}
                             <div class="relative mt-8 pt-8 border-t border-gray-200">
-                                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center">
-                                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler o artigo completo?</h3>
-                                    <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todos os artigos e edições exclusivas.</p>
-                                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                        @auth
-                                            <a href="{{ route('subscriptions.plans') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
-                                                Assinar Agora
-                                            </a>
-                                        @else
+                                @if($requiresLoginOnly)
+                                    <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Acesso Gratuito Disponível</h3>
+                                        <p class="text-gray-600 mb-6">Este artigo está disponível gratuitamente para todos os usuários cadastrados. Faça login para ler o conteúdo completo.</p>
+                                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
                                             <a href="{{ route('login') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
                                                 Fazer Login
                                             </a>
-                                            <a href="{{ route('subscriptions.plans') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
-                                                Assinar Agora
+                                            <a href="{{ route('register') }}" class="bg-white text-red-800 border border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                                                Criar Conta Grátis
                                             </a>
-                                        @endauth
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler o artigo completo?</h3>
+                                        <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todos os artigos e edições exclusivas.</p>
+                                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                            @auth
+                                                <a href="{{ route('subscriptions.plans') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
+                                                    Assinar Agora
+                                                </a>
+                                            @else
+                                                <a href="{{ route('login') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
+                                                    Fazer Login
+                                                </a>
+                                                <a href="{{ route('subscriptions.plans') }}" class="!bg-red-800 !text-white px-8 py-3 rounded-lg hover:!bg-red-900 transition-colors font-medium">
+                                                    Assinar Agora
+                                                </a>
+                                            @endauth
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endif

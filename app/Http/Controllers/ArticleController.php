@@ -33,11 +33,18 @@ class ArticleController extends Controller
         // Verifica acesso do usuário
         $user = auth()->user();
         
-        // Se o artigo foi publicado há mais de 5 meses, todos têm acesso completo
+        // Se o artigo foi publicado há mais de 5 meses, qualquer usuário LOGADO tem acesso completo
         if ($article->canBeAccessedByNonSubscribers()) {
-            $hasFullAccess = true;
+            if ($user) {
+                $hasFullAccess = true;
+                $requiresLoginOnly = false;
+            } else {
+                $hasFullAccess = false;
+                $requiresLoginOnly = true;
+            }
         } else {
             // Artigos recentes: apenas assinantes têm acesso completo
+            $requiresLoginOnly = false;
             if ($user) {
                 $hasFullAccess = $user->canAccessArticle($article);
             } else {
@@ -82,7 +89,7 @@ class ArticleController extends Controller
         // Obter o slug da categoria para o botão "Ver mais"
         $categorySlug = $categoryModel ? $categoryModel->slug : Str::slug($article->category ?? $category);
 
-        return view('articles.show', compact('article', 'hasFullAccess', 'relatedArticles', 'categorySlug'));
+        return view('articles.show', compact('article', 'hasFullAccess', 'relatedArticles', 'categorySlug', 'requiresLoginOnly'));
     }
 
     /**

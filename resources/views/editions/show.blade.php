@@ -57,9 +57,22 @@
         {{-- Conteúdo Adicional --}}
         <div class="prose prose-lg max-w-none">
             @if($hasFullAccess)
-            <p class="text-gray-600">
+                <p class="text-gray-600">
                     Esta edição está disponível para download em formato PDF. Clique no botão acima para baixar.
                 </p>
+            @elseif($requiresLoginOnly)
+                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Acesso Gratuito Disponível</h3>
+                    <p class="text-gray-600 mb-6">Esta edição está disponível gratuitamente para todos os usuários cadastrados. Faça login para visualizar e baixar o PDF.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                            Fazer Login
+                        </a>
+                        <a href="{{ route('register') }}" class="bg-white text-red-800 border border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                            Criar Conta Grátis
+                        </a>
+                    </div>
+                </div>
             @else
                 <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
                     <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler esta edição completa?</h3>

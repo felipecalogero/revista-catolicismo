@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Edition;
 use App\Services\PdfCompressor;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,12 +38,28 @@ class EditionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'pdf_file' => 'required|mimes:pdf|max:102400', // 100MB (102400 KB)
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
+            'pdf_file' => 'required|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
             'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
         ]);
+
+        // Verificar se os arquivos foram realmente recebidos (detectar limite do PHP/Server)
+        if (!$request->hasFile('cover_image') || !$request->hasFile('pdf_file')) {
+            $message = 'Os arquivos não foram recebidos corretamente. Verifique se o tamanho total não excede o limite permitido pelo servidor (100MB).';
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'error' => 'file_not_received',
+                    'php_upload_max' => ini_get('upload_max_filesize'),
+                    'php_post_max' => ini_get('post_max_size'),
+                ], 422);
+            }
+            return back()->withErrors(['pdf_file' => $message]);
+        }
+
 
         try {
             // Upload da imagem da capa
@@ -50,6 +67,20 @@ class EditionController extends Controller
 
             // Upload do arquivo PDF
             $pdfFilePath = $request->file('pdf_file')->store('editions/pdfs', 'public');
+
+            // Processar Imagem da Capa (Comprimir e Converter para WebP)
+            try {
+                $imageService = new ImageService();
+                $newCoverPath = $imageService->processStorageImage($coverImagePath, 'public', 80, true);
+                if ($newCoverPath) {
+                    $coverImagePath = $newCoverPath;
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Falha ao otimizar imagem da capa, mantendo original', [
+                    'file' => $coverImagePath,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             // Comprimir PDF após upload (se falhar, mantém o original)
             try {
@@ -135,12 +166,13 @@ class EditionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'pdf_file' => 'nullable|mimes:pdf|max:102400', // 100MB (102400 KB)
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
+            'pdf_file' => 'nullable|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
             'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
         ]);
+
 
         // Upload da nova imagem da capa se fornecida
         if ($request->hasFile('cover_image')) {
@@ -160,6 +192,20 @@ class EditionController extends Controller
                 Storage::disk('public')->delete($edition->pdf_file);
             }
             $pdfFilePath = $request->file('pdf_file')->store('editions/pdfs', 'public');
+
+            // Processar Imagem da Capa (Comprimir e Converter para WebP)
+            try {
+                $imageService = new ImageService();
+                $newCoverPath = $imageService->processStorageImage($coverImagePath, 'public', 80, true);
+                if ($newCoverPath) {
+                    $coverImagePath = $newCoverPath;
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Falha ao otimizar imagem da capa, mantendo original', [
+                    'file' => $coverImagePath,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             // Comprimir PDF após upload (se falhar, mantém o original)
             try {
