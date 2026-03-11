@@ -13,7 +13,7 @@
                 <p class="text-gray-600">Preencha os campos abaixo para publicar um novo artigo</p>
             </div>
 
-            <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="article-form">
                 @csrf
 
                 {{-- Título --}}
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (contentEditor) {
         const contentTextarea = document.querySelector('#content');
-        setupQuillFormValidation(null, [
+        setupQuillFormValidation('article-form', [
             { editor: contentEditor, textarea: contentTextarea, fieldName: 'o conteúdo do artigo' }
         ]);
     }

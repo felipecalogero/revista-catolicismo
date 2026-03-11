@@ -18,13 +18,18 @@
         color: #171717;
         background-color: #ffffff;
     }
-    
-    h1, h2, h3, h4, h5, h6 {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         font-family: var(--font-serif);
         font-weight: 700;
         line-height: 1.2;
     }
-    
+
     /* Linha clamps para textos */
     .line-clamp-2 {
         display: -webkit-box;
@@ -32,7 +37,7 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    
+
     .line-clamp-3 {
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -42,16 +47,17 @@
 }
 
 @layer components {
+
     /* Botões com estilo tradicional */
     .btn-primary {
         @apply bg-red-800 text-white px-6 py-3 rounded hover:bg-red-900 transition-colors font-medium;
     }
-    
+
     /* Cards com estilo editorial */
     .card-editorial {
         @apply bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow;
     }
-    
+
     /* Links com estilo tradicional */
     .link-traditional {
         @apply text-gray-700 hover:text-red-800 transition-colors;
@@ -60,6 +66,7 @@
 
 /* Estilos personalizados para o editor Quill WYSIWYG */
 #content-editor {
+    font-size: 1rem;
     font-family: serif;
 }
 
@@ -67,7 +74,7 @@
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-family: serif;
-    font-size: 1rem;
+    font-size: 1.125rem;
     min-height: 400px;
 }
 
@@ -109,7 +116,7 @@
 #description-editor .ql-container {
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
-    font-size: 1rem;
+    font-size: 1.125rem;
     min-height: 120px;
 }
 
@@ -251,4 +258,3 @@
     font-style: italic;
     color: #6b7280;
 }
-
