@@ -6,7 +6,6 @@
                 <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">A Revista</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                     <li><a href="{{ route('pages.about') }}" class="hover:text-red-800 transition-colors">Sobre Nós</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Nossa História</a></li>
                     <li><a href="{{ route('pages.mission') }}" class="hover:text-red-800 transition-colors">Nossa Missão</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Equipe Editorial</a></li>
                     <li><a href="{{ route('contact.index') }}" class="hover:text-red-800 transition-colors">Fale Conosco</a></li>
