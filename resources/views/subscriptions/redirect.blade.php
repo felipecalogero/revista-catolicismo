@@ -10,7 +10,10 @@
             text-align: center;
             padding: 50px;
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            background-color: #f8f1e4;
+            background-image: url('/img/textura.jpeg');
+            background-size: cover;
+            background-position: center;
         }
         .container {
             background: white;

@@ -3,7 +3,13 @@
 @section('title', 'Visualizar Revista - ' . $edition->title . ' - Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-gray-100">
+<div class="relative min-h-screen bg-[#f8f1e4]">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10">
     {{-- Header --}}
     <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="container mx-auto px-4 lg:px-8 py-4">
@@ -254,5 +260,6 @@
             </script>
         </div>
     </div>
+</div>
 </div>
 @endsection

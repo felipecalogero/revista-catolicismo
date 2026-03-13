@@ -3,8 +3,13 @@
 @section('title', 'Fale Conosco - Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12">
-    <div class="max-w-6xl mx-auto px-4 lg:px-8">
+<div class="relative min-h-screen bg-[#f8f1e4] py-12">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 max-w-6xl mx-auto px-4 lg:px-8">
         {{-- Header --}}
         <div class="text-center mb-12">
             <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 font-serif mb-4">

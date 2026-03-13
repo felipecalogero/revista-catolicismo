@@ -3,8 +3,13 @@
 @section('title', 'Recuperar Senha - Revista Catolicismo')
 
 @section('content')
-<div class="flex-grow flex items-center justify-center bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 mt-[-5rem]">
+<div class="relative flex-grow flex items-center justify-center bg-[#f8f1e4] py-20 px-4 sm:px-6 lg:px-8">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 max-w-md w-full space-y-8 mt-[-5rem]">
         <div>
             <h2 class="mt-6 text-center text-3xl font-bold text-gray-900 font-serif">
                 Recuperar sua senha

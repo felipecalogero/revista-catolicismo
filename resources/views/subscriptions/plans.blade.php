@@ -3,8 +3,13 @@
 @section('title', 'Planos de Assinatura - Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12">
-    <div class="container mx-auto px-4 lg:px-8">
+<div class="relative min-h-screen bg-[#f8f1e4] py-12">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 container mx-auto px-4 lg:px-8">
         {{-- Mensagens de Erro/Sucesso --}}
         @if(session('error'))
             <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">

@@ -3,8 +3,13 @@
 @section('title', 'Configurações - Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="container mx-auto px-4 lg:px-8 max-w-7xl">
+<div class="relative min-h-screen bg-[#f8f1e4] py-8">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 container mx-auto px-4 lg:px-8 max-w-7xl">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 font-serif mb-2">
                 Configurações

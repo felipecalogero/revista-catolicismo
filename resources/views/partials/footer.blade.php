@@ -1,13 +1,13 @@
-<footer class="bg-white border-t border-gray-200 flex-shrink-0">
-    <div class="container mx-auto px-4 lg:px-8 py-12">
+<footer class="bg-[#f8f1e4] border-t border-gray-200 flex-shrink-0">
+    <div class="container mx-auto px-4 lg:px-8 py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {{-- Sobre --}}
             <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-4 font-serif">A Revista</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Sobre Nós</a></li>
+                    <li><a href="{{ route('pages.about') }}" class="hover:text-red-800 transition-colors">Sobre Nós</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Nossa História</a></li>
-                    <li><a href="#" class="hover:text-red-800 transition-colors">Nossa Missão</a></li>
+                    <li><a href="{{ route('pages.mission') }}" class="hover:text-red-800 transition-colors">Nossa Missão</a></li>
                     <li><a href="#" class="hover:text-red-800 transition-colors">Equipe Editorial</a></li>
                     <li><a href="{{ route('contact.index') }}" class="hover:text-red-800 transition-colors">Fale Conosco</a></li>
                 </ul>
@@ -56,10 +56,12 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Copyright --}}
-        <div class="mt-12 pt-8 border-t border-gray-200 text-center">
-            <p class="text-sm text-gray-600">
+    {{-- Copyright --}}
+    <div class="bg-red-800 text-center">
+        <div class="container mx-auto px-4 lg:px-8 py-6">
+            <p class="text-sm text-white">
                 &copy; {{ date('Y') }} Revista Catolicismo. Todos os direitos reservados.
             </p>
         </div>

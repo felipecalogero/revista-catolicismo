@@ -4,8 +4,13 @@
 @section('description', 'Política de Privacidade da Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12">
-    <div class="container mx-auto px-4 lg:px-8">
+<div class="relative min-h-screen bg-[#f8f1e4] py-12">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 container mx-auto px-4 lg:px-8">
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
             <div class="mb-8 pb-6 border-b-2 border-red-800">
                 <h1 class="text-4xl font-bold text-gray-900 font-serif mb-4">Política de Privacidade</h1>
@@ -96,7 +101,7 @@
                     <h2 class="text-2xl font-bold text-gray-900 font-serif mb-4">8. Contato</h2>
                     <p class="text-gray-700 mb-4">
                         Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco através 
-                        do e-mail: <a href="mailto:contato@revistacatolicismo.com.br" class="text-red-800 hover:text-red-900">contato@revistacatolicismo.com.br</a>
+                        do e-mail: <a href="mailto:contato@catolicismo.com.br" class="text-red-800 hover:text-red-900">contato@catolicismo.com.br</a>
                     </p>
                 </section>
             </div>

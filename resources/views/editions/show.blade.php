@@ -3,8 +3,14 @@
 @section('title', $edition->title . ' - Revista Catolicismo')
 
 @section('content')
-<div class="min-h-screen bg-white">
-    <div class="container mx-auto px-4 lg:px-8 py-12">
+<div class="relative min-h-screen bg-[#f8f1e4] py-12">
+    <img
+        src="{{ asset('img/textura.jpeg') }}"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+    >
+    <div class="relative z-10 container mx-auto px-4 lg:px-8">
+        <div class="bg-white rounded-lg shadow-md p-8 md:p-12">
         {{-- Cabeçalho da Edição --}}
         <div class="mb-8 pb-6 border-b-2 border-red-800">
             <div class="flex flex-col md:flex-row gap-8">
@@ -98,8 +104,8 @@
 
     {{-- Outras Edições --}}
     @if(isset($otherEditions) && count($otherEditions) > 0)
-        <section class="bg-gray-50 py-16 border-t border-gray-200">
-            <div class="container mx-auto px-4 lg:px-8">
+        <section class="py-16 border-t border-gray-200">
+            <div class="bg-white rounded-lg shadow-md p-8 md:p-12">
                 <div class="mb-10 pb-4 border-b-2 border-red-800">
                     <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Outras Edições</h2>
                 </div>
@@ -143,5 +149,8 @@
             </div>
         </section>
     @endif
+
+        </div>
+    </div>
 </div>
 @endsection

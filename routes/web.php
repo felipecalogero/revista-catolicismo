@@ -22,6 +22,8 @@ use App\Http\Controllers\ContactController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sobre-nos', [PageController::class, 'about'])->name('pages.about');
+Route::get('/nossa-missao', [PageController::class, 'mission'])->name('pages.mission');
 Route::get('/politica-de-privacidade', [PageController::class, 'privacy'])->name('pages.privacy');
 Route::get('/termos-de-uso', [PageController::class, 'terms'])->name('pages.terms');
 Route::get('/fale-conosco', [ContactController::class, 'index'])->name('contact.index');

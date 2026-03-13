@@ -40,123 +40,132 @@
     <x-revista-slider :revistas="$revistas ?? []" />
 
     {{-- Grid de Destaques --}}
-    <section class="bg-white py-16 border-t border-gray-200">
-        <div class="container mx-auto px-4 lg:px-8">
-            <div class="mb-10">
-                <h2 class="text-3xl font-bold text-gray-900 font-serif mb-3">Destaques</h2>
-                <div class="w-20 h-1 bg-red-800"></div>
-            </div>
+    <section class="relative py-16 border-t border-gray-200">
+        <img
+            src="{{ asset('img/textura.jpeg') }}"
+            alt=""
+            class="absolute inset-0 w-full h-full object-cover"
+        >
+        <div class="relative z-10 container mx-auto px-4 lg:px-8">
+            <div class="bg-white rounded-lg p-6 md:p-8">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-bold text-gray-900 font-serif mb-3">Destaques</h2>
+                    <div class="w-20 h-1 bg-red-800"></div>
+                </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                @forelse($destaques ?? [] as $destaque)
-                    <x-article-card :article="$destaque" />
-                @empty
-                    <p class="col-span-full text-center text-gray-500 py-8">Nenhum destaque disponível no momento.</p>
-                @endforelse
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    @forelse($destaques ?? [] as $destaque)
+                        <x-article-card :article="$destaque" />
+                    @empty
+                        <p class="col-span-full text-center text-gray-500 py-8">Nenhum destaque disponível no momento.</p>
+                    @endforelse
+                </div>
             </div>
         </div>
     </section>
 
     {{-- Conteúdo Principal - Duas Colunas --}}
-    <section class="bg-gray-50 py-16 border-t border-gray-200">
+    <section class="bg-[#f8f1e4] py-16 border-t border-gray-200">
         <div class="container mx-auto px-4 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {{-- Coluna Esquerda - Artigos Recentes --}}
-                <div class="lg:col-span-2">
-                    <div class="mb-8 pb-4 border-b-2 border-red-800">
-                        <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Últimas Notícias</h2>
-                        <p class="text-gray-600 text-sm">As principais notícias e análises do momento</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                        @forelse($noticias ?? [] as $index => $noticia)
-                            <x-article-card
-                                :article="$noticia"
-                            />
-                        @empty
-                            <p class="col-span-full text-center text-gray-500 py-8">Nenhuma notícia disponível no momento.</p>
-                        @endforelse
-                    </div>
-
-                    {{-- Botão Ver Mais --}}
-                    <div class="text-center pt-2">
-                        <a href="{{ route('articles.index') }}" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                            Ver Todas as Notícias
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Sidebar --}}
-                <aside class="space-y-8 self-start">
-                    {{-- Mais Lidas --}}
-                    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="mb-6 pb-3 border-b-2 border-red-800">
-                            <h3 class="text-xl font-bold text-gray-900 font-serif">
-                                Mais Lidas
-                            </h3>
+            <div class="bg-white rounded-lg p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    {{-- Coluna Esquerda - Artigos Recentes --}}
+                    <div class="lg:col-span-2">
+                        <div class="mb-8 pb-4 border-b-2 border-red-800">
+                            <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Últimas Notícias</h2>
+                            <p class="text-gray-600 text-sm">As principais notícias e análises do momento</p>
                         </div>
-                        <div class="space-y-5">
-                            @forelse($maisLidas ?? [] as $index => $artigo)
-                                <article class="group cursor-pointer pb-5 {{ !$loop->last ? 'border-b border-gray-100' : '' }}">
-                                    <a href="{{ isset($artigo['slug']) && isset($artigo['category_slug']) ? route('articles.show', [$artigo['category_slug'], $artigo['slug']]) : '#' }}" class="block">
-                                        <div class="flex gap-4">
-                                            <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
-                                                <img
-                                                    src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}"
-                                                    alt="{{ $artigo['title'] ?? '' }}"
-                                                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                >
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                            @forelse($noticias ?? [] as $index => $noticia)
+                                <x-article-card
+                                    :article="$noticia"
+                                />
+                            @empty
+                                <p class="col-span-full text-center text-gray-500 py-8">Nenhuma notícia disponível no momento.</p>
+                            @endforelse
+                        </div>
+
+                        {{-- Botão Ver Mais --}}
+                        <div class="text-center pt-2">
+                            <a href="{{ route('articles.index') }}" class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                Ver Todas as Notícias
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Sidebar --}}
+                    <aside class="space-y-8 self-start">
+                        {{-- Mais Lidas --}}
+                        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <div class="mb-6 pb-3 border-b-2 border-red-800">
+                                <h3 class="text-xl font-bold text-gray-900 font-serif">
+                                    Mais Lidas
+                                </h3>
+                            </div>
+                            <div class="space-y-5">
+                                @forelse($maisLidas ?? [] as $index => $artigo)
+                                    <article class="group cursor-pointer pb-5 {{ !$loop->last ? 'border-b border-gray-100' : '' }}">
+                                        <a href="{{ isset($artigo['slug']) && isset($artigo['category_slug']) ? route('articles.show', [$artigo['category_slug'], $artigo['slug']]) : '#' }}" class="block">
+                                            <div class="flex gap-4">
+                                                <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+                                                    <img
+                                                        src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}"
+                                                        alt="{{ $artigo['title'] ?? '' }}"
+                                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    >
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="text-xs font-bold text-red-800 mb-1">{{ $index + 1 }}º</div>
+                                                    <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-3 group-hover:text-red-800 transition-colors font-serif leading-snug">
+                                                        {{ $artigo['title'] ?? 'Título do Artigo' }}
+                                                    </h4>
+                                                    <p class="text-xs text-gray-500">
+                                                        {{ $artigo['date'] ?? '' }}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div class="flex-1">
-                                                <div class="text-xs font-bold text-red-800 mb-1">{{ $index + 1 }}º</div>
-                                                <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-3 group-hover:text-red-800 transition-colors font-serif leading-snug">
-                                                    {{ $artigo['title'] ?? 'Título do Artigo' }}
-                                                </h4>
-                                                <p class="text-xs text-gray-500">
-                                                    {{ $artigo['date'] ?? '' }}
-                                                </p>
-                                            </div>
+                                        </a>
+                                    </article>
+                                @empty
+                                    <p class="text-center text-gray-500 py-4 text-sm">Nenhum artigo disponível no momento.</p>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Categorias --}}
+                        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <div class="mb-6 pb-3 border-b-2 border-red-800">
+                                <h3 class="text-xl font-bold text-gray-900 font-serif">
+                                    Categorias
+                                </h3>
+                            </div>
+                            <div class="space-y-2">
+                                @forelse($categorias ?? [] as $categoria)
+                                    <a href="{{ route('categories.show', $categoria->slug) }}" class="block py-2 px-3 rounded-lg hover:bg-red-50 transition-colors group">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm font-medium text-gray-700 group-hover:text-red-800 transition-colors">
+                                                {{ $categoria->name }}
+                                            </span>
+                                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-red-100 group-hover:text-red-800 transition-colors">
+                                                {{ $categoria->articles_count }}
+                                            </span>
                                         </div>
                                     </a>
-                                </article>
-                            @empty
-                                <p class="text-center text-gray-500 py-4 text-sm">Nenhum artigo disponível no momento.</p>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    {{-- Categorias --}}
-                    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="mb-6 pb-3 border-b-2 border-red-800">
-                            <h3 class="text-xl font-bold text-gray-900 font-serif">
-                                Categorias
-                            </h3>
-                        </div>
-                        <div class="space-y-2">
-                            @forelse($categorias ?? [] as $categoria)
-                                <a href="{{ route('categories.show', $categoria->slug) }}" class="block py-2 px-3 rounded-lg hover:bg-red-50 transition-colors group">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-800 transition-colors">
-                                            {{ $categoria->name }}
-                                        </span>
-                                        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-red-100 group-hover:text-red-800 transition-colors">
-                                            {{ $categoria->articles_count }}
-                                        </span>
-                                    </div>
-                                </a>
-                            @empty
-                                <p class="text-center text-gray-500 py-4 text-sm">Nenhuma categoria disponível no momento.</p>
-                            @endforelse
-                        </div>
-                        @if(isset($categorias) && $categorias->count() > 0)
-                            <div class="mt-4 pt-4 border-t border-gray-200">
-                                <a href="{{ route('articles.index') }}" class="block text-center text-sm text-red-800 hover:text-red-900 font-medium transition-colors">
-                                    Ver todas as categorias →
-                                </a>
+                                @empty
+                                    <p class="text-center text-gray-500 py-4 text-sm">Nenhuma categoria disponível no momento.</p>
+                                @endforelse
                             </div>
-                        @endif
-                    </div>
-                </aside>
+                            @if(isset($categorias) && $categorias->count() > 0)
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <a href="{{ route('articles.index') }}" class="block text-center text-sm text-red-800 hover:text-red-900 font-medium transition-colors">
+                                        Ver todas as categorias →
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </aside>
+                </div>
             </div>
         </div>
     </section>
@@ -164,14 +173,40 @@
     {{-- Seções por Categoria - 3 Categorias Mais Visitadas --}}
     @if(isset($categoriasMaisVisitadas) && count($categoriasMaisVisitadas) > 0)
         @foreach($categoriasMaisVisitadas as $index => $categoria)
-        <section class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }} py-16 border-t border-gray-200">
-            <x-section-block
-                :title="$categoria['name']"
-                :articles="$categoria['articles']"
-                :columns="4"
-                :slug="$categoria['slug']"
-            />
-        </section>
+        @if($index % 2 == 0)
+            <section class="relative py-16 border-t border-gray-200">
+                <img
+                    src="{{ asset('img/textura.jpeg') }}"
+                    alt=""
+                    class="absolute inset-0 w-full h-full object-cover"
+                >
+                <div class="relative z-10">
+                    <div class="container mx-auto px-4 lg:px-8">
+                        <div class="bg-white rounded-lg p-6 md:p-8">
+                            <x-section-block
+                                :title="$categoria['name']"
+                                :articles="$categoria['articles']"
+                                :columns="4"
+                                :slug="$categoria['slug']"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @else
+            <section class="bg-[#f8f1e4] py-16 border-t border-gray-200">
+                <div class="container mx-auto px-4 lg:px-8">
+                    <div class="bg-white rounded-lg p-6 md:p-8">
+                        <x-section-block
+                            :title="$categoria['name']"
+                            :articles="$categoria['articles']"
+                            :columns="4"
+                            :slug="$categoria['slug']"
+                        />
+                    </div>
+                </div>
+            </section>
+        @endif
         @endforeach
     @endif
 @endsection

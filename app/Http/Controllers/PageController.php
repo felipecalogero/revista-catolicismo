@@ -21,4 +21,17 @@ class PageController extends Controller
     {
         return view('pages.terms');
     }
+
+    /**
+     * Exibe a página de Sobre nós
+     */
+    public function about()
+    {
+        return view('pages.about');
+    }
+
+    public function mission()
+    {
+        return view('pages.mission');
+    }
 }

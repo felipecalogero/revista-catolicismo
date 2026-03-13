@@ -17,6 +17,9 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
+                <a href="{{ route('pages.about') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                    Sobre nós
+                </a>
                 @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         {{ $category->name }}
@@ -87,6 +90,9 @@
             <nav class="flex flex-col space-y-3 pt-4">
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
+                </a>
+                <a href="{{ route('pages.about') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                    Sobre nós
                 </a>
                 @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">

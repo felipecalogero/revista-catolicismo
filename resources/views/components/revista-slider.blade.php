@@ -1,11 +1,12 @@
 @props(['revistas'])
 
-<section class="bg-white py-16 border-b border-gray-200">
+<section class="bg-[#f8f1e4] py-16 border-b border-gray-200">
     <div class="container mx-auto px-4 lg:px-8">
-        <div class="mb-10 pb-4 border-b-2 border-red-800">
-            <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Edições</h2>
-            <p class="text-gray-600 text-sm">Nossas últimas publicações</p>
-        </div>
+        <div class="bg-white rounded-lg p-6 md:p-8">
+            <div class="mb-10 pb-4 border-b-2 border-red-800">
+                <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Edições</h2>
+                <p class="text-gray-600 text-sm">Nossas últimas publicações</p>
+            </div>
         
         {{-- Slider de Revistas Compacto --}}
         <div class="relative">
@@ -61,13 +62,14 @@
             </button>
         </div>
         
-        <div class="mt-8 text-center">
-            <a href="{{ route('editions.index') }}" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
-                Ver todas as edições
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
+            <div class="mt-8 text-center">
+                <a href="{{ route('editions.index') }}" class="inline-flex items-center gap-2 text-red-800 hover:text-red-900 font-medium text-sm border-b border-red-800 hover:border-red-900 transition-colors">
+                    Ver todas as edições
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
     </div>
 </section>
