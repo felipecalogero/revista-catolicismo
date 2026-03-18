@@ -26,11 +26,13 @@ class Article extends Model
         'published',
         'published_at',
         'views',
+        'free_access',
     ];
 
     protected $casts = [
         'published' => 'boolean',
         'published_at' => 'datetime',
+        'free_access' => 'boolean',
     ];
 
     /**
@@ -77,10 +79,14 @@ class Article extends Model
 
     /**
      * Verifica se o artigo pode ser acessado por não-assinantes
-     * Não-assinantes só podem acessar artigos publicados há mais de 5 meses
+     * Não-assinantes só podem acessar artigos publicados há mais de 5 meses ou que tenham free_access
      */
     public function canBeAccessedByNonSubscribers(): bool
     {
+        if ($this->free_access) {
+            return true;
+        }
+
         if (!$this->published_at) {
             return false;
         }
@@ -95,7 +101,10 @@ class Article extends Model
     public function scopeAccessibleByNonSubscribers($query)
     {
         $fiveMonthsAgo = now()->subMonths(5);
-        return $query->where('published_at', '<=', $fiveMonthsAgo);
+        return $query->where(function($q) use ($fiveMonthsAgo) {
+            $q->where('free_access', true)
+              ->orWhere('published_at', '<=', $fiveMonthsAgo);
+        });
     }
 
     /**

@@ -181,18 +181,18 @@
                     </div>
                 </div>
 
-                {{-- Publicado --}}
-                <div class="flex items-center">
-                    <input
-                        type="checkbox"
-                        id="published"
-                        name="published"
-                        value="1"
-                        {{ old('published', $article->published) ? 'checked' : '' }}
-                        class="w-4 h-4 text-red-800 border-gray-300 rounded focus:ring-red-800"
-                    >
-                    <label for="published" class="ml-2 text-sm font-medium text-gray-700">
-                        Publicar imediatamente
+                {{-- Publicado e Acesso Livre --}}
+                <div class="mb-4 flex items-center gap-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="published" value="1" {{ old('published', $article->published) ? 'checked' : '' }}
+                            class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                        <span class="ml-2 text-sm font-medium text-gray-700">Artigo Publicado</span>
+                    </label>
+                    
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="free_access" value="1" {{ old('free_access', $article->free_access) ? 'checked' : '' }}
+                            class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                        <span class="ml-2 text-sm font-medium text-gray-700">Desbloqueado para Todos (Ignorar limite de 5 meses)</span>
                     </label>
                 </div>
 

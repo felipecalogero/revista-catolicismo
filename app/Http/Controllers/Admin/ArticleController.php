@@ -44,6 +44,7 @@ class ArticleController extends Controller
             'new_category' => 'nullable|string|max:255',
             'author' => 'nullable|string|max:255',
             'published' => 'boolean',
+            'free_access' => 'boolean',
         ]);
 
         // Upload da imagem
@@ -103,6 +104,7 @@ class ArticleController extends Controller
             'author' => $validated['author'] ?? null,
             'published' => $request->has('published'),
             'published_at' => $request->has('published') ? now() : null,
+            'free_access' => $request->has('free_access'),
         ]);
 
         return redirect()->route('admin.articles.index')
@@ -145,6 +147,7 @@ class ArticleController extends Controller
             'new_category' => 'nullable|string|max:255',
             'author' => 'nullable|string|max:255',
             'published' => 'boolean',
+            'free_access' => 'boolean',
         ]);
 
         // Upload da nova imagem se fornecida
@@ -214,6 +217,7 @@ class ArticleController extends Controller
             'author' => $validated['author'] ?? null,
             'published' => $request->has('published'),
             'published_at' => $request->has('published') && !$article->published_at ? now() : $article->published_at,
+            'free_access' => $request->has('free_access'),
         ]);
 
         return redirect()->route('admin.articles.index')
