@@ -3,7 +3,7 @@
 @section('title', 'Visualizar Revista - ' . $edition->title . ' - Revista Catolicismo')
 
 @section('content')
-<div class="relative min-h-screen bg-[#f8f1e4]">
+<div class="relative min-h-screen bg-[#f5f0e6]">
     <img
         src="{{ asset('img/textura.jpeg') }}"
         alt=""

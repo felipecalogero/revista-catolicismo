@@ -73,8 +73,18 @@ class Article extends Model
             return $this->image;
         }
 
+        $imagePath = $this->image;
+
+        // Se a imagem foi salva como array JSON (ex: Voyager)
+        if (Str::startsWith($imagePath, '[') && Str::endsWith($imagePath, ']')) {
+            $decoded = json_decode($imagePath, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $imagePath = $decoded[0];
+            }
+        }
+
         // Caso contrário, é um arquivo local no storage
-        return Storage::url($this->image);
+        return Storage::url($imagePath);
     }
 
     /**

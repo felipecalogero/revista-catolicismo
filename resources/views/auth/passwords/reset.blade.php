@@ -3,7 +3,7 @@
 @section('title', 'Redefinir Senha - Revista Catolicismo')
 
 @section('content')
-<div class="relative flex-grow flex items-center justify-center bg-[#f8f1e4] py-20 px-4 sm:px-6 lg:px-8">
+<div class="relative flex-grow flex items-center justify-center bg-[#f5f0e6] py-20 px-4 sm:px-6 lg:px-8">
     <img
         src="{{ asset('img/textura.jpeg') }}"
         alt=""

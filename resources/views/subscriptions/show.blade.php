@@ -3,7 +3,7 @@
 @section('title', 'Minha Assinatura - Revista Catolicismo')
 
 @section('content')
-<div class="relative min-h-screen bg-[#f8f1e4] py-12">
+<div class="relative min-h-screen bg-[#f5f0e6] py-12">
     <img
         src="{{ asset('img/textura.jpeg') }}"
         alt=""

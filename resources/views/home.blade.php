@@ -65,7 +65,7 @@
     </section>
 
     {{-- Conteúdo Principal - Duas Colunas --}}
-    <section class="bg-[#f8f1e4] py-16 border-t border-gray-200">
+    <section class="bg-[#f5f0e6] py-16 border-t border-gray-200">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="bg-white rounded-lg p-6 md:p-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -194,7 +194,7 @@
                 </div>
             </section>
         @else
-            <section class="bg-[#f8f1e4] py-16 border-t border-gray-200">
+            <section class="bg-[#f5f0e6] py-16 border-t border-gray-200">
                 <div class="container mx-auto px-4 lg:px-8">
                     <div class="bg-white rounded-lg p-6 md:p-8">
                         <x-section-block

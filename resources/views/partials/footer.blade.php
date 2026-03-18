@@ -1,4 +1,4 @@
-<footer class="bg-[#f8f1e4] border-t border-gray-200 flex-shrink-0">
+<footer class="bg-[#f5f0e6] border-t border-gray-200 flex-shrink-0">
     <div class="container mx-auto px-4 lg:px-8 py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {{-- Sobre --}}

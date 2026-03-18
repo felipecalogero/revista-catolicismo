@@ -62,7 +62,7 @@ class HomeController extends Controller
                 return [
                     'title' => $article->title,
                     'excerpt' => $article->description,
-                    'image' => $article->image,
+                    'image' => $article->image_url,
                     'category' => $article->category_name,
                     'category_slug' => $categorySlug,
                     'author' => $article->author,
@@ -80,7 +80,7 @@ class HomeController extends Controller
                 return [
                     'title' => $article->title,
                     'excerpt' => $article->description,
-                    'image' => $article->image,
+                    'image' => $article->image_url,
                     'category' => $article->category_name,
                     'category_slug' => $categorySlug,
                     'author' => $article->author,
@@ -98,7 +98,7 @@ class HomeController extends Controller
                 $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
                 return [
                     'title' => $article->title,
-                    'image' => $article->image,
+                    'image' => $article->image_url,
                     'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
                     'slug' => $article->slug,
                     'category_slug' => $categorySlug,
@@ -133,7 +133,7 @@ class HomeController extends Controller
                     return [
                         'title' => $article->title,
                         'excerpt' => $article->description,
-                        'image' => $article->image,
+                        'image' => $article->image_url,
                         'category' => $article->category_name,
                         'category_slug' => $categorySlug,
                         'author' => $article->author,
