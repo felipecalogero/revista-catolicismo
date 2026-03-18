@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Log;
 use App\Mail\WelcomeUserMail;
 use App\Mail\NewUserNotificationMail;
 
@@ -41,11 +42,15 @@ class RegisterController extends Controller
         ]);
 
         // Envia email de boas-vindas
-        Mail::to($user->email)->send(new WelcomeUserMail($user));
+        try {
+            Mail::to($user->email)->send(new WelcomeUserMail($user));
 
-        // Envia notificacao para o admin
-        $adminEmail = config('mail.from.address', 'admin@revistacatolicismo.com.br');
-        Mail::to($adminEmail)->send(new NewUserNotificationMail($user));
+            // Envia notificacao para o admin
+            $adminEmail = config('mail.from.address', 'admin@revistacatolicismo.com.br');
+            Mail::to($adminEmail)->send(new NewUserNotificationMail($user));
+        } catch (\Exception $e) {
+            Log::error('Erro ao enviar e-mail no cadastro: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 

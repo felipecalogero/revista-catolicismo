@@ -32,6 +32,7 @@ class EditionController extends Controller
 
         // Verifica acesso do usuário
         $user = auth()->user();
+        $requiresLoginOnly = false;
         
         // Se a edição foi lançada há mais de 5 meses, qualquer usuário LOGADO tem acesso completo
         if ($edition->canBeAccessedByNonSubscribers()) {
