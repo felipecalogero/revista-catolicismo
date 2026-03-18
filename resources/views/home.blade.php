@@ -10,7 +10,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="text-center md:text-left">
                     <span class="text-lg md:text-xl font-medium">Assine a Revista Catolicismo e tenha acessos exclusivos a partir de</span>
-                    <span class="text-2xl md:text-3xl font-bold ml-2">R$ 149,90/mês</span>
+                    <span class="text-2xl md:text-3xl font-bold ml-2">R$ 140,00/mês</span>
                 </div>
                 <div class="flex items-center gap-3">
                     @auth
