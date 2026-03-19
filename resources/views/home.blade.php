@@ -36,6 +36,18 @@
         </div>
     </section>
 
+    {{-- Informativo de Acesso --}}
+    <div class="bg-gray-100 py-4 border-b border-gray-200">
+        <div class="container mx-auto px-4 lg:px-8 flex items-center gap-3 text-gray-700">
+            <svg class="w-5 h-5 text-red-800 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm md:text-base italic">
+                As 5 edições mais recentes são exclusivas para assinantes; as anteriores podem ser acessadas gratuitamente com um simples cadastro.
+            </p>
+        </div>
+    </div>
+
     {{-- Slider de Revistas Compacto --}}
     <x-revista-slider :revistas="$revistas ?? []" />
 

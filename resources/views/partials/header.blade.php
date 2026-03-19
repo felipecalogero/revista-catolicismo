@@ -1,4 +1,4 @@
-<header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+<header class="bg-[#fdfcfb] border-b border-gray-200 sticky top-0 z-50 shadow-sm">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="flex items-center justify-between h-20">
             {{-- Logo --}}
@@ -34,7 +34,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="absolute top-full left-0 mt-2 w-56 bg-[#fdfcfb] rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="py-2">
                                 @foreach($moreCategories as $category)
                                     <a href="{{ route('categories.show', $category->slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
