@@ -95,6 +95,9 @@ class PagBankWebhookController extends Controller
             } elseif (isset($data['transaction_id'])) {
                 $updateData['pagbank_transaction_id'] = $data['transaction_id'];
             }
+
+            // Sync user data from PagBank
+            $this->syncUserData($subscription->user, $data);
         }
 
         $subscription->update($updateData);
@@ -103,6 +106,63 @@ class PagBankWebhookController extends Controller
             'subscription_id' => $subscription->id,
             'status' => $status,
         ]);
+    }
+
+    /**
+     * Sincroniza dados do usuário recebidos pelo PagBank
+     */
+    private function syncUserData($user, array $data): void
+    {
+        if (!$user) return;
+
+        $userData = [];
+
+        // Extrair CPF (tax_id)
+        $taxId = $data['customer']['tax_id'] ?? null;
+        if ($taxId && empty($user->cpf)) {
+            $userData['cpf'] = preg_replace('/[^0-9]/', '', $taxId);
+        }
+
+        // Extrair Telefone
+        $phone = $data['customer']['phones'][0] ?? null;
+        if ($phone && empty($user->phone)) {
+            $area = $phone['area'] ?? '';
+            $number = $phone['number'] ?? '';
+            if ($area && $number) {
+                $userData['phone'] = preg_replace('/[^0-9]/', '', $area . $number);
+            }
+        }
+
+        // Extrair Endereço (Shipping ou Billing)
+        $addressData = $data['shipping']['address'] ?? $data['billing']['address'] ?? null;
+        if ($addressData && empty($user->address)) {
+            $street = $addressData['street'] ?? '';
+            $number = $addressData['number'] ?? '';
+            $complement = $addressData['complement'] ?? '';
+            $locality = $addressData['locality'] ?? ''; // Bairro
+            $city = $addressData['city'] ?? '';
+            $region = $addressData['region_code'] ?? '';
+            $postalCode = $addressData['postal_code'] ?? '';
+
+            $addressParts = [];
+            if ($street) $addressParts[] = $street . ($number ? ", $number" : "");
+            if ($complement) $addressParts[] = $complement;
+            if ($locality) $addressParts[] = $locality;
+            if ($city) $addressParts[] = $city . ($region ? " - $region" : "");
+            if ($postalCode) $addressParts[] = "CEP: $postalCode";
+
+            if (!empty($addressParts)) {
+                $userData['address'] = implode(', ', $addressParts);
+            }
+        }
+
+        if (!empty($userData)) {
+            $user->update($userData);
+            Log::info('User data synced from PagBank webhook', [
+                'user_id' => $user->id,
+                'fields' => array_keys($userData),
+            ]);
+        }
     }
 
 }

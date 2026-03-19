@@ -21,6 +21,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'cpf',
+        'address',
+        'phone',
         'password',
         'role',
     ];
@@ -59,6 +62,43 @@ class User extends Authenticatable
     /**
      * Verifica se o usuário é administrador
      */
+    public function getFormattedCpfAttribute()
+    {
+        if (!$this->cpf) return '';
+        $cpf = preg_replace('/[^0-9]/', '', $this->cpf);
+        if (strlen($cpf) !== 11) return $this->cpf;
+        
+        return sprintf('%s.%s.%s-%s',
+            substr($cpf, 0, 3),
+            substr($cpf, 3, 3),
+            substr($cpf, 6, 3),
+            substr($cpf, 9, 2)
+        );
+    }
+
+    public function getFormattedPhoneAttribute()
+    {
+        if (!$this->phone) return '';
+        $phone = preg_replace('/[^0-9]/', '', $this->phone);
+        $len = strlen($phone);
+        
+        if ($len === 11) {
+            return sprintf('(%s) %s-%s',
+                substr($phone, 0, 2),
+                substr($phone, 2, 5),
+                substr($phone, 7, 4)
+            );
+        } elseif ($len === 10) {
+            return sprintf('(%s) %s-%s',
+                substr($phone, 0, 2),
+                substr($phone, 2, 4),
+                substr($phone, 6, 4)
+            );
+        }
+        
+        return $this->phone;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -153,5 +193,13 @@ class User extends Authenticatable
 
         // Não-assinantes só têm acesso a edições publicadas há mais de 5 meses
         return $edition->canBeAccessedByNonSubscribers();
+    }
+
+    /**
+     * Verifica se o usuário tem senha definida
+     */
+    public function hasPassword(): bool
+    {
+        return !empty($this->password);
     }
 }

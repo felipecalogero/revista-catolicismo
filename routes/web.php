@@ -50,6 +50,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/esqueci-minha-senha', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('/redefinir-senha/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/redefinir-senha', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    // First Access Flow
+    Route::get('/primeiro-acesso', [\App\Http\Controllers\Auth\FirstAccessController::class, 'showForm'])->name('first-access');
+    Route::post('/primeiro-acesso', [\App\Http\Controllers\Auth\FirstAccessController::class, 'sendLink'])->name('first-access.send');
 });
 
 // Rotas autenticadas
@@ -83,6 +87,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('articles', AdminArticleController::class);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::resource('editions', \App\Http\Controllers\Admin\EditionController::class);
+    Route::get('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
+    Route::post('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'storeImport'])->name('users.storeImport');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::post('/editions/{id}/publish', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
     Route::post('/editions/{id}/unpublish', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');

@@ -198,7 +198,10 @@ class SubscriptionController extends Controller
             $amount,
             $user->name,
             $user->email,
-            $planName
+            $planName,
+            $user->cpf,
+            $user->phone,
+            $user->address
         );
 
         if (!$checkout) {

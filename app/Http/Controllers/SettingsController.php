@@ -18,15 +18,23 @@ class SettingsController extends Controller
         return view('settings.index', compact('user'));
     }
 
-    /**
-     * Atualiza as informações pessoais do usuário
-     */
     public function update(Request $request)
     {
         $user = Auth::user();
 
+        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        if ($request->has('cpf')) {
+            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+        }
+        if ($request->has('phone')) {
+            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'cpf' => ['nullable', 'string', 'size:11', 'unique:users,cpf,' . $user->id],
+            'address' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'min:10', 'max:11'],
         ]);
 
         // Apenas administradores podem alterar o email

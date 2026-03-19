@@ -64,8 +64,13 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::with('subscriptions')->findOrFail($id);
-        return view('admin.users.edit', compact('user'));
+        $user = User::with(['subscriptions' => function($query) {
+            $query->latest();
+        }])->findOrFail($id);
+        
+        $latestSubscription = $user->subscriptions->first();
+        
+        return view('admin.users.edit', compact('user', 'latestSubscription'));
     }
 
     /**
@@ -75,17 +80,34 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        if ($request->has('cpf')) {
+            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+        }
+        if ($request->has('phone')) {
+            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:user,admin',
+            'cpf' => 'nullable|string|size:11|unique:users,cpf,' . $id,
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|min:10|max:11',
+            'plan_type' => 'nullable|in:physical,virtual,none',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'cpf' => $validated['cpf'],
+            'address' => $validated['address'],
+            'phone' => $validated['phone'],
         ];
 
         // Atualizar senha apenas se fornecida
@@ -94,6 +116,32 @@ class UserController extends Controller
         }
 
         $user->update($updateData);
+
+        // Gerenciar Assinatura
+        if (isset($validated['plan_type'])) {
+            if ($validated['plan_type'] === 'none') {
+                // Se o admin escolher "Nenhuma", podemos expirar a assinatura atual se existir
+                $user->subscriptions()->where('status', 'active')->update(['status' => 'cancelled']);
+            } else {
+                // Atualizar ou criar assinatura
+                $latest = $user->subscriptions()->latest()->first();
+
+                $subData = [
+                    'plan_type' => $validated['plan_type'],
+                    'start_date' => $validated['start_date'],
+                    'end_date' => $validated['end_date'],
+                    'status' => 'active',
+                    'purchase_date' => now(),
+                    'amount' => $validated['plan_type'] === 'physical' ? 100.00 : 50.00, // Valores padrão fictícios se manual
+                ];
+
+                if ($latest) {
+                    $latest->update($subData);
+                } else {
+                    $user->subscriptions()->create($subData);
+                }
+            }
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário atualizado com sucesso!');
@@ -116,5 +164,81 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário deletado com sucesso!');
+    }
+
+    /**
+     * Show the import form.
+     */
+    public function import()
+    {
+        return view('admin.users.import');
+    }
+
+    /**
+     * Process the CSV import.
+     */
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        
+        // Skip header
+        fgetcsv($handle);
+
+        $count = 0;
+        $errors = [];
+
+        while (($data = fgetcsv($handle)) !== FALSE) {
+            // Expecting: Nome, Email, CPF (opcional), Telefone (opcional), Endereço (opcional)
+            $name = $data[0] ?? null;
+            $email = $data[1] ?? null;
+            $cpf = !empty($data[2]) ? preg_replace('/[^0-9]/', '', $data[2]) : null;
+            $phone = !empty($data[3]) ? preg_replace('/[^0-9]/', '', $data[3]) : null;
+            $address = $data[4] ?? null;
+
+            if (!$name || !$email) {
+                continue;
+            }
+
+            // Check if user already exists
+            if (User::where('email', $email)->exists()) {
+                $errors[] = "E-mail {$email} já cadastrado.";
+                continue;
+            }
+
+            // Check if CPF already exists if provided
+            if ($cpf && User::where('cpf', $cpf)->exists()) {
+                $errors[] = "CPF {$cpf} já cadastrado para o e-mail {$email}.";
+                continue;
+            }
+
+            try {
+                User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'cpf' => $cpf,
+                    'phone' => $phone,
+                    'address' => $address,
+                    'password' => null, // No password initially
+                    'role' => 'user',
+                ]);
+                $count++;
+            } catch (\Exception $e) {
+                $errors[] = "Erro ao importar {$email}: " . $e->getMessage();
+            }
+        }
+
+        fclose($handle);
+
+        $message = "{$count} usuários importados com sucesso!";
+        if (!empty($errors)) {
+            $message .= " Erros: " . implode(' ', $errors);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', $message);
     }
 }

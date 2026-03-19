@@ -86,6 +86,50 @@
                                 </p>
                             @endif
                         </div>
+
+                        <div>
+                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">
+                                CPF
+                            </label>
+                            <input 
+                                type="text" 
+                                id="cpf" 
+                                name="cpf" 
+                                value="{{ old('cpf', $user->formatted_cpf) }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-8:00 focus:border-transparent"
+                                placeholder="000.000.000-00"
+                                maxlength="14"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                Endereço
+                            </label>
+                            <input 
+                                type="text" 
+                                id="address" 
+                                name="address" 
+                                value="{{ old('address', $user->address) }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-8:00 focus:border-transparent"
+                                placeholder="Seu endereço completo"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                Telefone
+                            </label>
+                            <input 
+                                type="text" 
+                                id="phone" 
+                                name="phone" 
+                                value="{{ old('phone', $user->formatted_phone) }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-8:00 focus:border-transparent"
+                                placeholder="(XX) XXXXX-XXXX"
+                                maxlength="15"
+                            >
+                        </div>
                     </div>
                 </form>
             </div>
@@ -251,6 +295,44 @@ function validatePasswordMatch() {
 
 // Validar senha ao carregar a página se já houver valor
 document.addEventListener('DOMContentLoaded', function() {
+    // Máscaras para CPF e Telefone
+    const cpfInput = document.getElementById('cpf');
+    const phoneInput = document.getElementById('phone');
+
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            
+            let masked = value;
+            if (value.length > 3) masked = value.slice(0, 3) + '.' + value.slice(3);
+            if (value.length > 6) masked = masked.slice(0, 7) + '.' + masked.slice(7);
+            if (value.length > 9) masked = masked.slice(0, 11) + '-' + masked.slice(11);
+            
+            e.target.value = masked;
+        });
+    }
+
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            
+            let masked = '';
+            if (value.length > 0) masked = '(' + value;
+            if (value.length > 2) masked = '(' + value.slice(0, 2) + ') ' + value.slice(2);
+            if (value.length > 7) {
+                if (value.length === 11) {
+                    masked = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7);
+                } else {
+                    masked = '(' + value.slice(0, 2) + ') ' + value.slice(2, 6) + '-' + value.slice(6);
+                }
+            }
+            
+            e.target.value = masked;
+        });
+    }
+
     const passwordInput = document.getElementById('password');
     if (passwordInput && passwordInput.value) {
         validatePassword(passwordInput.value);

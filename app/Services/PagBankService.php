@@ -66,9 +66,35 @@ class PagBankService
         float $amount,
         string $customerName,
         string $customerEmail,
-        string $planName = 'Assinatura Anual'
+        string $planName = 'Assinatura Anual',
+        ?string $cpf = null,
+        ?string $phone = null,
+        ?string $address = null
     ): ?array {
         $amountInCents = (int) ($amount * 100);
+
+        $customer = [
+            'name' => $customerName,
+            'email' => $customerEmail,
+        ];
+
+        if ($cpf) {
+            $customer['tax_id'] = preg_replace('/[^0-9]/', '', $cpf);
+        }
+
+        if ($phone) {
+            $digits = preg_replace('/[^0-9]/', '', $phone);
+            if (strlen($digits) >= 10) {
+                $customer['phones'] = [
+                    [
+                        'country' => '55',
+                        'area' => substr($digits, 0, 2),
+                        'number' => substr($digits, 2),
+                        'type' => strlen($digits) === 11 ? 'MOBILE' : 'HOME',
+                    ]
+                ];
+            }
+        }
 
         $checkoutData = [
             'reference_id' => (string) $subscriptionId,
@@ -85,11 +111,28 @@ class PagBankService
                     'unit_amount' => $amountInCents,
                 ],
             ],
-            'customer' => [
-                'name' => $customerName,
-                'email' => $customerEmail,
-            ],
+            'customer' => $customer,
         ];
+
+        // Se tiver endereço, tenta mapear para o PagBank (opcional)
+        if ($address) {
+            $parts = array_map('trim', explode(',', $address));
+            if (count($parts) >= 1) {
+                $checkoutData['shipping'] = [
+                    'address' => [
+                        'street' => $parts[0],
+                        'number' => $parts[1] ?? 'SN',
+                        'locality' => $parts[2] ?? '',
+                        'city' => count($parts) > 3 ? explode('-', $parts[3])[0] : '',
+                        'region_code' => count($parts) > 3 && strpos($parts[3], '-') !== false ? trim(explode('-', $parts[3])[1]) : 'SP',
+                        'country' => 'BRA',
+                        'postal_code' => $parts[count($parts)-1] && strpos($parts[count($parts)-1], 'CEP:') !== false 
+                            ? preg_replace('/[^0-9]/', '', $parts[count($parts)-1]) 
+                            : '00000000',
+                    ]
+                ];
+            }
+        }
 
         return $this->createCheckout($checkoutData);
     }

@@ -13,9 +13,14 @@
                     </h1>
                     <p class="text-gray-600">Gerencie todos os usuários e assinaturas</p>
                 </div>
-                <a href="{{ route('admin.users.create') }}" class="bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                    + Novo Usuário
-                </a>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.users.import') }}" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300">
+                        Importar Usuários
+                    </a>
+                    <a href="{{ route('admin.users.create') }}" class="bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                        + Novo Usuário
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))

@@ -87,9 +87,12 @@
                     </label>
                 </div>
 
-                <div class="text-sm">
-                    <a href="{{ route('password.request') }}" class="font-medium text-red-800 hover:text-red-900">
+                <div class="text-sm space-y-2 text-right">
+                    <a href="{{ route('password.request') }}" class="block font-medium text-red-800 hover:text-red-900">
                         Esqueceu a senha?
+                    </a>
+                    <a href="{{ route('first-access') }}" class="block font-medium text-red-800 hover:text-red-900 border-t border-gray-100 pt-2">
+                        Primeiro acesso? Configure sua senha
                     </a>
                 </div>
             </div>
