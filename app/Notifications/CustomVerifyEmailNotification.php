@@ -41,7 +41,7 @@ class CustomVerifyEmailNotification extends Notification
             ->line('Bem-vindo à Revista Catolicismo! Por favor, clique no botão abaixo para verificar o seu endereço de e-mail e ativar a sua conta.')
             ->action('Verificar E-mail', $verificationUrl)
             ->line('Se você não criou uma conta, nenhuma ação adicional é necessária.')
-            ->salutation('Atenciosamente, ' . config('app.name'));
+            ->salutation('Atenciosamente, Equipe Catolicismo');
     }
 
     /**

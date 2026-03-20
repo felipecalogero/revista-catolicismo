@@ -32,6 +32,7 @@ class CustomResetPasswordNotification extends Notification
             ->line('Você está recebendo este e-mail porque recebemos uma solicitação de redefinição de senha para sua conta.')
             ->action('Redefinir Senha', $url)
             ->line('Este link de redefinição de senha expirará em '.config('auth.passwords.'.config('auth.defaults.passwords').'.expire').' minutos.')
-            ->line('Se você não solicitou uma redefinição de senha, nenhuma ação adicional é necessária.');
+            ->line('Se você não solicitou uma redefinição de senha, nenhuma ação adicional é necessária.')
+            ->salutation('Atenciosamente, Equipe Catolicismo');
     }
 }
