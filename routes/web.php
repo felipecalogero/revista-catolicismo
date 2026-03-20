@@ -57,24 +57,42 @@ Route::middleware('guest')->group(function () {
 });
 
 // Rotas autenticadas
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
+    // Email Verification Routes
+    Route::get('/email/verify', [\App\Http\Controllers\Auth\VerificationController::class, 'show'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Configurações do usuário
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+    // Rotas que exigem e-mail verificado
+    Route::middleware('verified')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Rotas de assinatura
-    Route::prefix('assinaturas')->name('subscriptions.')->group(function () {
-        Route::post('/criar', [SubscriptionController::class, 'create'])->name('create');
-        Route::get('/minha-assinatura', [SubscriptionController::class, 'show'])->name('show');
-        Route::post('/ativar', [SubscriptionController::class, 'activate'])->name('activate');
-        Route::post('/suspender', [SubscriptionController::class, 'suspend'])->name('suspend');
-        Route::post('/cancelar', [SubscriptionController::class, 'cancel'])->name('cancel');
-        Route::get('/retorno-pagbank', [SubscriptionController::class, 'returnFromPagBank'])->name('return');
+        // Configurações do usuário
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+
+        // Rotas de assinatura
+        Route::prefix('assinaturas')->name('subscriptions.')->group(function () {
+            Route::post('/criar', [SubscriptionController::class, 'create'])->name('create');
+            Route::get('/minha-assinatura', [SubscriptionController::class, 'show'])->name('show');
+            Route::post('/ativar', [SubscriptionController::class, 'activate'])->name('activate');
+            Route::post('/suspender', [SubscriptionController::class, 'suspend'])->name('suspend');
+            Route::post('/cancelar', [SubscriptionController::class, 'cancel'])->name('cancel');
+        });
     });
+
+    // Rota de retorno do PagBank (pode ser acessada logo após pagamento, mas preferencialmente logado)
+    Route::get('/assinaturas/retorno-pagbank', [SubscriptionController::class, 'returnFromPagBank'])->name('subscriptions.return');
 });
 
 // Webhook do PagBank (sem autenticação)

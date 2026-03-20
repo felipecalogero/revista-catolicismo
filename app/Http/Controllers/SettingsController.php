@@ -63,11 +63,7 @@ class SettingsController extends Controller
                     $fail('A senha atual está incorreta.');
                 }
             }],
-            'password' => ['required', 'confirmed', Password::min(8)
-                ->letters()
-                ->mixedCase()
-                ->numbers()
-                ->symbols()],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user->update([

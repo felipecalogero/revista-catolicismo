@@ -35,7 +35,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
         ]);
 
@@ -45,6 +45,8 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);
+
+        $user->sendEmailVerificationNotification();
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário criado com sucesso!');
@@ -91,7 +93,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => ['nullable', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
             'cpf' => 'nullable|string|size:11|unique:users,cpf,' . $id,
             'address' => 'nullable|string|max:255',
@@ -217,7 +219,7 @@ class UserController extends Controller
             }
 
             try {
-                User::create([
+                $user = User::create([
                     'name' => $name,
                     'email' => $email,
                     'cpf' => $cpf,
@@ -226,6 +228,9 @@ class UserController extends Controller
                     'password' => null, // No password initially
                     'role' => 'user',
                 ]);
+
+                $user->sendEmailVerificationNotification();
+
                 $count++;
             } catch (\Exception $e) {
                 $errors[] = "Erro ao importar {$email}: " . $e->getMessage();

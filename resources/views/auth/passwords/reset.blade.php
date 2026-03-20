@@ -63,7 +63,35 @@
                         required 
                         class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent @error('password') border-red-500 @enderror"
                         placeholder="••••••••"
+                        oninput="validatePassword(this.value); validatePasswordMatch();"
                     >
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    {{-- Requisitos de Senha Forte --}}
+                    <ul class="mt-3 space-y-2" id="password-requirements">
+                        <li class="flex items-center text-sm" id="req-length">
+                            <span class="requirement-icon mr-2 text-red-600">✗</span>
+                            <span class="text-gray-700">Mínimo de 8 caracteres</span>
+                        </li>
+                        <li class="flex items-center text-sm" id="req-uppercase">
+                            <span class="requirement-icon mr-2 text-red-600">✗</span>
+                            <span class="text-gray-700">Pelo menos uma letra maiúscula (A-Z)</span>
+                        </li>
+                        <li class="flex items-center text-sm" id="req-lowercase">
+                            <span class="requirement-icon mr-2 text-red-600">✗</span>
+                            <span class="text-gray-700">Pelo menos uma letra minúscula (a-z)</span>
+                        </li>
+                        <li class="flex items-center text-sm" id="req-number">
+                            <span class="requirement-icon mr-2 text-red-600">✗</span>
+                            <span class="text-gray-700">Pelo menos um número (0-9)</span>
+                        </li>
+                        <li class="flex items-center text-sm" id="req-symbol">
+                            <span class="requirement-icon mr-2 text-red-600">✗</span>
+                            <span class="text-gray-700">Pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;:,.<>?)</span>
+                        </li>
+                    </ul>
                 </div>
 
                 <div>
@@ -77,19 +105,31 @@
                         required 
                         class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent"
                         placeholder="••••••••"
+                        oninput="validatePasswordMatch()"
                     >
+                    <div id="password-match-message" class="mt-2 text-sm hidden"></div>
                 </div>
             </div>
 
             <div>
                 <button 
+                    id="submit-button"
                     type="submit" 
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 transition-colors"
+                    disabled
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Redefinir Senha
                 </button>
             </div>
         </form>
+
+        <script src="{{ asset('js/password-validation.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                PasswordValidation.init();
+            });
+        </script>
+        @endpush
     </div>
 </div>
 @endsection

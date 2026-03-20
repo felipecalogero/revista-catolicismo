@@ -149,103 +149,11 @@
     </div>
 </div>
 @push('scripts')
+<script src="{{ asset('js/password-validation.js') }}"></script>
 <script>
-function validatePassword(password) {
-    const requirements = {
-        length: password.length >= 8,
-        uppercase: /[A-Z]/.test(password),
-        lowercase: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
-        symbol: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
-    };
-
-    // Atualizar cada requisito
-    updateRequirement('req-length', requirements.length);
-    updateRequirement('req-uppercase', requirements.uppercase);
-    updateRequirement('req-lowercase', requirements.lowercase);
-    updateRequirement('req-number', requirements.number);
-    updateRequirement('req-symbol', requirements.symbol);
-
-    checkFormValidity();
-}
-
-function updateRequirement(id, isValid) {
-    const element = document.getElementById(id);
-    const icon = element.querySelector('.requirement-icon');
-    const text = element.querySelector('span:last-child');
-    
-    if (isValid) {
-        icon.textContent = '✓';
-        icon.className = 'requirement-icon mr-2 text-green-600 font-bold';
-        text.className = 'text-green-700';
-    } else {
-        icon.textContent = '✗';
-        icon.className = 'requirement-icon mr-2 text-red-600';
-        text.className = 'text-gray-700';
-    }
-}
-
-function validatePasswordMatch() {
-    const password = document.getElementById('password').value;
-    const passwordConfirmation = document.getElementById('password_confirmation').value;
-    const messageDiv = document.getElementById('password-match-message');
-    const confirmationInput = document.getElementById('password_confirmation');
-    
-    if (passwordConfirmation.length === 0) {
-        messageDiv.classList.add('hidden');
-        confirmationInput.classList.remove('border-green-500', 'border-red-500');
-        confirmationInput.classList.add('border-gray-300');
-        checkFormValidity();
-        return;
-    }
-    
-    messageDiv.classList.remove('hidden');
-    
-    if (password === passwordConfirmation) {
-        messageDiv.textContent = '✓ As senhas coincidem';
-        messageDiv.className = 'mt-2 text-sm text-green-600 font-medium';
-        confirmationInput.classList.remove('border-red-500', 'border-gray-300');
-        confirmationInput.classList.add('border-green-500');
-    } else {
-        messageDiv.textContent = '✗ As senhas não coincidem';
-        messageDiv.className = 'mt-2 text-sm text-red-600 font-medium';
-        confirmationInput.classList.remove('border-green-500', 'border-gray-300');
-        confirmationInput.classList.add('border-red-500');
-    }
-
-    checkFormValidity();
-}
-
-function checkFormValidity() {
-    const password = document.getElementById('password').value;
-    const passwordConfirmation = document.getElementById('password_confirmation').value;
-    const submitButton = document.getElementById('submit-button');
-    
-    const isStrengthValid = (
-        password.length >= 8 &&
-        /[A-Z]/.test(password) &&
-        /[a-z]/.test(password) &&
-        /[0-9]/.test(password) &&
-        /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
-    );
-    
-    const isMatchValid = (password.length > 0 && password === passwordConfirmation);
-    
-    if (submitButton) {
-        submitButton.disabled = !(isStrengthValid && isMatchValid);
-    }
-}
-
-// Validar senha ao carregar a página se já houver valor
-document.addEventListener('DOMContentLoaded', function() {
-    const passwordInput = document.getElementById('password');
-    if (passwordInput && passwordInput.value) {
-        validatePassword(passwordInput.value);
-        validatePasswordMatch();
-    }
-    checkFormValidity();
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        PasswordValidation.init();
+    });
 </script>
 @endpush
 @endsection
-
