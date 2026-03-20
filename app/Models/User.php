@@ -60,6 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Override o envio do e-mail de verificação para usar nosso template em português.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\CustomVerifyEmailNotification());
+    }
+
+    /**
      * Verifica se o usuário é administrador
      */
     public function getFormattedCpfAttribute()
