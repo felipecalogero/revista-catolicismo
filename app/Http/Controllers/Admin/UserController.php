@@ -32,11 +32,25 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        if ($request->has('cpf')) {
+            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+        }
+        if ($request->has('phone')) {
+            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
+            'cpf' => 'nullable|string|size:11|unique:users,cpf',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|min:10|max:11',
+            'plan_type' => 'nullable|in:physical,virtual,none',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $user = User::create([
@@ -44,7 +58,22 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'cpf' => $validated['cpf'],
+            'address' => $validated['address'],
+            'phone' => $validated['phone'],
         ]);
+
+        // Gerenciar Assinatura
+        if (isset($validated['plan_type']) && $validated['plan_type'] !== 'none') {
+            $user->subscriptions()->create([
+                'plan_type' => $validated['plan_type'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'status' => 'active',
+                'purchase_date' => now(),
+                'amount' => $validated['plan_type'] === 'physical' ? 100.00 : 50.00,
+            ]);
+        }
 
         $user->sendEmailVerificationNotification();
 
