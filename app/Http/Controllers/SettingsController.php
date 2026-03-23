@@ -22,23 +22,33 @@ class SettingsController extends Controller
     {
         $user = Auth::user();
 
-        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        // Normalizar CPF, Telefone e CEP (remover máscara) antes da validação
         if ($request->has('cpf')) {
-            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+            $cpf = preg_replace('/[^0-9]/', '', $request->cpf);
+            $request->merge(['cpf' => $cpf ?: null]);
+        }
+        if ($request->has('zip_code')) {
+            $zip = preg_replace('/[^0-9]/', '', $request->zip_code);
+            $request->merge(['zip_code' => $zip ?: null]);
         }
         if ($request->has('phone')) {
-            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+            $phone = preg_replace('/[^0-9]/', '', $request->phone);
+            $request->merge(['phone' => $phone ?: null]);
         }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'cpf' => ['nullable', 'string', 'size:11', 'unique:users,cpf,' . $user->id],
+            'cpf' => ['nullable', 'string', 'min:11', 'max:14', 'unique:users,cpf,' . $user->id],
             'address' => ['nullable', 'string', 'max:255'],
+            'neighborhood' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'size:2'],
+            'zip_code' => ['nullable', 'string', 'size:8'],
             'phone' => ['nullable', 'string', 'min:10', 'max:11'],
         ]);
 
-        // Apenas administradores podem alterar o email
-        if ($user->isAdmin()) {
+        // Apenas administradores podem alterar o email (embora no settings.index esteja desabilitado para o usuário)
+        if ($request->has('email') && $user->isAdmin()) {
             $validated['email'] = $request->validate([
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             ])['email'];

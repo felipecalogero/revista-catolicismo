@@ -121,7 +121,7 @@
                     {{-- CPF --}}
                     <div>
                         <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">
-                            CPF
+                            CPF/CNPJ
                         </label>
                         <input
                             type="text"
@@ -129,10 +129,29 @@
                             name="cpf"
                             value="{{ old('cpf') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="000.000.000-00"
-                            maxlength="14"
+                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                            maxlength="18"
                         >
                         @error('cpf')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- CEP --}}
+                    <div>
+                        <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">
+                            CEP
+                        </label>
+                        <input
+                            type="text"
+                            id="zip_code"
+                            name="zip_code"
+                            value="{{ old('zip_code') }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                            placeholder="00000-000"
+                            maxlength="9"
+                        >
+                        @error('zip_code')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -140,7 +159,7 @@
                     {{-- Endereço --}}
                     <div>
                         <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                            Endereço
+                            Endereço (Rua e Número)
                         </label>
                         <input
                             type="text"
@@ -148,9 +167,64 @@
                             name="address"
                             value="{{ old('address') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="Endereço completo"
+                            placeholder="Ex: Rua das Flores, 123"
                         >
                         @error('address')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Bairro --}}
+                    <div>
+                        <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
+                            Bairro
+                        </label>
+                        <input
+                            type="text"
+                            id="neighborhood"
+                            name="neighborhood"
+                            value="{{ old('neighborhood') }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                            placeholder="Bairro"
+                        >
+                        @error('neighborhood')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Cidade --}}
+                    <div>
+                        <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cidade
+                        </label>
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            value="{{ old('city') }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                            placeholder="Cidade"
+                        >
+                        @error('city')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Estado --}}
+                    <div>
+                        <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                            Estado
+                        </label>
+                        <input
+                            type="text"
+                            id="state"
+                            name="state"
+                            value="{{ old('state') }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                            placeholder="UF"
+                            maxlength="2"
+                        >
+                        @error('state')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -195,7 +269,7 @@
                 </div>
 
                 {{-- Seção de Assinatura --}}
-                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <div id="subscription-section" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 font-serif mb-4 pb-2 border-b border-gray-300">
                         Gerenciar Assinatura (já em andamento)
                     </h3>
@@ -287,19 +361,52 @@
 document.addEventListener('DOMContentLoaded', function() {
     PasswordValidation.init();
 
+    const roleSelect = document.getElementById('role');
+    const subscriptionSection = document.getElementById('subscription-section');
+
+    function toggleSubscriptionSection() {
+        if (roleSelect && subscriptionSection) {
+            if (roleSelect.value === 'admin') {
+                subscriptionSection.style.display = 'none';
+            } else {
+                subscriptionSection.style.display = 'block';
+            }
+        }
+    }
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleSubscriptionSection);
+        toggleSubscriptionSection(); // Run on load
+    }
+
     const cpfInput = document.getElementById('cpf');
     const phoneInput = document.getElementById('phone');
+    const zipCodeInput = document.getElementById('zip_code');
+    const addressInput = document.getElementById('address');
+    const neighborhoodInput = document.getElementById('neighborhood');
+    const cityInput = document.getElementById('city');
+    const stateInput = document.getElementById('state');
 
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 14) value = value.slice(0, 14);
             
-            let masked = value;
-            if (value.length > 3) masked = value.slice(0, 3) + '.' + value.slice(3);
-            if (value.length > 6) masked = masked.slice(0, 7) + '.' + masked.slice(7);
-            if (value.length > 9) masked = masked.slice(0, 11) + '-' + masked.slice(11);
-            
+            let masked = '';
+            if (value.length <= 11) {
+                // CPF: 000.000.000-00
+                if (value.length > 0) masked = value.slice(0, 3);
+                if (value.length > 3) masked += '.' + value.slice(3, 6);
+                if (value.length > 6) masked += '.' + value.slice(6, 9);
+                if (value.length > 9) masked += '-' + value.slice(9, 11);
+            } else {
+                // CNPJ: 00.000.000/0000-00
+                if (value.length > 0) masked = value.slice(0, 2);
+                if (value.length > 2) masked += '.' + value.slice(2, 5);
+                if (value.length > 5) masked += '.' + value.slice(5, 8);
+                if (value.length > 8) masked += '/' + value.slice(8, 12);
+                if (value.length > 12) masked += '-' + value.slice(12, 14);
+            }
             e.target.value = masked;
         });
     }
@@ -319,8 +426,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     masked = '(' + value.slice(0, 2) + ') ' + value.slice(2, 6) + '-' + value.slice(6);
                 }
             }
-            
             e.target.value = masked;
+        });
+    }
+
+    if (zipCodeInput) {
+        zipCodeInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 8) value = value.slice(0, 8);
+            
+            let masked = value;
+            if (value.length > 5) masked = value.slice(0, 5) + '-' + value.slice(5);
+            e.target.value = masked;
+
+            if (value.length === 8) {
+                fetch(`https://viacep.com.br/ws/${value}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            if (addressInput) addressInput.value = data.logradouro;
+                            if (neighborhoodInput) neighborhoodInput.value = data.bairro;
+                            if (cityInput) cityInput.value = data.localidade;
+                            if (stateInput) stateInput.value = data.uf;
+                            
+                            if (addressInput) {
+                                addressInput.focus();
+                                if (data.logradouro) addressInput.value += ', ';
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar CEP:', error));
+            }
         });
     }
 });

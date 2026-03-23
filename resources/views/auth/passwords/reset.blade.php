@@ -123,6 +123,7 @@
             </div>
         </form>
 
+        @push('scripts')
         <script src="{{ asset('js/password-validation.js') }}"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {

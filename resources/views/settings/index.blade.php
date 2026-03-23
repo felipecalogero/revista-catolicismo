@@ -43,11 +43,11 @@
                         </div>
 
                         <div>
-                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF/CNPJ</label>
                             <input type="text" id="cpf" name="cpf" value="{{ old('cpf', $user->formatted_cpf) }}" 
-                                maxlength="14"
+                                maxlength="18"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                                placeholder="000.000.000-00">
+                                placeholder="000.000.000-00 ou 00.000.000/0000-00">
                             @error('cpf') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
@@ -60,12 +60,51 @@
                             @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="md:col-span-2">
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Endereço Completo</label>
+                        {{-- CEP --}}
+                        <div>
+                            <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
+                            <input type="text" id="zip_code" name="zip_code" value="{{ old('zip_code', $user->zip_code) }}" 
+                                maxlength="9"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="00000-000">
+                            @error('zip_code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Endereço --}}
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Endereço (Rua e Número)</label>
                             <input type="text" id="address" name="address" value="{{ old('address', $user->address) }}" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                                placeholder="Rua, número, complemento, bairro, cidade - UF">
+                                placeholder="Ex: Rua das Flores, 123">
                             @error('address') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Bairro --}}
+                        <div>
+                            <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
+                            <input type="text" id="neighborhood" name="neighborhood" value="{{ old('neighborhood', $user->neighborhood) }}" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Bairro">
+                            @error('neighborhood') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Cidade --}}
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+                            <input type="text" id="city" name="city" value="{{ old('city', $user->city) }}" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Cidade">
+                            @error('city') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Estado --}}
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                            <input type="text" id="state" name="state" value="{{ old('state', $user->state) }}" 
+                                maxlength="2"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="UF">
+                            @error('state') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
@@ -194,13 +233,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 14) value = value.slice(0, 14);
             
-            let masked = value;
-            if (value.length > 3) masked = value.slice(0, 3) + '.' + value.slice(3);
-            if (value.length > 6) masked = masked.slice(0, 7) + '.' + masked.slice(7);
-            if (value.length > 9) masked = masked.slice(0, 11) + '-' + masked.slice(11);
-            
+            let masked = '';
+            if (value.length <= 11) {
+                // CPF: 000.000.000-00
+                if (value.length > 0) masked = value.slice(0, 3);
+                if (value.length > 3) masked += '.' + value.slice(3, 6);
+                if (value.length > 6) masked += '.' + value.slice(6, 9);
+                if (value.length > 9) masked += '-' + value.slice(9, 11);
+            } else {
+                // CNPJ: 00.000.000/0000-00
+                if (value.length > 0) masked = value.slice(0, 2);
+                if (value.length > 2) masked += '.' + value.slice(2, 5);
+                if (value.length > 5) masked += '.' + value.slice(5, 8);
+                if (value.length > 8) masked += '/' + value.slice(8, 12);
+                if (value.length > 12) masked += '-' + value.slice(12, 14);
+            }
             e.target.value = masked;
         });
     }
@@ -222,6 +271,43 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             e.target.value = masked;
+        });
+    }
+
+    // Máscaras e ViaCEP para Endereço
+    const zipCodeInput = document.getElementById('zip_code');
+    const addressInput = document.getElementById('address');
+    const neighborhoodInput = document.getElementById('neighborhood');
+    const cityInput = document.getElementById('city');
+    const stateInput = document.getElementById('state');
+
+    if (zipCodeInput) {
+        zipCodeInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 8) value = value.slice(0, 8);
+            
+            let masked = value;
+            if (value.length > 5) masked = value.slice(0, 5) + '-' + value.slice(5);
+            e.target.value = masked;
+
+            if (value.length === 8) {
+                fetch(`https://viacep.com.br/ws/${value}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            if (addressInput) addressInput.value = data.logradouro;
+                            if (neighborhoodInput) neighborhoodInput.value = data.bairro;
+                            if (cityInput) cityInput.value = data.localidade;
+                            if (stateInput) stateInput.value = data.uf;
+                            
+                            if (addressInput) {
+                                addressInput.focus();
+                                if (data.logradouro) addressInput.value += ', ';
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar CEP:', error));
+            }
         });
     }
 });

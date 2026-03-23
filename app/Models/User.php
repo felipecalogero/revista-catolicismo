@@ -23,6 +23,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'cpf',
         'address',
+        'neighborhood',
+        'city',
+        'state',
+        'zip_code',
         'phone',
         'password',
         'role',
@@ -74,14 +78,26 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if (!$this->cpf) return '';
         $cpf = preg_replace('/[^0-9]/', '', $this->cpf);
-        if (strlen($cpf) !== 11) return $this->cpf;
+        $len = strlen($cpf);
         
-        return sprintf('%s.%s.%s-%s',
-            substr($cpf, 0, 3),
-            substr($cpf, 3, 3),
-            substr($cpf, 6, 3),
-            substr($cpf, 9, 2)
-        );
+        if ($len === 11) {
+            return sprintf('%s.%s.%s-%s',
+                substr($cpf, 0, 3),
+                substr($cpf, 3, 3),
+                substr($cpf, 6, 3),
+                substr($cpf, 9, 2)
+            );
+        } elseif ($len === 14) {
+            return sprintf('%s.%s.%s/%s-%s',
+                substr($cpf, 0, 2),
+                substr($cpf, 2, 3),
+                substr($cpf, 5, 3),
+                substr($cpf, 8, 4),
+                substr($cpf, 12, 2)
+            );
+        }
+        
+        return $this->cpf;
     }
 
     public function getFormattedPhoneAttribute()

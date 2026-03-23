@@ -135,24 +135,29 @@ class PagBankWebhookController extends Controller
 
         // Extrair Endereço (Shipping ou Billing)
         $addressData = $data['shipping']['address'] ?? $data['billing']['address'] ?? null;
-        if ($addressData && empty($user->address)) {
+        if ($addressData) {
             $street = $addressData['street'] ?? '';
             $number = $addressData['number'] ?? '';
             $complement = $addressData['complement'] ?? '';
-            $locality = $addressData['locality'] ?? ''; // Bairro
+            $neighborhood = $addressData['locality'] ?? ''; // Bairro
             $city = $addressData['city'] ?? '';
             $region = $addressData['region_code'] ?? '';
             $postalCode = $addressData['postal_code'] ?? '';
 
-            $addressParts = [];
-            if ($street) $addressParts[] = $street . ($number ? ", $number" : "");
-            if ($complement) $addressParts[] = $complement;
-            if ($locality) $addressParts[] = $locality;
-            if ($city) $addressParts[] = $city . ($region ? " - $region" : "");
-            if ($postalCode) $addressParts[] = "CEP: $postalCode";
-
-            if (!empty($addressParts)) {
-                $userData['address'] = implode(', ', $addressParts);
+            if ($street) {
+                $userData['address'] = $street . ($number ? ", $number" : "") . ($complement ? " - $complement" : "");
+            }
+            if ($neighborhood) {
+                $userData['neighborhood'] = $neighborhood;
+            }
+            if ($city) {
+                $userData['city'] = $city;
+            }
+            if ($region) {
+                $userData['state'] = $region;
+            }
+            if ($postalCode) {
+                $userData['zip_code'] = preg_replace('/[^0-9]/', '', $postalCode);
             }
         }
 

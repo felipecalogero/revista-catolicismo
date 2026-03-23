@@ -32,12 +32,18 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        // Normalizar CPF, Telefone e CEP (remover máscara) antes da validação
         if ($request->has('cpf')) {
-            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+            $cpf = preg_replace('/[^0-9]/', '', $request->cpf);
+            $request->merge(['cpf' => $cpf ?: null]);
         }
         if ($request->has('phone')) {
-            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+            $phone = preg_replace('/[^0-9]/', '', $request->phone);
+            $request->merge(['phone' => $phone ?: null]);
+        }
+        if ($request->has('zip_code')) {
+            $zip = preg_replace('/[^0-9]/', '', $request->zip_code);
+            $request->merge(['zip_code' => $zip ?: null]);
         }
 
         $validated = $request->validate([
@@ -45,8 +51,12 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
-            'cpf' => 'nullable|string|size:11|unique:users,cpf',
+            'cpf' => 'nullable|string|min:11|max:14|unique:users,cpf',
             'address' => 'nullable|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|size:2',
+            'zip_code' => 'nullable|string|max:9',
             'phone' => 'nullable|string|min:10|max:11',
             'plan_type' => 'nullable|in:physical,virtual,none',
             'start_date' => 'nullable|date',
@@ -60,11 +70,15 @@ class UserController extends Controller
             'role' => $validated['role'],
             'cpf' => $validated['cpf'],
             'address' => $validated['address'],
+            'neighborhood' => $validated['neighborhood'],
+            'city' => $validated['city'],
+            'state' => $validated['state'],
+            'zip_code' => $validated['zip_code'],
             'phone' => $validated['phone'],
         ]);
 
-        // Gerenciar Assinatura
-        if (isset($validated['plan_type']) && $validated['plan_type'] !== 'none') {
+        // Gerenciar Assinatura (Apenas para usuários comuns)
+        if ($validated['role'] === 'user' && isset($validated['plan_type']) && $validated['plan_type'] !== 'none') {
             $user->subscriptions()->create([
                 'plan_type' => $validated['plan_type'],
                 'start_date' => $validated['start_date'],
@@ -111,12 +125,18 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Normalizar CPF e Telefone (remover máscara) antes da validação
+        // Normalizar CPF, Telefone e CEP (remover máscara) antes da validação
         if ($request->has('cpf')) {
-            $request->merge(['cpf' => preg_replace('/[^0-9]/', '', $request->cpf)]);
+            $cpf = preg_replace('/[^0-9]/', '', $request->cpf);
+            $request->merge(['cpf' => $cpf ?: null]);
         }
         if ($request->has('phone')) {
-            $request->merge(['phone' => preg_replace('/[^0-9]/', '', $request->phone)]);
+            $phone = preg_replace('/[^0-9]/', '', $request->phone);
+            $request->merge(['phone' => $phone ?: null]);
+        }
+        if ($request->has('zip_code')) {
+            $zip = preg_replace('/[^0-9]/', '', $request->zip_code);
+            $request->merge(['zip_code' => $zip ?: null]);
         }
 
         $validated = $request->validate([
@@ -124,8 +144,12 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => ['nullable', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
-            'cpf' => 'nullable|string|size:11|unique:users,cpf,' . $id,
+            'cpf' => 'nullable|string|min:11|max:14|unique:users,cpf,' . $id,
             'address' => 'nullable|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|size:2',
+            'zip_code' => 'nullable|string|max:9',
             'phone' => 'nullable|string|min:10|max:11',
             'plan_type' => 'nullable|in:physical,virtual,none',
             'start_date' => 'nullable|date',
@@ -138,6 +162,10 @@ class UserController extends Controller
             'role' => $validated['role'],
             'cpf' => $validated['cpf'],
             'address' => $validated['address'],
+            'neighborhood' => $validated['neighborhood'],
+            'city' => $validated['city'],
+            'state' => $validated['state'],
+            'zip_code' => $validated['zip_code'],
             'phone' => $validated['phone'],
         ];
 
@@ -148,8 +176,8 @@ class UserController extends Controller
 
         $user->update($updateData);
 
-        // Gerenciar Assinatura
-        if (isset($validated['plan_type'])) {
+        // Gerenciar Assinatura (Apenas para usuários comuns)
+        if ($validated['role'] === 'user' && isset($validated['plan_type'])) {
             if ($validated['plan_type'] === 'none') {
                 // Se o admin escolher "Nenhuma", podemos expirar a assinatura atual se existir
                 $user->subscriptions()->where('status', 'active')->update(['status' => 'cancelled']);
