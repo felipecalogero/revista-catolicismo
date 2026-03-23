@@ -4,11 +4,6 @@
 
 @section('content')
 <div class="relative min-h-screen bg-[#f5f0e6]">
-    <img
-        src="{{ asset('img/textura.jpeg') }}"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-    >
     <article class="relative z-10">
     {{-- Imagem Principal --}}
     @if($article->image_url)
@@ -224,8 +219,13 @@
     </div>
 
     {{-- Artigos Relacionados --}}
-    <section class="py-16 border-t border-gray-200">
-        <div class="container mx-auto px-4 lg:px-8">
+    <section class="relative py-16 border-t border-gray-200 overflow-hidden">
+        <img
+            src="{{ asset('img/textura.jpeg') }}"
+            alt=""
+            class="absolute inset-0 w-full h-full object-cover opacity-60"
+        >
+        <div class="relative z-10 container mx-auto px-4 lg:px-8">
             <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
                 <div class="mb-10 pb-4 border-b-2 border-red-800">
                     <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Artigos Relacionados</h2>
