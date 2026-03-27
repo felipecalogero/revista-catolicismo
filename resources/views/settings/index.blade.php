@@ -202,12 +202,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmationInput = document.getElementById('password_confirmation');
 
     const getFormValidity = (isValid, data) => {
-        // O botão deve estar habilitado se:
-        // 1. Não houver tentativa de mudar senha (campos vazios)
-        // 2. OU se os campos de senha forem válidos conforme a regra geral
-        const hasPasswordAttempt = data.password || data.passwordConfirmation || currentPasswordInput.value;
-        if (!hasPasswordAttempt) return true;
-        return isValid;
+        // Se a senha atual não estiver preenchida, o formulário é inválido
+        if (!currentPasswordInput.value || currentPasswordInput.value.length === 0) {
+            return false;
+        }
+
+        // Se estiver tentando mudar a senha (campos de nova senha não estão vazios)
+        const isChangingPassword = data.password.length > 0 || (confirmationInput && confirmationInput.value.length > 0);
+        
+        if (isChangingPassword) {
+            // Se estiver mudando a senha, exige que a nova senha seja válida (força e correspondência)
+            return isValid;
+        }
+
+        // Se NÃO estiver mudando a senha, mas preencheu a senha atual, permite salvar (para outros dados)
+        return true;
     };
 
     PasswordValidation.init({

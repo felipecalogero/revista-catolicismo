@@ -36,7 +36,7 @@ class SettingsController extends Controller
             $request->merge(['phone' => $phone ?: null]);
         }
 
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'cpf' => ['nullable', 'string', 'min:11', 'max:14', 'unique:users,cpf,' . $user->id],
             'address' => ['nullable', 'string', 'max:255'],
@@ -45,13 +45,33 @@ class SettingsController extends Controller
             'state' => ['nullable', 'string', 'size:2'],
             'zip_code' => ['nullable', 'string', 'size:8'],
             'phone' => ['nullable', 'string', 'min:10', 'max:11'],
-        ]);
+            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('A senha atual está incorreta.');
+                }
+            }],
+        ];
+
+        // Se estiver tentando mudar a senha
+        if ($request->filled('password')) {
+            $rules['password'] = ['required', 'confirmed', Password::defaults()];
+        }
+
+        $validated = $request->validate($rules);
 
         // Apenas administradores podem alterar o email (embora no settings.index esteja desabilitado para o usuário)
         if ($request->has('email') && $user->isAdmin()) {
             $validated['email'] = $request->validate([
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             ])['email'];
+        }
+
+        // Remover current_password do array de update
+        unset($validated['current_password']);
+
+        // Se a nova senha foi validada, criptografá-la
+        if ($request->filled('password')) {
+            $validated['password'] = Hash::make($validated['password']);
         }
 
         $user->update($validated);
