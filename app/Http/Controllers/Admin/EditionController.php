@@ -40,7 +40,7 @@ class EditionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:25600', // 25MB
             'pdf_file' => 'required|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
@@ -168,7 +168,7 @@ class EditionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:25600', // 25MB
             'pdf_file' => 'nullable|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
