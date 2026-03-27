@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Lang;
 
-class CustomVerifyEmailNotification extends Notification
+class CustomVerifyEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

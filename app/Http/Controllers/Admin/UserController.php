@@ -96,7 +96,13 @@ class UserController extends Controller
             ]);
         }
 
-        Password::sendResetLink($user->only('email'));
+        try {
+            Password::sendResetLink($user->only('email'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Falha ao enviar e-mail de redefinição para {$user->email}: " . $e->getMessage());
+            return redirect()->route('admin.users.index')
+                ->with('warning', 'Usuário criado com sucesso, mas o e-mail de boas-vindas não pôde ser enviado. Verifique a configuração SMTP.');
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário criado com sucesso!');
@@ -337,7 +343,11 @@ class UserController extends Controller
                 }
 
                 // Enviar link de redefinição de senha para o usuário definir sua senha e verificar o e-mail ao mesmo tempo
-                Password::sendResetLink($user->only('email'));
+                try {
+                    Password::sendResetLink($user->only('email'));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Falha ao enviar e-mail de redefinição na importação para {$email}: " . $e->getMessage());
+                }
 
                 $count++;
             } catch (\Exception $e) {
