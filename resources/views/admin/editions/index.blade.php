@@ -80,7 +80,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $edition->created_at->format('d/m/Y') }}
+                                    {{ $edition->release_date ? $edition->release_date->format('m/Y') : $edition->created_at->format('d/m/Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex gap-2">

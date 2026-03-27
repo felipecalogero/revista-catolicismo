@@ -46,12 +46,18 @@
                                         <span class="text-gray-400 text-sm">Sem Capa</span>
                                     </div>
                                 @endif
+
+                                {{-- Tag de Acesso --}}
+                                <span class="absolute top-2 left-2 bg-red-800 text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50 uppercase">
+                                    {{ $edition->canBeAccessedByNonSubscribers() ? 'Grátis' : 'Assinantes' }}
+                                </span>
+
                                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                                     <div class="text-white text-sm font-bold mb-1 line-clamp-1">{{ $edition->title }}</div>
                                     @if($edition->release_date)
-                                        <div class="text-white/80 text-xs">{{ $edition->release_date->format('M Y') }}</div>
+                                        <div class="text-white/80 text-xs">{{ $edition->release_date->format('m/Y') }}</div>
                                     @elseif($edition->published_at)
-                                        <div class="text-white/80 text-xs">{{ $edition->published_at->format('M Y') }}</div>
+                                        <div class="text-white/80 text-xs">{{ $edition->published_at->format('d/m/Y') }}</div>
                                     @endif
                                 </div>
                             </div>

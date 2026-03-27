@@ -52,7 +52,10 @@ class UserController extends Controller
             'password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
             'cpf' => 'nullable|string|min:11|max:14|unique:users,cpf',
+            'profession' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
+            'address_number' => 'nullable|string|max:255',
+            'complement' => 'nullable|string|max:255',
             'neighborhood' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|size:2',
@@ -69,7 +72,10 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'cpf' => $validated['cpf'],
+            'profession' => $validated['profession'],
             'address' => $validated['address'],
+            'address_number' => $validated['address_number'],
+            'complement' => $validated['complement'],
             'neighborhood' => $validated['neighborhood'],
             'city' => $validated['city'],
             'state' => $validated['state'],
@@ -145,7 +151,10 @@ class UserController extends Controller
             'password' => ['nullable', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
             'cpf' => 'nullable|string|min:11|max:14|unique:users,cpf,' . $id,
+            'profession' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
+            'address_number' => 'nullable|string|max:255',
+            'complement' => 'nullable|string|max:255',
             'neighborhood' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|size:2',
@@ -161,7 +170,10 @@ class UserController extends Controller
             'email' => $validated['email'],
             'role' => $validated['role'],
             'cpf' => $validated['cpf'],
+            'profession' => $validated['profession'],
             'address' => $validated['address'],
+            'address_number' => $validated['address_number'],
+            'complement' => $validated['complement'],
             'neighborhood' => $validated['neighborhood'],
             'city' => $validated['city'],
             'state' => $validated['state'],
@@ -252,12 +264,30 @@ class UserController extends Controller
         $errors = [];
 
         while (($data = fgetcsv($handle)) !== FALSE) {
-            // Expecting: Nome, Email, CPF (opcional), Telefone (opcional), Endereço (opcional)
+            // Expecting expanded structure:
+            // 0: Nome, 1: Email, 2: CPF/CNPJ, 3: Profissão, 4: Logradouro, 5: Número, 6: Complemento,
+            // 7: Bairro, 8: Cidade, 9: Estado, 10: CEP, 11: Telefone,
+            // 12: Plano (Name), 13: Produto (Name), 14: Status, 15: Início, 16: Fim, 17: Cancelamento, 18: Motivo
+            
             $name = $data[0] ?? null;
             $email = $data[1] ?? null;
-            $cpf = !empty($data[2]) ? preg_replace('/[^0-9]/', '', $data[2]) : null;
-            $phone = !empty($data[3]) ? preg_replace('/[^0-9]/', '', $data[3]) : null;
-            $address = $data[4] ?? null;
+            $address = $data[2] ?? null;
+            $neighborhood = $data[3] ?? null;
+            $city = $data[4] ?? null;
+            $state = $data[5] ?? null;
+            $zip_code = !empty($data[6]) ? preg_replace('/[^0-9]/', '', $data[6]) : null;
+            $cpf = !empty($data[7]) ? preg_replace('/[^0-9]/', '', $data[7]) : null;
+
+            // Subscription data
+            $planName = $data[8] ?? null;
+            $productName = $data[9] ?? null;
+            $status = $data[10] ?? 'active';
+            $startDate = !empty($data[11]) ? self::parseDate($data[11]) : null;
+            $endDate = !empty($data[12]) ? self::parseDate($data[12]) : null;
+            $canceledAt = !empty($data[13]) ? self::parseDate($data[13]) : null;
+            $cancelReason = $data[14] ?? null;
+            
+            $profession = $data[15] ?? null;
 
             if (!$name || !$email) {
                 continue;
@@ -280,11 +310,31 @@ class UserController extends Controller
                     'name' => $name,
                     'email' => $email,
                     'cpf' => $cpf,
-                    'phone' => $phone,
+                    'profession' => $profession,
                     'address' => $address,
+                    'neighborhood' => $neighborhood,
+                    'city' => $city,
+                    'state' => $state,
+                    'zip_code' => $zip_code,
                     'password' => null, // No password initially
                     'role' => 'user',
                 ]);
+
+                // Create subscription if relevant
+                if ($planName || $productName || $startDate) {
+                    $user->subscriptions()->create([
+                        'plan_type' => str_contains(strtolower($planName ?? $productName ?? ''), 'física') ? 'physical' : 'virtual',
+                        'plan_name' => $planName,
+                        'product_name' => $productName,
+                        'status' => strtolower($status) ?: 'active',
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'canceled_at' => $canceledAt,
+                        'cancel_reason' => $cancelReason,
+                        'purchase_date' => $startDate ?? now(),
+                        'amount' => 0.00, // Imported values usually don't have price in this format
+                    ]);
+                }
 
                 $user->sendEmailVerificationNotification();
 
@@ -302,5 +352,22 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')->with('success', $message);
+    }
+
+    /**
+     * Helper to parse dates from CSV (supports Y-m-d and d/m/Y)
+     */
+    private static function parseDate($dateString)
+    {
+        if (empty($dateString)) return null;
+        
+        try {
+            if (str_contains($dateString, '/')) {
+                return \Carbon\Carbon::createFromFormat('d/m/Y', $dateString);
+            }
+            return \Carbon\Carbon::parse($dateString);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

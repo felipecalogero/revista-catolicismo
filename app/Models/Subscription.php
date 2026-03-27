@@ -14,10 +14,14 @@ class Subscription extends Model
     protected $fillable = [
         'user_id',
         'plan_type',
+        'plan_name',
+        'product_name',
         'status',
         'purchase_date',
         'start_date',
         'end_date',
+        'canceled_at',
+        'cancel_reason',
         'renewal_date',
         'pagbank_transaction_id',
         'pagbank_subscription_id',
@@ -30,6 +34,7 @@ class Subscription extends Model
         'purchase_date' => 'date',
         'start_date' => 'date',
         'end_date' => 'date',
+        'canceled_at' => 'datetime',
         'renewal_date' => 'date',
         'amount' => 'decimal:2',
     ];

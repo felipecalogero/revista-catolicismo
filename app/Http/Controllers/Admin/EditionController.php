@@ -17,7 +17,9 @@ class EditionController extends Controller
      */
     public function index()
     {
-        $editions = Edition::orderBy('created_at', 'desc')->paginate(15);
+        $editions = Edition::orderBy('release_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
         return view('admin.editions.index', compact('editions'));
     }
 

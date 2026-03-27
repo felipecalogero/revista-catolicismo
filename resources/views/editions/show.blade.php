@@ -31,7 +31,9 @@
                         {{ $edition->title }}
                     </h1>
                     <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                        @if($edition->published_at)
+                        @if($edition->release_date)
+                            <span>Edição de {{ $edition->release_date->format('m/Y') }}</span>
+                        @elseif($edition->published_at)
                             <span>Publicada em {{ $edition->published_at->format('d/m/Y') }}</span>
                         @endif
                     </div>
@@ -125,12 +127,18 @@
                                             <span class="text-gray-400 text-xs">Sem Capa</span>
                                         </div>
                                     @endif
+
+                                    {{-- Tag de Acesso --}}
+                                    <span class="absolute top-2 left-2 bg-red-800 text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50 uppercase">
+                                        {{ $otherEdition->canBeAccessedByNonSubscribers() ? 'Grátis' : 'Assinantes' }}
+                                    </span>
+
                                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                                         <div class="text-white text-sm font-medium line-clamp-1">{{ $otherEdition->title }}</div>
                                         @if($otherEdition->release_date)
-                                            <div class="text-white/80 text-xs">{{ $otherEdition->release_date->format('M Y') }}</div>
+                                            <div class="text-white/80 text-xs">{{ $otherEdition->release_date->format('m/Y') }}</div>
                                         @elseif($otherEdition->published_at)
-                                            <div class="text-white/80 text-xs">{{ $otherEdition->published_at->format('m/Y') }}</div>
+                                            <div class="text-white/80 text-xs">{{ $otherEdition->published_at->format('d/m/Y') }}</div>
                                         @endif
                                     </div>
                                 </div>

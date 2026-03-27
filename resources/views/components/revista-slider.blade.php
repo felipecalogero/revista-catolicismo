@@ -22,10 +22,15 @@
                                         class="w-full h-[280px] md:h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
                                     >
                                     @if(isset($revista['destaque']) && $revista['destaque'])
-                                        <span class="absolute top-2 right-2 bg-red-800 text-white px-2 py-1 text-xs font-medium rounded">
+                                        <span class="absolute top-2 right-2 bg-red-800 text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50">
                                             NOVA
                                         </span>
                                     @endif
+                                    
+                                    <span class="absolute top-2 left-2 {{ ($revista['is_free'] ?? false) ? 'bg-red-800' : 'bg-red-800' }} text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50 uppercase">
+                                        {{ ($revista['is_free'] ?? false) ? 'Grátis' : 'Assinantes' }}
+                                    </span>
+
                                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                                         <div class="text-white text-xs font-medium mb-1">{{ $revista['edicao'] ?? 'Edição' }}</div>
                                         <div class="text-white text-xs">{{ $revista['data'] ?? '' }}</div>

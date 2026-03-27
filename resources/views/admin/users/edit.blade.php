@@ -137,99 +137,26 @@
                         @enderror
                     </div>
 
-                    {{-- Endereço --}}
-                    {{-- CEP --}}
+                    {{-- Profissão --}}
                     <div>
-                        <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">
-                            CEP
+                        <label for="profession" class="block text-sm font-medium text-gray-700 mb-2">
+                            Profissão
                         </label>
                         <input
                             type="text"
-                            id="zip_code"
-                            name="zip_code"
-                            value="{{ old('zip_code', $user->zip_code) }}"
+                            id="profession"
+                            name="profession"
+                            value="{{ old('profession', $user->profession) }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="00000-000"
-                            maxlength="9"
+                            placeholder="Ex: Advogado, Professor"
                         >
-                        @error('zip_code')
+                        @error('profession')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
-                    {{-- Endereço --}}
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                            Endereço (Rua e Número)
-                        </label>
-                        <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            value="{{ old('address', $user->address) }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="Ex: Rua das Flores, 123"
-                        >
-                        @error('address')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Bairro --}}
-                    <div>
-                        <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
-                            Bairro
-                        </label>
-                        <input
-                            type="text"
-                            id="neighborhood"
-                            name="neighborhood"
-                            value="{{ old('neighborhood', $user->neighborhood) }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="Bairro"
-                        >
-                        @error('neighborhood')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Cidade --}}
-                    <div>
-                        <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                            Cidade
-                        </label>
-                        <input
-                            type="text"
-                            id="city"
-                            name="city"
-                            value="{{ old('city', $user->city) }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="Cidade"
-                        >
-                        @error('city')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Estado --}}
-                    <div>
-                        <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
-                            Estado
-                        </label>
-                        <input
-                            type="text"
-                            id="state"
-                            name="state"
-                            value="{{ old('state', $user->state) }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                            placeholder="UF"
-                            maxlength="2"
-                        >
-                        @error('state')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- Telefone --}}
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
@@ -266,6 +193,144 @@
                         @error('role')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                    </div>
+                </div>
+
+                <div class="bg-gray-100 p-4 rounded-lg space-y-4">
+                    <h3 class="font-bold text-gray-900 font-serif border-b border-gray-300 pb-2">Endereço</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+                        {{-- CEP --}}
+                        <div class="md:col-span-2">
+                            <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">
+                                CEP
+                            </label>
+                            <input
+                                type="text"
+                                id="zip_code"
+                                name="zip_code"
+                                value="{{ old('zip_code', $user->zip_code) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="00000-000"
+                                maxlength="9"
+                            >
+                            @error('zip_code')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Rua --}}
+                        <div class="md:col-span-4">
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                Logradouro (Rua/Avenida)
+                            </label>
+                            <input
+                                type="text"
+                                id="address"
+                                name="address"
+                                value="{{ old('address', $user->address) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Ex: Rua das Flores"
+                            >
+                            @error('address')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+                        {{-- Número --}}
+                        <div class="md:col-span-1">
+                            <label for="address_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                Número
+                            </label>
+                            <input
+                                type="text"
+                                id="address_number"
+                                name="address_number"
+                                value="{{ old('address_number', $user->address_number) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="123"
+                            >
+                            @error('address_number')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Complemento --}}
+                        <div class="md:col-span-2">
+                            <label for="complement" class="block text-sm font-medium text-gray-700 mb-2">
+                                Complemento
+                            </label>
+                            <input
+                                type="text"
+                                id="complement"
+                                name="complement"
+                                value="{{ old('complement', $user->complement) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Apto 101, Bloco A"
+                            >
+                            @error('complement')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Bairro --}}
+                        <div class="md:col-span-3">
+                            <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
+                                Bairro
+                            </label>
+                            <input
+                                type="text"
+                                id="neighborhood"
+                                name="neighborhood"
+                                value="{{ old('neighborhood', $user->neighborhood) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Bairro"
+                            >
+                            @error('neighborhood')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {{-- Cidade --}}
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+                                Cidade
+                            </label>
+                            <input
+                                type="text"
+                                id="city"
+                                name="city"
+                                value="{{ old('city', $user->city) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="Cidade"
+                            >
+                            @error('city')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Estado --}}
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                                Estado
+                            </label>
+                            <input
+                                type="text"
+                                id="state"
+                                name="state"
+                                value="{{ old('state', $user->state) }}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
+                                placeholder="UF"
+                                maxlength="2"
+                            >
+                            @error('state')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
@@ -460,7 +525,6 @@
                             
                             if (addressInput) {
                                 addressInput.focus();
-                                if (data.logradouro) addressInput.value += ', ';
                             }
                         }
                     })
