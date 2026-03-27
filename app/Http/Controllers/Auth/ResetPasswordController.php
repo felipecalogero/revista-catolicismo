@@ -43,6 +43,11 @@ class ResetPasswordController extends Controller
 
                 $user->save();
 
+                // Automatically verify email upon password reset/creation
+                if (!$user->hasVerifiedEmail()) {
+                    $user->markEmailAsVerified();
+                }
+
                 event(new PasswordReset($user));
             }
         );

@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
-{
+{✅
     /**
      * Display a listing of the resource.
      */
@@ -95,7 +96,7 @@ class UserController extends Controller
             ]);
         }
 
-        $user->sendEmailVerificationNotification();
+        Password::sendResetLink($user->only('email'));
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário criado com sucesso!');
@@ -264,10 +265,9 @@ class UserController extends Controller
         $errors = [];
 
         while (($data = fgetcsv($handle)) !== FALSE) {
-            // Expecting expanded structure:
-            // 0: Nome, 1: Email, 2: CPF/CNPJ, 3: Profissão, 4: Logradouro, 5: Número, 6: Complemento,
-            // 7: Bairro, 8: Cidade, 9: Estado, 10: CEP, 11: Telefone,
-            // 12: Plano (Name), 13: Produto (Name), 14: Status, 15: Início, 16: Fim, 17: Cancelamento, 18: Motivo
+            // Expecting 16-column structure:
+            // 0: Nome, 1: Email, 2: Endereco, 3: Bairro, 4: Cidade, 5: Estado, 6: CEP, 7: CPF/CNPJ,
+            // 8: Plano, 9: Produto, 10: Status, 11: Inicio, 12: Fim, 13: Cancelamento, 14: Motivo, 15: Profissao
             
             $name = $data[0] ?? null;
             $email = $data[1] ?? null;
@@ -336,7 +336,8 @@ class UserController extends Controller
                     ]);
                 }
 
-                $user->sendEmailVerificationNotification();
+                // Enviar link de redefinição de senha para o usuário definir sua senha e verificar o e-mail ao mesmo tempo
+                Password::sendResetLink($user->only('email'));
 
                 $count++;
             } catch (\Exception $e) {
