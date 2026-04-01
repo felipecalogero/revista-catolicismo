@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -253,132 +254,58 @@ class UserController extends Controller
     }
 
     /**
-     * Process the CSV import.
+     * Process the user import (CSV, XLSX, XLS).
      */
     public function storeImport(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt',
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls',
+            'job_id' => 'required|string',
         ]);
 
-        $file = $request->file('file');
-        $handle = fopen($file->getRealPath(), 'r');
+        $jobId = $request->input('job_id');
+        $import = new \App\Imports\UsersImport($jobId);
         
-        // Skip header
-        fgetcsv($handle);
+        // Inicializar progresso caso demore
+        Cache::put('import_progress_' . $jobId, ['current' => 0, 'total' => 0, 'status' => 'starting'], 300);
 
-        $count = 0;
-        $errors = [];
-
-        while (($data = fgetcsv($handle)) !== FALSE) {
-            // Expecting 16-column structure:
-            // 0: Nome, 1: Email, 2: Endereco, 3: Bairro, 4: Cidade, 5: Estado, 6: CEP, 7: CPF/CNPJ,
-            // 8: Plano, 9: Produto, 10: Status, 11: Inicio, 12: Fim, 13: Cancelamento, 14: Motivo, 15: Profissao
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
             
-            $name = $data[0] ?? null;
-            $email = $data[1] ?? null;
-            $address = $data[2] ?? null;
-            $neighborhood = $data[3] ?? null;
-            $city = $data[4] ?? null;
-            $state = $data[5] ?? null;
-            $zip_code = !empty($data[6]) ? preg_replace('/[^0-9]/', '', $data[6]) : null;
-            $cpf = !empty($data[7]) ? preg_replace('/[^0-9]/', '', $data[7]) : null;
-
-            // Subscription data
-            $planName = $data[8] ?? null;
-            $productName = $data[9] ?? null;
-            $status = $data[10] ?? 'active';
-            $startDate = !empty($data[11]) ? self::parseDate($data[11]) : null;
-            $endDate = !empty($data[12]) ? self::parseDate($data[12]) : null;
-            $canceledAt = !empty($data[13]) ? self::parseDate($data[13]) : null;
-            $cancelReason = $data[14] ?? null;
+            $message = "{$import->count} usuários importados com sucesso!";
             
-            $profession = $data[15] ?? null;
-
-            if (!$name || !$email) {
-                continue;
+            if (!empty($import->errors)) {
+                $errorMsg = count($import->errors) > 5 
+                    ? implode(' ', array_slice($import->errors, 0, 5)) . " ... e mais " . (count($import->errors) - 5) . " erros."
+                    : implode(' ', $import->errors);
+                return redirect()->route('admin.users.index')->with('success', $message)->with('warning', "Alguns registros falharam: " . $errorMsg);
             }
 
-            // Check if user already exists
-            if (User::where('email', $email)->exists()) {
-                $errors[] = "E-mail {$email} já cadastrado.";
-                continue;
+            return redirect()->route('admin.users.index')->with('success', $message);
+        } catch (\Exception $e) {
+            if (isset($jobId)) {
+                Cache::put('import_progress_' . $jobId, ['status' => 'error', 'message' => $e->getMessage()], 300);
             }
-
-            // Check if CPF already exists if provided
-            if ($cpf && User::where('cpf', $cpf)->exists()) {
-                $errors[] = "CPF {$cpf} já cadastrado para o e-mail {$email}.";
-                continue;
-            }
-
-            try {
-                $user = User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'cpf' => $cpf,
-                    'profession' => $profession,
-                    'address' => $address,
-                    'neighborhood' => $neighborhood,
-                    'city' => $city,
-                    'state' => $state,
-                    'zip_code' => $zip_code,
-                    'password' => null, // No password initially
-                    'role' => 'user',
-                ]);
-
-                // Create subscription if relevant
-                if ($planName || $productName || $startDate) {
-                    $user->subscriptions()->create([
-                        'plan_type' => str_contains(strtolower($planName ?? $productName ?? ''), 'física') ? 'physical' : 'virtual',
-                        'plan_name' => $planName,
-                        'product_name' => $productName,
-                        'status' => strtolower($status) ?: 'active',
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'canceled_at' => $canceledAt,
-                        'cancel_reason' => $cancelReason,
-                        'purchase_date' => $startDate ?? now(),
-                        'amount' => 0.00, // Imported values usually don't have price in this format
-                    ]);
-                }
-
-                // Enviar link de redefinição de senha para o usuário definir sua senha e verificar o e-mail ao mesmo tempo
-                try {
-                    Password::sendResetLink($user->only('email'));
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Falha ao enviar e-mail de redefinição na importação para {$email}: " . $e->getMessage());
-                }
-
-                $count++;
-            } catch (\Exception $e) {
-                $errors[] = "Erro ao importar {$email}: " . $e->getMessage();
-            }
+            return redirect()->route('admin.users.index')->with('error', "Erro fatal na importação: " . $e->getMessage());
         }
-
-        fclose($handle);
-
-        $message = "{$count} usuários importados com sucesso!";
-        if (!empty($errors)) {
-            $message .= " Erros: " . implode(' ', $errors);
-        }
-
-        return redirect()->route('admin.users.index')->with('success', $message);
     }
 
     /**
-     * Helper to parse dates from CSV (supports Y-m-d and d/m/Y)
+     * Endpoint for AJAX progress tracking
      */
-    private static function parseDate($dateString)
+    public function importProgress(Request $request)
     {
-        if (empty($dateString)) return null;
-        
-        try {
-            if (str_contains($dateString, '/')) {
-                return \Carbon\Carbon::createFromFormat('d/m/Y', $dateString);
-            }
-            return \Carbon\Carbon::parse($dateString);
-        } catch (\Exception $e) {
-            return null;
+        $jobId = $request->query('job_id');
+        if (!$jobId) {
+            return response()->json(['status' => 'error', 'message' => 'Job ID não fornecido.'], 400);
         }
+
+        $progress = Cache::get('import_progress_' . $jobId, [
+            'current' => 0, 
+            'total' => 0, 
+            'status' => 'pending'
+        ]);
+
+        return response()->json($progress);
     }
 }

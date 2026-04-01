@@ -107,6 +107,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('editions', \App\Http\Controllers\Admin\EditionController::class);
     Route::get('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
     Route::post('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'storeImport'])->name('users.storeImport');
+    Route::get('/users/import/progress', [\App\Http\Controllers\Admin\UserController::class, 'importProgress'])->name('users.importProgress');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::post('/editions/{id}/publish', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
     Route::post('/editions/{id}/unpublish', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');

@@ -10,8 +10,8 @@ return [
     |
     */
 
-    'physical_price' => env('SUBSCRIPTION_PHYSICAL_PRICE', 299.90),
-    'virtual_price' => env('SUBSCRIPTION_VIRTUAL_PRICE', 199.90),
+    'physical_price' => env('SUBSCRIPTION_PHYSICAL_PRICE', 390.00),
+    'virtual_price' => env('SUBSCRIPTION_VIRTUAL_PRICE', 140.00),
 
     /*
     |--------------------------------------------------------------------------
