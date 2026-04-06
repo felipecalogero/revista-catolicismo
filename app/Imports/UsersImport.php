@@ -89,6 +89,7 @@ class UsersImport implements ToCollection
             if ($cols >= 17) {
                 // Original Physical format
                 $userData['cpf'] = !empty($row[2]) ? preg_replace('/[^0-9]/', '', (string)$row[2]) : null;
+                $userData['phone'] = $row[3] ?? null;
                 $userData['address'] = $row[4] ?? null;
                 $userData['neighborhood'] = $row[5] ?? null;
                 $userData['city'] = $row[6] ?? null;
@@ -103,6 +104,12 @@ class UsersImport implements ToCollection
                 $subData['plan_name'] = 'Assinatura Física';
                 $subData['start_date'] = $this->parseDate($row[10] ?? null);
                 $subData['end_date'] = $this->parseDate($row[11] ?? null);
+                $subData['canceled_at'] = $this->parseDate($row[12] ?? null);
+                $subData['cancel_reason'] = $row[13] ?? null;
+                
+                if (!empty($subData['canceled_at'])) {
+                    $subData['status'] = 'canceled';
+                }
 
             } elseif ($cols >= 16) {
                 // Standard format
@@ -130,6 +137,7 @@ class UsersImport implements ToCollection
             } elseif ($cols >= 8) {
                 // Original Digital format
                 $userData['cpf'] = !empty($row[2]) ? preg_replace('/[^0-9]/', '', (string)$row[2]) : null;
+                $userData['phone'] = $row[3] ?? null;
                 $userData['state'] = $row[4] ?? null;
                 $userData['profession'] = $row[7] ?? null;
 

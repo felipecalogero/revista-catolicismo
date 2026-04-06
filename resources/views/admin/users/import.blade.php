@@ -23,34 +23,73 @@
                 </div>
             @endif
 
-            <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800">
-                <h3 class="font-bold mb-2">Instruções de Importação:</h3>
-                <ol class="list-decimal list-inside space-y-1 text-sm">
-                    <li>O sistema aceita arquivos nos formatos <strong>Excel (.xlsx, .xls)</strong> e <strong>CSV</strong>.</li>
-                    <li>A primeira linha (cabeçalho) é ignorada automaticamente.</li>
-                    <li>O sistema é compatível com os formatos originais de "Usuários Físicos" e "Usuários Digitais", ou o formato padronizado de 16 colunas:
-                        <div class="mt-2 grid grid-cols-2 gap-x-4 bg-white/50 p-2 rounded border border-blue-100">
-                            <span>1. Nome <span class="text-red-600">*</span></span>
-                            <span>2. Email <span class="text-red-600">*</span></span>
-                            <span>3. Endereço</span>
-                            <span>4. Bairro</span>
-                            <span>5. Cidade</span>
-                            <span>6. Estado</span>
-                            <span>7. CEP</span>
-                            <span>8. CPF/CNPJ</span>
-                            <span>9. Plano</span>
-                            <span>10. Produto</span>
-                            <span>11. Status</span>
-                            <span>12. Início</span>
-                            <span>13. Fim</span>
-                            <span>14. Cancelamento</span>
-                            <span>15. Motivo</span>
-                            <span>16. Profissão</span>
+            <div class="mb-6 bg-gray-50 rounded-xl border border-gray-200 border-l-4 border-l-red-800 p-4 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div class="p-1.5 bg-red-100 text-red-800 rounded-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900">Instruções de Importação</h3>
+                </div>
+                
+                <div class="space-y-2.5 text-sm text-gray-600">
+                    <div class="flex gap-2.5 items-center">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p>Suporta arquivos <strong class="text-gray-800">Excel (.xlsx, .xls)</strong> e <strong class="text-gray-800">CSV</strong>.</p>
+                    </div>
+                    
+                    <div class="flex gap-2.5 items-center">
+                        <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <p>A ordem das colunas é rigorosa e os cabeçalhos são descartados. <span class="font-bold text-red-700">Nome e E-mail (colunas 1 e 2) são obrigatórios.</span></p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-200">
+                        <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-1.5 text-sm">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                            Formatos Estruturais Reconhecidos
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 gap-2.5">
+                            <!-- Fisicos -->
+                            <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:border-red-300 transition-colors">
+                                <div class="flex items-center gap-3 mb-1.5">
+                                    <span class="bg-red-50 text-red-800 text-[11px] font-bold px-2 py-0.5 rounded border border-red-100">17+ colunas</span>
+                                    <strong class="text-sm text-gray-800">Usuários Físicos (Original)</strong>
+                                </div>
+                                <div class="bg-gray-50 p-1.5 rounded border border-gray-100 overflow-x-auto scrollbar-hide">
+                                    <p class="text-[11px] font-mono text-gray-500 whitespace-nowrap">
+                                        <span class="text-red-700 font-bold">Nome*</span> | <span class="text-red-700 font-bold">Email*</span> | CPF | Telefone | Endereço | Bairro | Cidade | UF | Estado | Cep | Início | Fim | Cancelamento Data | Cancelamento Motivo | Período Ini | Período Fim | Profissão
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Digitais -->
+                            <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:border-blue-300 transition-colors">
+                                <div class="flex items-center gap-3 mb-1.5">
+                                    <span class="bg-blue-50 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-100">8 a 15 colunas</span>
+                                    <strong class="text-sm text-gray-800">Usuários Digitais (Original)</strong>
+                                </div>
+                                <div class="bg-gray-50 p-1.5 rounded border border-gray-100 overflow-x-auto scrollbar-hide">
+                                    <p class="text-[11px] font-mono text-gray-500 whitespace-nowrap">
+                                        <span class="text-red-700 font-bold">Nome*</span> | <span class="text-red-700 font-bold">Email*</span> | CPF / CNPJ | Fone | UF | Início | Fim | Profissão
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Padrao 16 -->
+                            <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:border-green-300 transition-colors">
+                                <div class="flex items-center gap-3 mb-1.5">
+                                    <span class="bg-green-50 text-green-800 text-[11px] font-bold px-2 py-0.5 rounded border border-green-100">Exatas 16 colunas</span>
+                                    <strong class="text-sm text-gray-800">Padrão Unificado</strong>
+                                </div>
+                                <div class="bg-gray-50 p-1.5 rounded border border-gray-100 overflow-x-auto scrollbar-hide">
+                                    <p class="text-[11px] font-mono text-gray-500 whitespace-nowrap">
+                                        <span class="text-red-700 font-bold">Nome*</span> | <span class="text-red-700 font-bold">Email*</span> | Endereço | Bairro | Cidade | Estado | CEP | CPF/CNPJ | Plano | Produto | Status | Início | Fim | Data Cancel. | Motivo | Profissão
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </li>
-                    <li class="mt-2 text-red-600 font-semibold">* Campos obrigatórios: Nome e Email.</li>
-                    <li>Para arquivos CSV, utilize a vírgula (,) como separador.</li>
-                </ol>
+                    </div>
+                </div>
             </div>
 
             <form id="importForm" action="{{ route('admin.users.storeImport') }}" method="POST" enctype="multipart/form-data">
