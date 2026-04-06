@@ -15,10 +15,21 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('subscriptions')->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.users.index', compact('users'));
+        $search = $request->input('search');
+
+        $users = User::with('subscriptions')
+            ->orderBy('created_at', 'desc')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('cpf', 'like', "%{$search}%");
+            })
+            ->paginate(15)
+            ->withQueryString();
+            
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     /**

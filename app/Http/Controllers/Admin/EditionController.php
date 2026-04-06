@@ -15,12 +15,20 @@ class EditionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $editions = Edition::orderBy('release_date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
-        return view('admin.editions.index', compact('editions'));
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%")
+                             ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->paginate(15)
+            ->withQueryString();
+            
+        return view('admin.editions.index', compact('editions', 'search'));
     }
 
     /**

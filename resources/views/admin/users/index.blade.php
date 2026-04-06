@@ -6,20 +6,37 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="bg-white rounded-lg shadow-md p-8">
-            <div class="mb-6 pb-4 border-b-2 border-red-800 flex justify-between items-center">
-                <div>
+            <div class="mb-6 pb-4 border-b-2 border-red-800 flex flex-col md:flex-row justify-between items-start gap-4">
+                <div class="md:w-1/3">
                     <h1 class="text-3xl font-bold text-gray-900 font-serif mb-2">
                         Gerenciar Usuários
                     </h1>
                     <p class="text-gray-600">Gerencie todos os usuários e assinaturas</p>
                 </div>
-                <div class="flex gap-2">
-                    <a href="{{ route('admin.users.import') }}" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300">
-                        Importar Usuários
-                    </a>
-                    <a href="{{ route('admin.users.create') }}" class="bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                        + Novo Usuário
-                    </a>
+                <div class="flex flex-col gap-4 w-full md:w-2/3">
+                    <form action="{{ route('admin.users.index') }}" method="GET" class="w-full">
+                        <div class="flex gap-2 w-full">
+                            <div class="relative flex-1">
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por nome, email ou CPF..." class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm">
+                                <div class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 pointer-events-none">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <button type="submit" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 whitespace-nowrap shadow-sm">
+                                Filtrar
+                            </button>
+                        </div>
+                    </form>
+                    <div class="flex gap-2 justify-end w-full">
+                        <a href="{{ route('admin.users.import') }}" class="text-center bg-white text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium border border-gray-300 shadow-sm">
+                            Importar Usuários
+                        </a>
+                        <a href="{{ route('admin.users.create') }}" class="text-center bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium whitespace-nowrap shadow-sm">
+                            + Novo Usuário
+                        </a>
+                    </div>
                 </div>
             </div>
 

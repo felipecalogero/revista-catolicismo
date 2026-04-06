@@ -14,10 +14,20 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $articles = Article::orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.articles.index', compact('articles'));
+        $search = $request->input('search');
+
+        $articles = Article::orderBy('created_at', 'desc')
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%")
+                             ->orWhere('description', 'like', "%{$search}%")
+                             ->orWhere('author', 'like', "%{$search}%");
+            })
+            ->paginate(15)
+            ->withQueryString();
+            
+        return view('admin.articles.index', compact('articles', 'search'));
     }
 
     /**
