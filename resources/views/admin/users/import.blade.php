@@ -118,21 +118,23 @@
             </form>
 
             <!-- Loading Overlay -->
-            <div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex flex-col items-center justify-center">
-                <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
-                    <div class="mb-4">
-                        <svg class="animate-spin h-10 w-10 text-red-800 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+            <div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+                <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border border-gray-100">
+                    <div class="mb-6">
+                        <div class="relative inline-flex">
+                            <svg class="animate-spin h-12 w-12 text-red-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Processando Arquivo...</h3>
-                    <p id="progressText" class="text-gray-600 mb-4 text-sm">Iniciando...</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Importando Usuários</h3>
+                    <p id="progressText" class="text-gray-600 mb-6 text-sm">Preparando registros...</p>
                     
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-200 shadow-inner">
-                        <div id="progressBar" class="bg-red-800 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <div class="w-full bg-gray-100 rounded-full h-3 mb-4 shadow-inner">
+                        <div id="progressBar" class="bg-red-800 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 italic">Por favor, não feche esta janela.</p>
+                    <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Por favor, mantenha esta aba aberta</p>
                 </div>
             </div>
 

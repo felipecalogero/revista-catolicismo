@@ -48,7 +48,7 @@ class UsersImport implements ToCollection
         foreach ($rows as $row) {
             $processedCount++;
             
-            if ($this->jobId && $processedCount % 10 === 0) {
+            if ($this->jobId && $processedCount % 50 === 0) {
                 Cache::put('import_progress_' . $this->jobId, [
                     'current' => $processedCount,
                     'total' => $totalRows,
@@ -165,13 +165,6 @@ class UsersImport implements ToCollection
                         'purchase_date' => $subData['start_date'] ?? now(),
                         'amount' => 0.00,
                     ]));
-                }
-
-                // Send reset link
-                try {
-                    Password::sendResetLink($user->only('email'));
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Falha ao enviar e-mail de redefinição na importação para {$email}: " . $e->getMessage());
                 }
 
                 $this->count++;
