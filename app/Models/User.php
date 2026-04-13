@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Notifications\CustomResetPasswordNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -71,7 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new \App\Notifications\CustomVerifyEmailNotification());
+        $this->notify(new \App\Notifications\CustomVerifyEmailNotification);
     }
 
     /**
@@ -79,10 +79,12 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getFormattedCpfAttribute()
     {
-        if (!$this->cpf) return '';
+        if (! $this->cpf) {
+            return '';
+        }
         $cpf = preg_replace('/[^0-9]/', '', $this->cpf);
         $len = strlen($cpf);
-        
+
         if ($len === 11) {
             return sprintf('%s.%s.%s-%s',
                 substr($cpf, 0, 3),
@@ -99,16 +101,18 @@ class User extends Authenticatable implements MustVerifyEmail
                 substr($cpf, 12, 2)
             );
         }
-        
+
         return $this->cpf;
     }
 
     public function getFormattedPhoneAttribute()
     {
-        if (!$this->phone) return '';
+        if (! $this->phone) {
+            return '';
+        }
         $phone = preg_replace('/[^0-9]/', '', $this->phone);
         $len = strlen($phone);
-        
+
         if ($len === 11) {
             return sprintf('(%s) %s-%s',
                 substr($phone, 0, 2),
@@ -122,7 +126,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 substr($phone, 6, 4)
             );
         }
-        
+
         return $this->phone;
     }
 
@@ -160,11 +164,21 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Assinatura mais recente (qualquer status), útil no admin para distinguir
+     * vigência encerrada de ausência de cadastro.
+     */
+    public function latestSubscription(): ?Subscription
+    {
+        return $this->subscriptions()->latest('id')->first();
+    }
+
+    /**
      * Verifica se o usuário tem assinatura ativa
      */
     public function hasActiveSubscription(): bool
     {
         $activeSubscription = $this->activeSubscription();
+
         return $activeSubscription !== null;
     }
 
@@ -227,6 +241,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasPassword(): bool
     {
-        return !empty($this->password);
+        return ! empty($this->password);
     }
 }

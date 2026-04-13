@@ -12,10 +12,29 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('articles')->orderBy('name')->paginate(15);
-        return view('admin.categories.index', compact('categories'));
+        $search = trim((string) $request->input('search', ''));
+        $hasArticles = $request->input('has_articles');
+
+        $categories = Category::query()
+            ->withCount('articles')
+            ->orderBy('name')
+            ->when($search !== '', function ($query) use ($search) {
+                $like = $this->searchLikePattern($search);
+
+                $query->where(function ($q) use ($like) {
+                    $q->where('name', 'like', $like)
+                        ->orWhere('slug', 'like', $like)
+                        ->orWhere('description', 'like', $like);
+                });
+            })
+            ->when($hasArticles === '1', fn ($q) => $q->has('articles'))
+            ->when($hasArticles === '0', fn ($q) => $q->doesntHave('articles'))
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.categories.index', compact('categories', 'search'));
     }
 
     /**
@@ -40,7 +59,7 @@ class CategoryController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Category::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -60,6 +79,7 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::with('articles')->findOrFail($id);
+
         return view('admin.categories.show', compact('category'));
     }
 
@@ -69,6 +89,7 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
+
         return view('admin.categories.edit', compact('category'));
     }
 
@@ -80,7 +101,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'name' => 'required|string|max:255|unique:categories,name,'.$category->id,
             'description' => 'nullable|string',
         ]);
 
@@ -90,7 +111,7 @@ class CategoryController extends Controller
             $originalSlug = $slug;
             $counter = 1;
             while (Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
         }
@@ -111,7 +132,7 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
-        
+
         // Verificar se há artigos associados
         if ($category->articles()->count() > 0) {
             return redirect()->route('admin.categories.index')
@@ -137,7 +158,7 @@ class CategoryController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Category::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 

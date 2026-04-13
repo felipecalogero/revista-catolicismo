@@ -258,3 +258,12 @@
     font-style: italic;
     color: #6b7280;
 }
+
+/* Modal nativo (<dialog>) — filtros admin e público */
+.admin-filter-dialog::backdrop {
+    background-color: rgb(15 23 42 / 0.45);
+}
+
+.admin-filter-dialog {
+    margin: auto;
+}

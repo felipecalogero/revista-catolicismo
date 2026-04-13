@@ -11,14 +11,52 @@ class EditionController extends Controller
     /**
      * Lista todas as edições
      */
-    public function index()
+    public function index(Request $request)
     {
-        $editions = Edition::where('published', true)
+        $search = trim((string) $request->input('search', ''));
+        $access = $request->input('access', '');
+        $year = $request->input('year');
+
+        $editions = Edition::query()
+            ->where('published', true)
+            ->when($search !== '', function ($query) use ($search) {
+                $like = $this->searchLikePattern($search);
+                $query->where(function ($q) use ($like) {
+                    $q->where('title', 'like', $like)
+                        ->orWhere('slug', 'like', $like)
+                        ->orWhere('description', 'like', $like);
+                });
+            })
+            ->when($access === 'free', fn ($q) => $q->accessibleByNonSubscribers())
+            ->when($access === 'subscribers', fn ($q) => $q->exclusiveForSubscribers())
+            ->when(
+                filled($year) && ctype_digit((string) $year) && (int) $year > 1900 && (int) $year <= (int) now()->format('Y') + 1,
+                function ($query) use ($year) {
+                    $y = (int) $year;
+                    $query->where(function ($q) use ($y) {
+                        $q->whereYear('release_date', $y)
+                            ->orWhere(function ($q2) use ($y) {
+                                $q2->whereNull('release_date')
+                                    ->whereYear('published_at', $y);
+                            });
+                    });
+                }
+            )
             ->orderBy('release_date', 'desc')
             ->orderBy('published_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('editions.index', compact('editions'));
+        $editionYears = Edition::query()
+            ->where('published', true)
+            ->get(['release_date', 'published_at'])
+            ->map(fn ($e) => $e->release_date?->year ?? $e->published_at?->year)
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('editions.index', compact('editions', 'search', 'editionYears'));
     }
 
     /**
@@ -33,7 +71,7 @@ class EditionController extends Controller
         // Verifica acesso do usuário
         $user = auth()->user();
         $requiresLoginOnly = false;
-        
+
         // Se a edição foi lançada há mais de 5 meses, qualquer usuário LOGADO tem acesso completo
         if ($edition->canBeAccessedByNonSubscribers()) {
             if ($user) {
@@ -82,7 +120,7 @@ class EditionController extends Controller
         $user = auth()->user();
 
         // Verifica se o usuário está autenticado
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login')
                 ->with('error', 'Você precisa estar logado para baixar esta edição.');
         }
@@ -92,17 +130,17 @@ class EditionController extends Controller
             // Permite download para qualquer usuário autenticado
         } else {
             // Para edições recentes, apenas assinantes podem baixar
-        if (!$user->canAccessEditions()) {
-            return redirect()->route('subscriptions.plans')
-                ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
+            if (! $user->canAccessEditions()) {
+                return redirect()->route('subscriptions.plans')
+                    ->with('error', 'Você precisa de uma assinatura ativa para baixar esta edição.');
             }
         }
 
-        if (!$edition->pdf_file || !Storage::disk('public')->exists($edition->pdf_file)) {
+        if (! $edition->pdf_file || ! Storage::disk('public')->exists($edition->pdf_file)) {
             abort(404, 'Arquivo PDF não encontrado.');
         }
 
-        return Storage::disk('public')->download($edition->pdf_file, $edition->slug . '.pdf');
+        return Storage::disk('public')->download($edition->pdf_file, $edition->slug.'.pdf');
     }
 
     /**
@@ -117,7 +155,7 @@ class EditionController extends Controller
         $user = auth()->user();
 
         // Verifica se o usuário está autenticado
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login')
                 ->with('error', 'Você precisa estar logado para visualizar esta edição.');
         }
@@ -127,14 +165,14 @@ class EditionController extends Controller
             // Permite visualização para qualquer usuário autenticado
         } else {
             // Para edições recentes, apenas assinantes podem visualizar
-            if (!$user->canAccessEditions()) {
+            if (! $user->canAccessEditions()) {
                 return redirect()->route('subscriptions.plans')
                     ->with('error', 'Você precisa de uma assinatura ativa para visualizar esta edição.');
             }
         }
 
         // Verifica se o PDF existe
-        if (!$edition->pdf_file || !Storage::disk('public')->exists($edition->pdf_file)) {
+        if (! $edition->pdf_file || ! Storage::disk('public')->exists($edition->pdf_file)) {
             abort(404, 'Arquivo PDF não encontrado.');
         }
 

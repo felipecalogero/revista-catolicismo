@@ -32,7 +32,7 @@ class ArticleController extends Controller
 
         // Verifica acesso do usuário
         $user = auth()->user();
-        
+
         // Se o artigo foi publicado há mais de 5 meses, qualquer usuário LOGADO tem acesso completo
         if ($article->canBeAccessedByNonSubscribers()) {
             if ($user) {
@@ -57,9 +57,9 @@ class ArticleController extends Controller
         // Buscar artigos relacionados (mesma categoria, excluindo o artigo atual)
         $relatedArticles = Article::where('published', true)
             ->where('id', '!=', $article->id)
-            ->where(function ($query) use ($category, $categoryModel, $article) {
+            ->where(function ($query) use ($category, $categoryModel) {
                 if ($categoryModel) {
-                    $query->where(function ($q) use ($categoryModel, $article) {
+                    $query->where(function ($q) use ($categoryModel) {
                         $q->where('category_id', $categoryModel->id)
                             ->orWhere('category', $categoryModel->name);
                     });
@@ -73,6 +73,7 @@ class ArticleController extends Controller
             ->get()
             ->map(function ($relatedArticle) {
                 $categorySlug = $relatedArticle->categoryRelation ? $relatedArticle->categoryRelation->slug : Str::slug($relatedArticle->category);
+
                 return [
                     'title' => $relatedArticle->title,
                     'excerpt' => $relatedArticle->description,
@@ -97,15 +98,27 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Article::where('published', true);
+        $query = Article::query()
+            ->with('categoryRelation')
+            ->where('published', true);
 
-        // Busca por texto
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('content', 'like', "%{$searchTerm}%");
+        // Busca por texto (campos do artigo + categoria relacionada)
+        $searchTerm = trim((string) $request->input('search', ''));
+        if ($searchTerm !== '') {
+            $like = $this->searchLikePattern($searchTerm);
+            $query->where(function ($q) use ($like) {
+                $q->where('title', 'like', $like)
+                    ->orWhere('slug', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhere('content', 'like', $like)
+                    ->orWhere('author', 'like', $like)
+                    ->orWhere('category', 'like', $like)
+                    ->orWhere('video_url', 'like', $like)
+                    ->orWhereHas('categoryRelation', function ($cq) use ($like) {
+                        $cq->where('name', 'like', $like)
+                            ->orWhere('slug', 'like', $like)
+                            ->orWhere('description', 'like', $like);
+                    });
             });
         }
 
@@ -115,19 +128,26 @@ class ArticleController extends Controller
             if ($category) {
                 $query->where(function ($q) use ($category) {
                     $q->where('category_id', $category->id)
-                      ->orWhere('category', $category->name);
+                        ->orWhere('category', $category->name);
                 });
             }
+        }
+
+        $freeAccess = $request->input('free_access');
+        if (in_array($freeAccess, ['0', '1'], true)) {
+            $query->where('free_access', $freeAccess === '1');
         }
 
         // Ordenação
         $articles = $query->orderBy('published_at', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
         // Formatar artigos
         $articles->getCollection()->transform(function ($article) {
             $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
+
             return [
                 'title' => $article->title,
                 'excerpt' => $article->description,

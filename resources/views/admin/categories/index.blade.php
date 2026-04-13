@@ -6,16 +6,37 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="bg-white rounded-lg shadow-md p-8">
-            <div class="mb-6 pb-4 border-b-2 border-red-800 flex justify-between items-center">
+            <div class="mb-6 pb-4 border-b-2 border-red-800 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 font-serif mb-2">
                         Gerenciar Categorias
                     </h1>
                     <p class="text-gray-600">Gerencie todas as categorias de artigos</p>
                 </div>
-                <a href="{{ route('admin.categories.create') }}" class="bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                    + Nova Categoria
-                </a>
+                <div class="flex w-full flex-col gap-3 lg:w-auto lg:min-w-[22rem] lg:flex-row lg:items-start">
+                    <div class="min-w-0 flex-1">
+                    <x-admin.filter-bar
+                        :formAction="route('admin.categories.index')"
+                        modalId="adminCategoriesFilterModal"
+                        searchPlaceholder="Nome, slug ou descrição…"
+                        :clearUrl="route('admin.categories.index')"
+                    >
+                        <x-slot name="modal">
+                            <div>
+                                <label for="filter_cat_has_art" class="mb-1 block text-sm font-medium text-gray-700">Artigos vinculados</label>
+                                <select id="filter_cat_has_art" name="has_articles" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todas</option>
+                                    <option value="1" @selected(request('has_articles') === '1')>Com pelo menos um artigo</option>
+                                    <option value="0" @selected(request('has_articles') === '0')>Sem artigos</option>
+                                </select>
+                            </div>
+                        </x-slot>
+                    </x-admin.filter-bar>
+                    </div>
+                    <a href="{{ route('admin.categories.create') }}" class="shrink-0 self-start bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium text-center whitespace-nowrap">
+                        + Nova Categoria
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))

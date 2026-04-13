@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Edition;
-use App\Services\PdfCompressor;
 use App\Services\ImageService;
+use App\Services\PdfCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,17 +17,32 @@ class EditionController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
+        $published = $request->input('published');
 
-        $editions = Edition::orderBy('release_date', 'desc')
+        $editions = Edition::query()
+            ->with('user')
+            ->orderBy('release_date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->when($search, function ($query, $search) {
-                return $query->where('title', 'like', "%{$search}%")
-                             ->orWhere('description', 'like', "%{$search}%");
+            ->when($search !== '', function ($query) use ($search) {
+                $like = $this->searchLikePattern($search);
+
+                $query->where(function ($q) use ($like) {
+                    $q->where('title', 'like', $like)
+                        ->orWhere('slug', 'like', $like)
+                        ->orWhere('description', 'like', $like)
+                        ->orWhere('cover_image', 'like', $like)
+                        ->orWhere('pdf_file', 'like', $like)
+                        ->orWhereHas('user', function ($uq) use ($like) {
+                            $uq->where('name', 'like', $like)
+                                ->orWhere('email', 'like', $like);
+                        });
+                });
             })
+            ->when(in_array($published, ['0', '1'], true), fn ($q) => $q->where('published', $published === '1'))
             ->paginate(15)
             ->withQueryString();
-            
+
         return view('admin.editions.index', compact('editions', 'search'));
     }
 
@@ -52,13 +67,13 @@ class EditionController extends Controller
             'pdf_file' => 'required|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
-            'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
+            'release_year' => 'required|integer|min:1951|max:'.(date('Y') + 2),
         ]);
 
         // Verificar se os arquivos foram realmente recebidos (detectar limite do PHP/Server)
-        if (!$request->hasFile('cover_image') || !$request->hasFile('pdf_file')) {
+        if (! $request->hasFile('cover_image') || ! $request->hasFile('pdf_file')) {
             $message = 'Os arquivos não foram recebidos corretamente. Verifique se o tamanho total não excede o limite permitido pelo servidor (100MB).';
-            
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'message' => $message,
@@ -67,9 +82,9 @@ class EditionController extends Controller
                     'php_post_max' => ini_get('post_max_size'),
                 ], 422);
             }
+
             return back()->withErrors(['pdf_file' => $message]);
         }
-
 
         try {
             // Upload da imagem da capa
@@ -80,7 +95,7 @@ class EditionController extends Controller
 
             // Processar Imagem da Capa (Comprimir e Converter para WebP)
             try {
-                $imageService = new ImageService();
+                $imageService = new ImageService;
                 $newCoverPath = $imageService->processStorageImage($coverImagePath, 'public', 80, true);
                 if ($newCoverPath) {
                     $coverImagePath = $newCoverPath;
@@ -88,30 +103,31 @@ class EditionController extends Controller
             } catch (\Exception $e) {
                 \Log::warning('Falha ao otimizar imagem da capa, mantendo original', [
                     'file' => $coverImagePath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
 
             // Comprimir PDF após upload (se falhar, mantém o original)
             try {
-                $compressor = new PdfCompressor();
+                $compressor = new PdfCompressor;
                 $compressor->compressStorageFile($pdfFilePath, 'public', 'ebook');
             } catch (\Exception $e) {
                 // Se a compressão falhar, continua com o arquivo original
                 \Log::warning('Falha ao comprimir PDF, mantendo original', [
                     'file' => $pdfFilePath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
-                    'message' => 'Erro ao fazer upload: ' . $e->getMessage(),
+                    'message' => 'Erro ao fazer upload: '.$e->getMessage(),
                     'error' => 'upload_failed',
                     'exception' => get_class($e),
                 ], 500);
             }
-            return back()->withErrors(['pdf_file' => 'Erro ao fazer upload: ' . $e->getMessage()]);
+
+            return back()->withErrors(['pdf_file' => 'Erro ao fazer upload: '.$e->getMessage()]);
         }
 
         // Gerar slug único
@@ -119,7 +135,7 @@ class EditionController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Edition::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -132,7 +148,7 @@ class EditionController extends Controller
             'pdf_file' => $pdfFilePath,
             'published' => $request->has('published'),
             'published_at' => $request->has('published') ? now() : null,
-            'release_date' => $validated['release_year'] . '-' . str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT) . '-01',
+            'release_date' => $validated['release_year'].'-'.str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT).'-01',
         ]);
 
         // Se for requisição AJAX, retornar JSON
@@ -140,7 +156,7 @@ class EditionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Edição criada com sucesso!',
-                'redirect' => route('admin.editions.index')
+                'redirect' => route('admin.editions.index'),
             ]);
         }
 
@@ -154,6 +170,7 @@ class EditionController extends Controller
     public function show(string $id)
     {
         $edition = Edition::findOrFail($id);
+
         return view('admin.editions.show', compact('edition'));
     }
 
@@ -163,6 +180,7 @@ class EditionController extends Controller
     public function edit(string $id)
     {
         $edition = Edition::findOrFail($id);
+
         return view('admin.editions.edit', compact('edition'));
     }
 
@@ -180,9 +198,8 @@ class EditionController extends Controller
             'pdf_file' => 'nullable|mimes:pdf|max:112640', // 110MB
             'published' => 'boolean',
             'release_month' => 'required|integer|min:1|max:12',
-            'release_year' => 'required|integer|min:1951|max:' . (date('Y') + 2),
+            'release_year' => 'required|integer|min:1951|max:'.(date('Y') + 2),
         ]);
-
 
         // Upload da nova imagem da capa se fornecida
         if ($request->hasFile('cover_image')) {
@@ -205,7 +222,7 @@ class EditionController extends Controller
 
             // Processar Imagem da Capa (Comprimir e Converter para WebP)
             try {
-                $imageService = new ImageService();
+                $imageService = new ImageService;
                 $newCoverPath = $imageService->processStorageImage($coverImagePath, 'public', 80, true);
                 if ($newCoverPath) {
                     $coverImagePath = $newCoverPath;
@@ -213,19 +230,19 @@ class EditionController extends Controller
             } catch (\Exception $e) {
                 \Log::warning('Falha ao otimizar imagem da capa, mantendo original', [
                     'file' => $coverImagePath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
 
             // Comprimir PDF após upload (se falhar, mantém o original)
             try {
-                $compressor = new PdfCompressor();
+                $compressor = new PdfCompressor;
                 $compressor->compressStorageFile($pdfFilePath, 'public', 'ebook');
             } catch (\Exception $e) {
                 // Se a compressão falhar, continua com o arquivo original
                 \Log::warning('Falha ao comprimir PDF, mantendo original', [
                     'file' => $pdfFilePath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         } else {
@@ -239,7 +256,7 @@ class EditionController extends Controller
             $originalSlug = $slug;
             $counter = 1;
             while (Edition::where('slug', $slug)->where('id', '!=', $edition->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
         }
@@ -251,8 +268,8 @@ class EditionController extends Controller
             'cover_image' => $coverImagePath,
             'pdf_file' => $pdfFilePath,
             'published' => $request->has('published'),
-            'published_at' => $request->has('published') && !$edition->published_at ? now() : $edition->published_at,
-            'release_date' => $validated['release_year'] . '-' . str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT) . '-01',
+            'published_at' => $request->has('published') && ! $edition->published_at ? now() : $edition->published_at,
+            'release_date' => $validated['release_year'].'-'.str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT).'-01',
         ]);
 
         // Se for requisição AJAX, retornar JSON
@@ -260,7 +277,7 @@ class EditionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Edição atualizada com sucesso!',
-                'redirect' => route('admin.editions.index')
+                'redirect' => route('admin.editions.index'),
             ]);
         }
 
@@ -296,7 +313,7 @@ class EditionController extends Controller
     {
         $edition = Edition::findOrFail($id);
 
-        if (!$edition->published) {
+        if (! $edition->published) {
             return redirect()->route('admin.editions.index')
                 ->with('error', 'Esta edição já está como rascunho.');
         }

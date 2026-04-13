@@ -14,21 +14,49 @@
                     <p class="text-gray-600">Gerencie todos os usuários e assinaturas</p>
                 </div>
                 <div class="flex flex-col gap-4 w-full md:w-2/3">
-                    <form action="{{ route('admin.users.index') }}" method="GET" class="w-full">
-                        <div class="flex gap-2 w-full">
-                            <div class="relative flex-1">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por nome, email ou CPF..." class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm">
-                                <div class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 pointer-events-none">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
+                    <x-admin.filter-bar
+                        :formAction="route('admin.users.index')"
+                        modalId="adminUsersFilterModal"
+                        searchPlaceholder="Nome, e-mail, CPF, telefone, endereço, cidade, UF, CEP, profissão…"
+                        :clearUrl="route('admin.users.index')"
+                    >
+                        <x-slot name="modal">
+                            <div>
+                                <label for="filter_user_role" class="mb-1 block text-sm font-medium text-gray-700">Perfil</label>
+                                <select id="filter_user_role" name="role" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todos</option>
+                                    <option value="user" @selected(request('role') === 'user')>Usuário</option>
+                                    <option value="admin" @selected(request('role') === 'admin')>Administrador</option>
+                                </select>
                             </div>
-                            <button type="submit" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 whitespace-nowrap shadow-sm">
-                                Filtrar
-                            </button>
-                        </div>
-                    </form>
+                            <div>
+                                <label for="filter_user_plan" class="mb-1 block text-sm font-medium text-gray-700">Tipo de plano (assinatura)</label>
+                                <select id="filter_user_plan" name="plan_type" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todos</option>
+                                    <option value="physical" @selected(request('plan_type') === 'physical')>Física</option>
+                                    <option value="virtual" @selected(request('plan_type') === 'virtual')>Virtual (digital)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter_user_sub_status" class="mb-1 block text-sm font-medium text-gray-700">Status da assinatura</label>
+                                <select id="filter_user_sub_status" name="subscription_status" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todos</option>
+                                    @foreach($subscriptionStatuses as $st)
+                                        <option value="{{ $st }}" @selected(request('subscription_status') === $st)>{{ ucfirst($st) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter_user_state" class="mb-1 block text-sm font-medium text-gray-700">UF (cadastro)</label>
+                                <select id="filter_user_state" name="state" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todas</option>
+                                    @foreach($ufOptions as $uf)
+                                        <option value="{{ $uf }}" @selected(strtoupper((string) request('state')) === $uf)>{{ $uf }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </x-slot>
+                    </x-admin.filter-bar>
                     <div class="flex gap-2 justify-end w-full">
                         <a href="{{ route('admin.users.import') }}" class="text-center bg-white text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium border border-gray-300 shadow-sm">
                             Importar Usuários
@@ -84,6 +112,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $activeSubscription = $user->activeSubscription();
+                                        $latestSubscription = $user->latestSubscription();
                                     @endphp
                                     @if($activeSubscription)
                                         <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">Ativa</span>
@@ -92,14 +121,25 @@
                                                 Até {{ \Carbon\Carbon::parse($activeSubscription->end_date)->format('d/m/Y') }}
                                             </div>
                                         @endif
+                                    @elseif($latestSubscription && $latestSubscription->status === 'cancelled')
+                                        <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">Cancelada</span>
+                                    @elseif($latestSubscription && $latestSubscription->status === 'active' && $latestSubscription->end_date && \Carbon\Carbon::parse($latestSubscription->end_date)->isPast())
+                                        <span class="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-900">Vigência encerrada</span>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Fim {{ \Carbon\Carbon::parse($latestSubscription->end_date)->format('d/m/Y') }}
+                                        </div>
+                                    @elseif($latestSubscription && $latestSubscription->status === 'active' && ! $latestSubscription->end_date)
+                                        <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-900">Ativa sem término</span>
+                                    @elseif($latestSubscription)
+                                        <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">{{ ucfirst($latestSubscription->status) }}</span>
                                     @else
-                                        <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">Inativa</span>
+                                        <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">Sem assinatura</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($activeSubscription)
+                                    @if($latestSubscription)
                                         <span class="text-sm text-gray-900">
-                                            {{ $activeSubscription->plan_type === 'physical' ? 'Física' : 'Virtual' }}
+                                            {{ $latestSubscription->plan_type === 'physical' ? 'Física' : 'Virtual' }}
                                         </span>
                                     @else
                                         <span class="text-sm text-gray-400">-</span>

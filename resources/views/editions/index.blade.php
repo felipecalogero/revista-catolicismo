@@ -29,6 +29,45 @@
                 </div>
             </div>
 
+            <div class="mb-10 rounded-lg border border-gray-200 bg-white p-4 md:p-6">
+                <p class="mb-3 text-sm font-medium text-gray-700">Buscar edições</p>
+                <x-admin.filter-bar
+                    :formAction="route('editions.index')"
+                    modalId="publicEditionsFilterModal"
+                    searchPlaceholder="Título, slug ou descrição…"
+                    :clearUrl="route('editions.index')"
+                >
+                    <x-slot name="modal">
+                        <div>
+                            <label for="edition_filter_access" class="mb-1 block text-sm font-medium text-gray-700">Tipo de acesso</label>
+                            <select id="edition_filter_access" name="access" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                <option value="">Todas</option>
+                                <option value="free" @selected(request('access') === 'free')>Grátis (cadastro)</option>
+                                <option value="subscribers" @selected(request('access') === 'subscribers')>Somente assinantes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edition_filter_year" class="mb-1 block text-sm font-medium text-gray-700">Ano (lançamento ou publicação)</label>
+                            <select id="edition_filter_year" name="year" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                <option value="">Todos</option>
+                                @foreach($editionYears as $y)
+                                    <option value="{{ $y }}" @selected((string) request('year') === (string) $y)>{{ $y }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </x-slot>
+                </x-admin.filter-bar>
+            </div>
+
+            @if(request()->filled('search') || request()->filled('access') || request()->filled('year'))
+                <div class="mb-6 border-b border-gray-200 pb-4">
+                    <h2 class="text-xl font-bold text-gray-900 font-serif">
+                        Resultados
+                        <span class="text-base font-normal text-gray-600">({{ $editions->total() }})</span>
+                    </h2>
+                </div>
+            @endif
+
             {{-- Grid de Edições --}}
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-12">
                 @forelse($editions as $edition)
@@ -65,7 +104,10 @@
                     </div>
                 @empty
                     <div class="col-span-full text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                        <p class="text-gray-500 font-serif text-lg">Nenhuma edição encontrada no momento.</p>
+                        <p class="text-gray-500 font-serif text-lg mb-4">Nenhuma edição encontrada com os filtros atuais.</p>
+                        @if(request()->filled('search') || request()->filled('access') || request()->filled('year'))
+                            <a href="{{ route('editions.index') }}" class="inline-block rounded-lg bg-red-800 px-6 py-3 text-sm font-medium text-white hover:bg-red-900">Ver todas as edições</a>
+                        @endif
                     </div>
                 @endforelse
             </div>
@@ -95,7 +137,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </div>
 @endsection

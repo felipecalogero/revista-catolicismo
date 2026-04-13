@@ -57,16 +57,25 @@
                     <h2 class="text-xl font-bold text-gray-900 mb-4 font-serif">Assinatura</h2>
                     @php
                         $activeSubscription = $user->activeSubscription();
-                        $latestSubscription = $user->subscriptions()->latest()->first();
+                        $latestSubscription = $user->latestSubscription();
                     @endphp
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Status</dt>
                             <dd class="mt-1">
                                 @if($activeSubscription)
-                                    <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">Ativa</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">Ativa (vigente)</span>
+                                @elseif($latestSubscription && $latestSubscription->status === 'cancelled')
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">Cancelada</span>
+                                @elseif($latestSubscription && $latestSubscription->status === 'active' && $latestSubscription->end_date && \Carbon\Carbon::parse($latestSubscription->end_date)->isPast())
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-900">Vigência encerrada</span>
+                                    <span class="block text-xs text-gray-500 mt-1">A data de término já passou; o cadastro não dá acesso como assinante ativo.</span>
+                                @elseif($latestSubscription && $latestSubscription->status === 'active' && ! $latestSubscription->end_date)
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-900">Ativa sem data de término</span>
+                                @elseif($latestSubscription)
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">{{ ucfirst($latestSubscription->status) }}</span>
                                 @else
-                                    <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">Inativa</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">Sem assinatura</span>
                                 @endif
                             </dd>
                         </div>

@@ -40,8 +40,8 @@ Route::get('/assinaturas/planos', [SubscriptionController::class, 'plans'])->nam
 
 // Rotas de autenticação
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/entrar', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/entrar', [LoginController::class, 'login']);
     Route::get('/cadastro', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/cadastro', [RegisterController::class, 'register']);
 
@@ -59,27 +59,27 @@ Route::middleware('guest')->group(function () {
 // Rotas autenticadas
 Route::middleware(['auth'])->group(function () {
     // Email Verification Routes
-    Route::get('/email/verify', [\App\Http\Controllers\Auth\VerificationController::class, 'show'])
+    Route::get('/email/verificar', [\App\Http\Controllers\Auth\VerificationController::class, 'show'])
         ->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])
+    Route::get('/email/verificar/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])
+    Route::post('/email/notificacao-verificacao', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+    Route::post('/sair', [LogoutController::class, 'logout'])->name('logout');
 
     // Rotas que exigem e-mail verificado
     Route::middleware('verified')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/painel', [DashboardController::class, 'index'])->name('dashboard');
 
         // Configurações do usuário
-        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+        Route::get('/configuracoes', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/configuracoes', [SettingsController::class, 'update'])->name('settings.update');
+        Route::put('/configuracoes/senha', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
 
         // Rotas de assinatura
         Route::prefix('assinaturas')->name('subscriptions.')->group(function () {
@@ -100,17 +100,17 @@ Route::post('/webhook/pagbank', [PagBankWebhookController::class, 'handle'])->na
 
 // Rotas de administrador
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/painel', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/csrf-token', [\App\Http\Controllers\Admin\CsrfTokenController::class, 'getToken'])->name('csrf-token');
-    Route::resource('articles', AdminArticleController::class);
-    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-    Route::resource('editions', \App\Http\Controllers\Admin\EditionController::class);
-    Route::get('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
-    Route::post('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'storeImport'])->name('users.storeImport');
-    Route::get('/users/import/progress', [\App\Http\Controllers\Admin\UserController::class, 'importProgress'])->name('users.importProgress');
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::post('/editions/{id}/publish', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
-    Route::post('/editions/{id}/unpublish', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');
+    Route::resource('artigos', AdminArticleController::class)->names('articles');
+    Route::resource('categorias', \App\Http\Controllers\Admin\CategoryController::class)->names('categories');
+    Route::resource('edicoes', \App\Http\Controllers\Admin\EditionController::class)->names('editions');
+    Route::get('/usuarios/importar', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
+    Route::post('/usuarios/importar', [\App\Http\Controllers\Admin\UserController::class, 'storeImport'])->name('users.storeImport');
+    Route::get('/usuarios/importar/progresso', [\App\Http\Controllers\Admin\UserController::class, 'importProgress'])->name('users.importProgress');
+    Route::resource('usuarios', \App\Http\Controllers\Admin\UserController::class)->names('users');
+    Route::post('/edicoes/{id}/publicar', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
+    Route::post('/edicoes/{id}/despublicar', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');
 });
 
 // Rota de categorias (deve vir antes da rota de artigos)

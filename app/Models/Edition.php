@@ -48,12 +48,13 @@ class Edition extends Model
         // Usa release_date se disponível, caso contrário cai para published_at
         $baseDate = $this->release_date ?? $this->published_at;
 
-        if (!$baseDate) {
+        if (! $baseDate) {
             return false;
         }
 
         // Verifica se foi publicada há mais de 5 meses
         $fiveMonthsAgo = now()->subMonths(5);
+
         return $baseDate->lte($fiveMonthsAgo);
     }
 
@@ -63,12 +64,34 @@ class Edition extends Model
     public function scopeAccessibleByNonSubscribers($query)
     {
         $fiveMonthsAgo = now()->subMonths(5);
-        return $query->where(function($q) use ($fiveMonthsAgo) {
+
+        return $query->where(function ($q) use ($fiveMonthsAgo) {
             $q->where('release_date', '<=', $fiveMonthsAgo)
-              ->orWhere(function($q2) use ($fiveMonthsAgo) {
-                  $q2->whereNull('release_date')
-                     ->where('published_at', '<=', $fiveMonthsAgo);
-              });
+                ->orWhere(function ($q2) use ($fiveMonthsAgo) {
+                    $q2->whereNull('release_date')
+                        ->where('published_at', '<=', $fiveMonthsAgo);
+                });
+        });
+    }
+
+    /**
+     * Edições cuja vigência de acesso exige assinatura (inverso do acesso “grátis” após ~5 meses).
+     */
+    public function scopeExclusiveForSubscribers($query)
+    {
+        $cutoff = now()->subMonths(5);
+
+        return $query->where(function ($q) use ($cutoff) {
+            $q->where(function ($q2) {
+                $q2->whereNull('release_date')->whereNull('published_at');
+            })->orWhere(function ($q2) use ($cutoff) {
+                $q2->whereNotNull('release_date')
+                    ->where('release_date', '>', $cutoff);
+            })->orWhere(function ($q2) use ($cutoff) {
+                $q2->whereNull('release_date')
+                    ->whereNotNull('published_at')
+                    ->where('published_at', '>', $cutoff);
+            });
         });
     }
 
@@ -77,7 +100,7 @@ class Edition extends Model
      */
     public function getPdfFileUrlAttribute(): ?string
     {
-        if (!$this->pdf_file) {
+        if (! $this->pdf_file) {
             return null;
         }
 

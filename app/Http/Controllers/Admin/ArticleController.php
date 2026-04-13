@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Category;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,18 +17,48 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
+        $published = $request->input('published');
+        $freeAccess = $request->input('free_access');
 
-        $articles = Article::orderBy('created_at', 'desc')
-            ->when($search, function ($query, $search) {
-                return $query->where('title', 'like', "%{$search}%")
-                             ->orWhere('description', 'like', "%{$search}%")
-                             ->orWhere('author', 'like', "%{$search}%");
+        $articles = Article::query()
+            ->with(['user', 'categoryRelation'])
+            ->orderBy('created_at', 'desc')
+            ->when($search !== '', function ($query) use ($search) {
+                $like = $this->searchLikePattern($search);
+
+                $query->where(function ($q) use ($like) {
+                    $q->where('title', 'like', $like)
+                        ->orWhere('slug', 'like', $like)
+                        ->orWhere('description', 'like', $like)
+                        ->orWhere('content', 'like', $like)
+                        ->orWhere('author', 'like', $like)
+                        ->orWhere('category', 'like', $like)
+                        ->orWhere('image', 'like', $like)
+                        ->orWhere('video_url', 'like', $like)
+                        ->orWhereHas('user', function ($uq) use ($like) {
+                            $uq->where('name', 'like', $like)
+                                ->orWhere('email', 'like', $like);
+                        })
+                        ->orWhereHas('categoryRelation', function ($cq) use ($like) {
+                            $cq->where('name', 'like', $like)
+                                ->orWhere('slug', 'like', $like)
+                                ->orWhere('description', 'like', $like);
+                        });
+                });
             })
+            ->when(
+                $request->filled('category_id') && ($cid = $request->integer('category_id')) > 0 && Category::whereKey($cid)->exists(),
+                fn ($q) => $q->where('category_id', $cid)
+            )
+            ->when(in_array($published, ['0', '1'], true), fn ($q) => $q->where('published', $published === '1'))
+            ->when(in_array($freeAccess, ['0', '1'], true), fn ($q) => $q->where('free_access', $freeAccess === '1'))
             ->paginate(15)
             ->withQueryString();
-            
-        return view('admin.articles.index', compact('articles', 'search'));
+
+        $categories = Category::orderBy('name')->get();
+
+        return view('admin.articles.index', compact('articles', 'search', 'categories'));
     }
 
     /**
@@ -36,6 +67,7 @@ class ArticleController extends Controller
     public function create()
     {
         $categories = \App\Models\Category::orderBy('name')->get();
+
         return view('admin.articles.create', compact('categories'));
     }
 
@@ -62,7 +94,7 @@ class ArticleController extends Controller
 
         // Processar Imagem (Comprimir e Converter para WebP)
         try {
-            $imageService = new ImageService();
+            $imageService = new ImageService;
             $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
             if ($newImagePath) {
                 $imagePath = $newImagePath;
@@ -70,7 +102,7 @@ class ArticleController extends Controller
         } catch (\Exception $e) {
             \Log::warning('Falha ao otimizar imagem do artigo, mantendo original', [
                 'file' => $imagePath,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
 
@@ -79,18 +111,18 @@ class ArticleController extends Controller
         $originalSlug = $slug;
         $counter = 1;
         while (Article::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
         // Criar nova categoria se fornecida
         $categoryId = $validated['category_id'] ?? null;
-        if (empty($categoryId) && !empty($validated['new_category'])) {
+        if (empty($categoryId) && ! empty($validated['new_category'])) {
             $newCategorySlug = Str::slug($validated['new_category']);
             $originalCategorySlug = $newCategorySlug;
             $categoryCounter = 1;
             while (\App\Models\Category::where('slug', $newCategorySlug)->exists()) {
-                $newCategorySlug = $originalCategorySlug . '-' . $categoryCounter;
+                $newCategorySlug = $originalCategorySlug.'-'.$categoryCounter;
                 $categoryCounter++;
             }
 
@@ -127,6 +159,7 @@ class ArticleController extends Controller
     public function show(string $id)
     {
         $article = Article::findOrFail($id);
+
         return view('admin.articles.show', compact('article'));
     }
 
@@ -137,6 +170,7 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
         $categories = \App\Models\Category::orderBy('name')->get();
+
         return view('admin.articles.edit', compact('article', 'categories'));
     }
 
@@ -170,7 +204,7 @@ class ArticleController extends Controller
 
             // Processar Imagem (Comprimir e Converter para WebP)
             try {
-                $imageService = new ImageService();
+                $imageService = new ImageService;
                 $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
                 if ($newImagePath) {
                     $imagePath = $newImagePath;
@@ -178,7 +212,7 @@ class ArticleController extends Controller
             } catch (\Exception $e) {
                 \Log::warning('Falha ao otimizar imagem do artigo, mantendo original', [
                     'file' => $imagePath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         } else {
@@ -192,19 +226,19 @@ class ArticleController extends Controller
             $originalSlug = $slug;
             $counter = 1;
             while (Article::where('slug', $slug)->where('id', '!=', $article->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
         }
 
         // Criar nova categoria se fornecida
         $categoryId = $validated['category_id'] ?? null;
-        if (empty($categoryId) && !empty($validated['new_category'])) {
+        if (empty($categoryId) && ! empty($validated['new_category'])) {
             $newCategorySlug = Str::slug($validated['new_category']);
             $originalCategorySlug = $newCategorySlug;
             $categoryCounter = 1;
             while (\App\Models\Category::where('slug', $newCategorySlug)->exists()) {
-                $newCategorySlug = $originalCategorySlug . '-' . $categoryCounter;
+                $newCategorySlug = $originalCategorySlug.'-'.$categoryCounter;
                 $categoryCounter++;
             }
 
@@ -226,7 +260,7 @@ class ArticleController extends Controller
             'category' => $categoryId ? \App\Models\Category::find($categoryId)->name : null, // Manter para compatibilidade
             'author' => $validated['author'] ?? null,
             'published' => $request->has('published'),
-            'published_at' => $request->has('published') && !$article->published_at ? now() : $article->published_at,
+            'published_at' => $request->has('published') && ! $article->published_at ? now() : $article->published_at,
             'free_access' => $request->has('free_access'),
         ]);
 

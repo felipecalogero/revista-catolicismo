@@ -14,21 +14,23 @@
                     <p class="text-gray-600">Gerencie todas as edições da revista</p>
                 </div>
                 <div class="flex flex-col gap-4 w-full md:w-2/3">
-                    <form action="{{ route('admin.editions.index') }}" method="GET" class="w-full">
-                        <div class="flex gap-2 w-full">
-                            <div class="relative flex-1">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por título ou descrição..." class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm">
-                                <div class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 pointer-events-none">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
+                    <x-admin.filter-bar
+                        :formAction="route('admin.editions.index')"
+                        modalId="adminEditionsFilterModal"
+                        searchPlaceholder="Título, slug, descrição, capa, PDF ou autor…"
+                        :clearUrl="route('admin.editions.index')"
+                    >
+                        <x-slot name="modal">
+                            <div>
+                                <label for="filter_edition_published" class="mb-1 block text-sm font-medium text-gray-700">Status de publicação</label>
+                                <select id="filter_edition_published" name="published" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                    <option value="">Todos</option>
+                                    <option value="1" @selected(request('published') === '1')>Publicada</option>
+                                    <option value="0" @selected(request('published') === '0')>Não publicada</option>
+                                </select>
                             </div>
-                            <button type="submit" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 whitespace-nowrap shadow-sm">
-                                Filtrar
-                            </button>
-                        </div>
-                    </form>
+                        </x-slot>
+                    </x-admin.filter-bar>
                     <div class="flex gap-2 justify-end w-full">
                         <a href="{{ route('admin.editions.create') }}" class="text-center bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium whitespace-nowrap shadow-sm">
                             + Nova Edição

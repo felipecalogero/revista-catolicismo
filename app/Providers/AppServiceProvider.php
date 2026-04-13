@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
 use App\Models\Category;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,8 +47,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('partials.footer', function ($view) {
-            $categories = Category::orderBy('name')->get();
-            $view->with('categories', $categories);
+            $allCategories = Category::orderBy('name')->get();
+            $view->with([
+                'categories' => $allCategories,
+                'mainCategories' => $allCategories->take(5),
+                'moreCategories' => $allCategories->skip(5),
+            ]);
         });
     }
 }

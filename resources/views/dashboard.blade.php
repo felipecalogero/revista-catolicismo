@@ -18,7 +18,7 @@
                 <p class="text-gray-600">Esta é sua área de usuário</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Minha Assinatura</h3>
                     <p class="text-gray-600 text-sm mb-4">Gerencie sua assinatura da revista</p>
@@ -33,10 +33,18 @@
                 </div>
 
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Notícias</h3>
+                    <p class="text-gray-600 text-sm mb-4">Todas as notícias com busca, categoria e filtros em “Mais opções”.</p>
+                    <a href="{{ route('articles.index') }}" class="text-red-800 hover:text-red-900 font-medium text-sm">
+                        Abrir notícias →
+                    </a>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 font-serif">Edições</h3>
-                    <p class="text-gray-600 text-sm mb-4">Acesse suas edições digitais</p>
-                    <a href="#" class="text-red-800 hover:text-red-900 font-medium text-sm">
-                        Ver edições →
+                    <p class="text-gray-600 text-sm mb-4">Acervo digital com busca, ano e tipo de acesso (grátis ou assinantes).</p>
+                    <a href="{{ route('editions.index') }}" class="text-red-800 hover:text-red-900 font-medium text-sm">
+                        Abrir edições →
                     </a>
                 </div>
 

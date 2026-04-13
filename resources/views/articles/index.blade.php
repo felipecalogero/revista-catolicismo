@@ -26,60 +26,39 @@
 
                     {{-- Buscador e Filtro --}}
                     <div class="bg-white rounded-lg p-6 mb-10 border border-gray-200">
-                        <form action="{{ route('articles.index') }}" method="GET" class="space-y-4 md:space-y-0 md:flex md:gap-4">
-                <div class="flex-1">
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-                        Buscar Notícia
-                    </label>
-                    <input 
-                        type="text" 
-                        id="search" 
-                        name="search" 
-                        value="{{ request('search') }}"
-                        placeholder="Digite o título ou conteúdo da notícia..."
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                    >
-                </div>
-                <div class="md:w-64">
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                        Filtrar por Categoria
-                    </label>
-                    <select 
-                        id="category" 
-                        name="category"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent"
-                    >
-                        <option value="">Todas as categorias</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="flex items-end gap-2">
-                    <button 
-                        type="submit"
-                        class="bg-red-800 text-white px-6 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium whitespace-nowrap"
-                    >
-                        Buscar
-                    </button>
-                    @if(request('search') || request('category'))
-                        <a 
-                            href="{{ route('articles.index') }}"
-                            class="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium whitespace-nowrap"
+                        <p class="mb-3 text-sm font-medium text-gray-700">Buscar notícias</p>
+                        <x-admin.filter-bar
+                            :formAction="route('articles.index')"
+                            modalId="publicArticlesFilterModal"
+                            searchPlaceholder="Título, autor, texto, slug, categoria ou link de vídeo…"
+                            :clearUrl="route('articles.index')"
                         >
-                            Limpar
-                        </a>
-                    @endif
-                </div>
-            </form>
+                            <x-slot name="modal">
+                                <div>
+                                    <label for="public_filter_category" class="mb-1 block text-sm font-medium text-gray-700">Categoria</label>
+                                    <select id="public_filter_category" name="category" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                        <option value="">Todas as categorias</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->slug }}" @selected(request('category') === $category->slug)>{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="public_filter_free" class="mb-1 block text-sm font-medium text-gray-700">Acesso livre</label>
+                                    <select id="public_filter_free" name="free_access" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                        <option value="">Todos</option>
+                                        <option value="1" @selected(request('free_access') === '1')>Sim (leitura sem assinatura)</option>
+                                        <option value="0" @selected(request('free_access') === '0')>Não</option>
+                                    </select>
+                                </div>
+                            </x-slot>
+                        </x-admin.filter-bar>
                     </div>
 
                     @if($articles->count() > 0)
                         <div class="mb-8 pb-4 border-b-2 border-red-800">
                             <h2 class="text-2xl font-bold text-gray-900 font-serif">
-                                @if(request('search') || request('category'))
+                                @if(request()->filled('search') || request()->filled('category') || request()->filled('free_access'))
                                     Resultados da Busca
                                 @else
                                     Todas as Notícias
@@ -105,13 +84,13 @@
                             </svg>
                             <h3 class="text-xl font-bold text-gray-900 mb-2 font-serif">Nenhuma notícia encontrada</h3>
                             <p class="text-gray-600 mb-6">
-                                @if(request('search') || request('category'))
+                                @if(request()->filled('search') || request()->filled('category') || request()->filled('free_access'))
                                     Não encontramos notícias com os filtros selecionados. Tente alterar sua busca.
                                 @else
                                     Ainda não há notícias publicadas.
                                 @endif
                             </p>
-                            @if(request('search') || request('category'))
+                            @if(request()->filled('search') || request()->filled('category') || request()->filled('free_access'))
                                 <a href="{{ route('articles.index') }}" class="inline-block bg-red-800 text-white px-6 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
                                     Ver Todas as Notícias
                                 </a>
