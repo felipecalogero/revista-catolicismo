@@ -40,7 +40,7 @@
             <div>
                 <h3 class="mb-4 font-serif text-lg font-bold text-gray-900">Institucional</h3>
                 <ul class="space-y-2 text-sm font-medium text-gray-700">
-                    <li><a href="{{ config('revista.edicoes_arquivo_url') }}" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-red-800">Acervo até 2024</a></li>
+                    <li><a href="{{ config('revista.edicoes_arquivo_url') }}" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-red-800">Edições até 2024</a></li>
                     <li><a href="{{ config('revista.edicoes_novas_url') }}" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-red-800">Edições 2025+</a></li>
                     <li><a href="{{ config('revista.edicoes_busca_url') }}" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-red-800">Buscar edições</a></li>
                     <li><a href="{{ route('subscriptions.plans') }}" class="transition-colors hover:text-red-800">Assinaturas</a></li>
