@@ -515,12 +515,35 @@ class UsersImport implements ToCollection
         }
 
         $date = trim((string) $date);
+        if ($date === '') {
+            return null;
+        }
+
+        $formats = [
+            'd/m/Y',
+            'd/m/Y H:i',
+            'd/m/Y H:i:s',
+            'Y/m/d',
+            'Y/m/d H:i',
+            'Y/m/d H:i:s',
+            'm/d/Y',
+            'm/d/Y H:i',
+            'm/d/Y H:i:s',
+            'Y-m-d',
+            'Y-m-d H:i',
+            'Y-m-d H:i:s',
+            \DateTimeInterface::ATOM,
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, $date);
+            } catch (\Throwable) {
+                // tenta próximo formato
+            }
+        }
 
         try {
-            if (str_contains($date, '/')) {
-                return Carbon::createFromFormat('d/m/Y', $date);
-            }
-
             return Carbon::parse($date);
         } catch (\Exception) {
             return null;

@@ -16,10 +16,10 @@
     <div class="container">
         <h1>Bem-vindo(a), {{ $user->name }}!</h1>
         <p>Agradecemos por se cadastrar na <strong>Revista Catolicismo</strong>.</p>
-        <p>Seu cadastro foi realizado com sucesso. Agora você tem acesso aos conteúdos conforme seu plano de assinatura e pode gerenciar sua conta a qualquer momento.</p>
-        <p>Para acessar sua conta, clique no botão abaixo:</p>
+        <p>Seu cadastro foi realizado com sucesso. Para liberar o acesso, confirme primeiro seu endereço de e-mail no link de verificação enviado em mensagem separada.</p>
+        <p>Depois da confirmação, você pode acessar sua conta no botão abaixo:</p>
         <p style="text-align: center; margin: 30px 0;">
-            <a href="{{ route('login') }}" class="btn">Acessar Minha Conta</a>
+            <a href="{{ route('verification.notice') }}" class="btn">Verificar / Acessar Conta</a>
         </p>
         <p>Se você tiver alguma dúvida, nossa equipe está sempre à disposição.</p>
         <p>Atenciosamente,<br>Equipe Catolicismo</p>
