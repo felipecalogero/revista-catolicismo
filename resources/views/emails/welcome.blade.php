@@ -9,7 +9,7 @@
         h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; text-align: center; }
         p { font-size: 16px; line-height: 1.5; margin-bottom: 15px; }
         .footer { margin-top: 30px; font-size: 14px; text-align: center; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
-        .btn { display: inline-block; background-color: #8b0000; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center; }
+        .btn { display: inline-block; background-color: #8b0000; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
@@ -19,7 +19,7 @@
         <p>Seu cadastro foi realizado com sucesso. Para liberar o acesso, confirme primeiro seu endereço de e-mail no link de verificação enviado em mensagem separada.</p>
         <p>Depois da confirmação, você pode acessar sua conta no botão abaixo:</p>
         <p style="text-align: center; margin: 30px 0;">
-            <a href="{{ route('verification.notice') }}" class="btn">Verificar / Acessar Conta</a>
+            <a href="{{ route('verification.notice') }}" class="btn" style="color: #ffffff !important;">Verificar / Acessar Conta</a>
         </p>
         <p>Se você tiver alguma dúvida, nossa equipe está sempre à disposição.</p>
         <p>Atenciosamente,<br>Equipe Catolicismo</p>
