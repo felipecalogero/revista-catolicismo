@@ -69,6 +69,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/notificacao-verificacao', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+    Route::post('/email/atualizar', [\App\Http\Controllers\Auth\VerificationController::class, 'updateEmail'])
+        ->middleware('throttle:6,1')
+        ->name('verification.update-email');
 
     Route::post('/sair', [LogoutController::class, 'logout'])->name('logout');
 
