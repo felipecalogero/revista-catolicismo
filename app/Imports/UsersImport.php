@@ -195,8 +195,18 @@ class UsersImport implements ToCollection
         ];
 
         if ($map !== null) {
-            $sub['start_date'] = $this->parseDate($this->valueAt($row, $map, 'start'));
-            $sub['end_date'] = $this->parseDate($this->valueAt($row, $map, 'end'));
+            $startValue = $this->valueAt($row, $map, 'current_period_start');
+            if ($startValue === null || $startValue === '') {
+                $startValue = $this->valueAt($row, $map, 'start');
+            }
+
+            $endValue = $this->valueAt($row, $map, 'current_period_end');
+            if ($endValue === null || $endValue === '') {
+                $endValue = $this->valueAt($row, $map, 'end');
+            }
+
+            $sub['start_date'] = $this->parseDate($startValue);
+            $sub['end_date'] = $this->parseDate($endValue);
             $sub['canceled_at'] = $this->parseDate($this->valueAt($row, $map, 'canceled_at'));
             $sub['cancel_reason'] = $this->stringOrNull($this->valueAt($row, $map, 'cancel_reason'));
         } else {
@@ -334,6 +344,8 @@ class UsersImport implements ToCollection
             'zip' => ['cep', 'zip', 'codigopostal', 'postal'],
             'start' => ['inicio', 'datainicio', 'inicioassinatura', 'start', 'startdate', 'datadeinicio'],
             'end' => ['fim', 'datafim', 'termino', 'validade', 'end', 'enddate', 'datafinal'],
+            'current_period_start' => ['currentperiodstart'],
+            'current_period_end' => ['currentperiodend'],
             'canceled_at' => ['canceledat', 'canceladoem', 'datacancelamento', 'datadecancelamento'],
             'cancel_reason' => ['cancelreason', 'motivocancelamento', 'motivodocancelamento', 'motivo'],
             'profession' => ['profissao', 'ocupacao', 'cargo'],
