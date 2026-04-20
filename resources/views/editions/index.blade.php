@@ -125,7 +125,7 @@
                         Todo o nosso acervo histórico anterior a esta plataforma está disponível em nosso site arquivado.
                     </p>
                     <a
-                        href="https://catolicismo.com.br"
+                        href="https://acervo.catolicismo.com.br/"
                         target="_blank"
                         class="inline-flex items-center gap-2 bg-red-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-900 transition-colors shadow-md text-sm"
                     >
