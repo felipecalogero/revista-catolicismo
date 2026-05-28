@@ -30,10 +30,18 @@ Route::get('/fale-conosco', [ContactController::class, 'index'])->name('contact.
 Route::post('/fale-conosco', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/edicoes', [EditionController::class, 'index'])->name('editions.index');
+Route::get('/edicoes/galeria', [EditionController::class, 'gallery'])->name('editions.gallery');
 Route::get('/edicoes/{slug}', [EditionController::class, 'show'])->name('editions.show');
 Route::get('/edicoes/{slug}/revista', [EditionController::class, 'viewMagazine'])->name('editions.magazine');
-Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download')
-    ->middleware('subscription');
+Route::get('/edicoes/{slug}/download', [EditionController::class, 'download'])->name('editions.download');
+Route::get('/edicoes/{slug}/pagina/{label}', [EditionController::class, 'showPage'])->name('editions.page');
+Route::get('/edicoes/{slug}/artigos/{textSlug}', [EditionController::class, 'showArticle'])->name('editions.article');
+
+// Redirecionamentos para preservar links antigos do acervo
+Route::redirect('/arquivo/edicoes', '/edicoes')->name('archive.editions.index');
+Route::redirect('/arquivo/edicoes/{slug}', '/edicoes/{slug}')->name('archive.editions.show');
+Route::redirect('/arquivo/edicoes/{slug}/revista', '/edicoes/{slug}/revista')->name('archive.editions.magazine');
+Route::redirect('/arquivo/edicoes/{slug}/download', '/edicoes/{slug}/download')->name('archive.editions.download');
 
 // Rotas de assinatura (públicas para visualização de planos)
 Route::get('/assinaturas/planos', [SubscriptionController::class, 'plans'])->name('subscriptions.plans');

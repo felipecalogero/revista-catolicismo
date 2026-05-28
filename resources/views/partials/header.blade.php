@@ -20,6 +20,25 @@
                 <a href="{{ route('pages.about') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Sobre nós
                 </a>
+                {{-- Dropdown de Edições --}}
+                <div class="relative group">
+                    <button class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
+                        Edições
+                        <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="absolute top-full left-0 mt-2 w-56 bg-[#fdfcfb] rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="py-2">
+                            <a href="{{ route('editions.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
+                                Lista completa
+                            </a>
+                            <a href="{{ route('editions.gallery') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
+                                Galeria por década
+                            </a>
+                        </div>
+                    </div>
+                </div>
                 @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         {{ $category->name }}
@@ -94,6 +113,23 @@
                 <a href="{{ route('pages.about') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Sobre nós
                 </a>
+                {{-- Edições (mobile) --}}
+                <div>
+                    <button id="editions-mobile-btn" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1 w-full">
+                        Edições
+                        <svg id="editions-mobile-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="editions-mobile-menu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="{{ route('editions.index') }}" class="block text-gray-600 hover:text-red-800 font-medium text-sm transition-colors">
+                            Lista completa
+                        </a>
+                        <a href="{{ route('editions.gallery') }}" class="block text-gray-600 hover:text-red-800 font-medium text-sm transition-colors">
+                            Galeria por década
+                        </a>
+                    </div>
+                </div>
                 @foreach($mainCategories ?? [] as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         {{ $category->name }}
@@ -158,6 +194,16 @@
     document.getElementById('more-categories-btn')?.addEventListener('click', function() {
         const menu = document.getElementById('more-categories-menu');
         const icon = document.getElementById('more-categories-icon');
+        if (menu && icon) {
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+    });
+
+    // Toggle dropdown de Edições no mobile
+    document.getElementById('editions-mobile-btn')?.addEventListener('click', function() {
+        const menu = document.getElementById('editions-mobile-menu');
+        const icon = document.getElementById('editions-mobile-icon');
         if (menu && icon) {
             menu.classList.toggle('hidden');
             icon.classList.toggle('rotate-180');

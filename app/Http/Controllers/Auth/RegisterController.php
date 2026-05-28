@@ -47,7 +47,7 @@ class RegisterController extends Controller
             Mail::to($user->email)->send(new WelcomeUserMail($user));
 
             // Envia notificacao para o admin
-            $adminEmail = config('mail.from.address', 'admin@revistacatolicismo.com.br');
+            $adminEmail = config('mail.from.address', 'contato@catolicismo.com.br');
             Mail::to($adminEmail)->send(new NewUserNotificationMail($user));
         } catch (\Exception $e) {
             Log::error('Erro ao enviar e-mail no cadastro: ' . $e->getMessage());

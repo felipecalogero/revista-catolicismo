@@ -267,3 +267,22 @@
 .admin-filter-dialog {
     margin: auto;
 }
+
+/*
+ * Fundo de textura usado nas páginas públicas.
+ * Usa background-image com repeat em tamanho fixo para evitar que a
+ * textura seja esticada (e perca qualidade) em páginas muito longas.
+ */
+.bg-textura {
+    background-image: url('/img/textura.jpeg');
+    background-repeat: repeat;
+    background-size: 1024px auto;
+    background-position: top left;
+    background-color: #f5f0e6;
+}
+
+@media (max-width: 768px) {
+    .bg-textura {
+        background-size: 640px auto;
+    }
+}

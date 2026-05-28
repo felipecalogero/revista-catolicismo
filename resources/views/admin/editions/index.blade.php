@@ -68,8 +68,8 @@
                         @forelse($editions as $edition)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($edition->cover_image)
-                                        <img src="{{ Storage::url($edition->cover_image) }}" alt="{{ $edition->title }}" class="w-20 h-28 object-cover rounded">
+                                    @if($edition->cover_image_url)
+                                        <img src="{{ $edition->cover_image_url }}" alt="{{ $edition->title }}" class="w-20 h-28 object-cover rounded">
                                     @else
                                         <div class="w-20 h-28 bg-gray-200 rounded flex items-center justify-center">
                                             <span class="text-gray-400 text-xs">Sem capa</span>
@@ -105,8 +105,8 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex gap-2">
-                                        @if($edition->pdf_file)
-                                            <a href="{{ Storage::url($edition->pdf_file) }}" target="_blank" class="text-blue-600 hover:text-blue-900" title="Visualizar PDF">
+                                        @if($edition->pdf_file_url)
+                                            <a href="{{ $edition->pdf_file_url }}" target="_blank" class="text-blue-600 hover:text-blue-900" title="Visualizar PDF">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                                 </svg>

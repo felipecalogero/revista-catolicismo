@@ -9,6 +9,7 @@ use App\Services\PdfCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Edition as EditionModel;
 
 class EditionController extends Controller
 {
@@ -204,7 +205,7 @@ class EditionController extends Controller
         // Upload da nova imagem da capa se fornecida
         if ($request->hasFile('cover_image')) {
             // Deletar imagem antiga
-            if ($edition->cover_image) {
+            if ($edition->cover_image && ! EditionModel::isAbsoluteUrl($edition->cover_image)) {
                 Storage::disk('public')->delete($edition->cover_image);
             }
             $coverImagePath = $request->file('cover_image')->store('editions/covers', 'public');
@@ -215,7 +216,7 @@ class EditionController extends Controller
         // Upload do novo arquivo PDF se fornecido
         if ($request->hasFile('pdf_file')) {
             // Deletar PDF antigo
-            if ($edition->pdf_file) {
+            if ($edition->pdf_file && ! EditionModel::isAbsoluteUrl($edition->pdf_file)) {
                 Storage::disk('public')->delete($edition->pdf_file);
             }
             $pdfFilePath = $request->file('pdf_file')->store('editions/pdfs', 'public');
@@ -333,11 +334,11 @@ class EditionController extends Controller
     {
         $edition = Edition::findOrFail($id);
 
-        // Deletar arquivos
-        if ($edition->cover_image) {
+        // Deletar arquivos locais (ignorar URLs externas do acervo legado)
+        if ($edition->cover_image && ! EditionModel::isAbsoluteUrl($edition->cover_image)) {
             Storage::disk('public')->delete($edition->cover_image);
         }
-        if ($edition->pdf_file) {
+        if ($edition->pdf_file && ! EditionModel::isAbsoluteUrl($edition->pdf_file)) {
             Storage::disk('public')->delete($edition->pdf_file);
         }
 

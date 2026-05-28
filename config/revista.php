@@ -4,19 +4,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Links do rodapé — edições (arquivo x nova versão)
+    | Acervo (edições legado) — regras de acesso
     |--------------------------------------------------------------------------
     |
-    | Edições anteriores a jan/2025: site legado.
-    | Edições a partir de jan/2025: nova versão (mesmo destino de /edicoes na pré-produção).
+    | Todo o acervo histórico foi migrado para a tabela `editions` (com
+    | `is_legacy = true`) e seus assets vivem em `storage/app/public/editions/`.
+    | Os campos abaixo só controlam visibilidade.
     |
     */
 
-    'edicoes_arquivo_url' => env('REVISTA_EDICOES_ARQUIVO_URL', 'https://catolicismo.com.br/'),
+    /** Caminho absoluto da pasta Num (legado em disco). Usado pelo comando de importação. */
+    'legacy_acervo_num_path' => env('REVISTA_LEGACY_ACERVO_NUM_PATH'),
 
-    'edicoes_novas_url' => env('REVISTA_EDICOES_NOVAS_URL', 'https://novaversao.catolicismo.com.br/edicoes'),
+    /** Usuário dono das edições importadas (ID). Se vazio, usa o primeiro admin. */
+    'legacy_import_user_id' => env('REVISTA_LEGACY_IMPORT_USER_ID'),
 
-    /** Buscador / listagem com foco em 2025+ (ano na query da listagem de edições) */
-    'edicoes_busca_url' => env('REVISTA_EDICOES_BUSCA_URL', 'https://novaversao.catolicismo.com.br/edicoes?year=2025'),
+    /**
+     * Se true, edições com is_legacy contam como “arquivo” para a regra de acesso
+     * (qualquer usuário logado acessa sem assinatura).
+     */
+    'legacy_counts_as_free_tier' => env('REVISTA_LEGACY_COUNTS_AS_FREE_TIER', true),
+
+    /**
+     * Se true, visitantes não logados veem capa/sumário/páginas das edições legado sem login.
+     * Use com cuidado (conteúdo aberto).
+     */
+    'legacy_public_access' => env('REVISTA_LEGACY_PUBLIC_ACCESS', false),
 
 ];

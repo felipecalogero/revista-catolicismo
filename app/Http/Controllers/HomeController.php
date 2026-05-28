@@ -13,6 +13,7 @@ class HomeController extends Controller
     {
         // Buscar as últimas 10 edições publicadas
         $editions = Edition::where('published', true)
+            ->nonLegacy()
             ->orderBy('release_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->limit(10)
@@ -25,7 +26,7 @@ class HomeController extends Controller
                 'titulo' => $edition->title,
                 'edicao' => $edition->title,
                 'data' => $edition->release_date ? $edition->release_date->format('m/Y') : ($edition->published_at ? $edition->published_at->format('d/m/Y') : $edition->created_at->format('d/m/Y')),
-                'capa' => $edition->cover_image ? \Illuminate\Support\Facades\Storage::url($edition->cover_image) : '',
+                'capa' => $edition->cover_image_url ?? '',
                 'destaque' => $edition->published_at && $edition->published_at->isToday(),
                 'is_free' => $edition->canBeAccessedByNonSubscribers(),
                 'slug' => $edition->slug,

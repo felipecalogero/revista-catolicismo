@@ -12,8 +12,9 @@
             font-family: Arial, sans-serif;
             background-color: #f5f0e6;
             background-image: url('/img/textura.jpeg');
-            background-size: cover;
-            background-position: center;
+            background-repeat: repeat;
+            background-size: 1024px auto;
+            background-position: top left;
         }
         .container {
             background: white;

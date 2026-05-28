@@ -5,11 +5,7 @@
 
 @section('content')
 <div class="relative min-h-screen bg-gray-50 py-12">
-    <img
-        src="{{ asset('img/textura.jpeg') }}"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-    >
+    <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
     <div class="relative z-10 container mx-auto px-4 lg:px-8">
         <div class="max-w-4xl mx-auto bg-white/90 rounded-lg shadow-md overflow-hidden">
             <div class="p-8 md:p-12">

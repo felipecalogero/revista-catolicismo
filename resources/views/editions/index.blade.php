@@ -4,17 +4,17 @@
 
 @section('content')
 <div class="relative min-h-screen bg-[#f5f0e6]">
-    <img
-        src="{{ asset('img/textura.jpeg') }}"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-    >
+    <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
     <div class="relative z-10 container mx-auto px-4 lg:px-8 py-12">
         <div class="bg-white rounded-lg p-6 md:p-8">
             {{-- Header da Página --}}
             <div class="mb-8 pb-4 border-b-2 border-red-800">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 font-serif mb-2">Todas as Edições</h1>
-                <p class="text-lg text-gray-600 font-serif">Acompanhe nossa trajetória através de todas as edições publicadas.</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 font-serif mb-2">
+                    Todas as Edições
+                </h1>
+                <p class="text-lg text-gray-600 font-serif">
+                    Edições atuais e acervo histórico (1951–presente) reunidos no mesmo lugar.
+                </p>
             </div>
 
             {{-- Informativo de Acesso --}}
@@ -47,6 +47,14 @@
                             </select>
                         </div>
                         <div>
+                            <label for="edition_filter_source" class="mb-1 block text-sm font-medium text-gray-700">Origem da edição</label>
+                            <select id="edition_filter_source" name="source" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
+                                <option value="">Todas</option>
+                                <option value="nova" @selected(request('source') === 'nova')>Edições atuais</option>
+                                <option value="acervo" @selected(request('source') === 'acervo')>Acervo histórico</option>
+                            </select>
+                        </div>
+                        <div>
                             <label for="edition_filter_year" class="mb-1 block text-sm font-medium text-gray-700">Ano (lançamento ou publicação)</label>
                             <select id="edition_filter_year" name="year" class="w-full rounded-lg border border-gray-300 py-2 text-sm">
                                 <option value="">Todos</option>
@@ -59,7 +67,7 @@
                 </x-admin.filter-bar>
             </div>
 
-            @if(request()->filled('search') || request()->filled('access') || request()->filled('year'))
+            @if(request()->filled('search') || request()->filled('access') || request()->filled('year') || request()->filled('source'))
                 <div class="mb-6 border-b border-gray-200 pb-4">
                     <h2 class="text-xl font-bold text-gray-900 font-serif">
                         Resultados
@@ -74,11 +82,12 @@
                     <div class="group">
                         <a href="{{ route('editions.show', $edition->slug) }}" class="block">
                             <div class="relative overflow-hidden rounded shadow-md hover:shadow-xl transition-all duration-300 aspect-[3/4]">
-                                @if($edition->cover_image)
+                                @if($edition->cover_image_url)
                                     <img
-                                        src="{{ Storage::url($edition->cover_image) }}"
+                                        src="{{ $edition->cover_image_url }}"
                                         alt="{{ $edition->title }}"
                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        loading="lazy"
                                     >
                                 @else
                                     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -90,6 +99,12 @@
                                 <span class="absolute top-2 left-2 bg-red-800 text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50 uppercase">
                                     {{ $edition->canBeAccessedByNonSubscribers() ? 'Grátis' : 'Assinantes' }}
                                 </span>
+
+                                @if($edition->is_legacy)
+                                    <span class="absolute top-2 right-2 bg-amber-700 text-white px-1.5 py-0.5 text-xs font-medium rounded shadow-sm z-50 uppercase">
+                                        Acervo
+                                    </span>
+                                @endif
 
                                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                                     <div class="text-white text-sm font-bold mb-1 line-clamp-1">{{ $edition->title }}</div>
@@ -105,7 +120,7 @@
                 @empty
                     <div class="col-span-full text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                         <p class="text-gray-500 font-serif text-lg mb-4">Nenhuma edição encontrada com os filtros atuais.</p>
-                        @if(request()->filled('search') || request()->filled('access') || request()->filled('year'))
+                        @if(request()->filled('search') || request()->filled('access') || request()->filled('year') || request()->filled('source'))
                             <a href="{{ route('editions.index') }}" class="inline-block rounded-lg bg-red-800 px-6 py-3 text-sm font-medium text-white hover:bg-red-900">Ver todas as edições</a>
                         @endif
                     </div>
@@ -117,22 +132,17 @@
                 {{ $editions->links() }}
             </div>
 
-            {{-- Call to Action: Edições Anteriores --}}
             <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 md:p-10 text-center relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-2xl md:text-3xl font-bold font-serif mb-3 text-gray-900">Busca edições mais antigas?</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold font-serif mb-3 text-gray-900">Navegar pelo acervo histórico</h2>
                     <p class="text-gray-600 max-w-2xl mx-auto mb-6">
-                        Todo o nosso acervo histórico anterior a esta plataforma está disponível em nosso site arquivado.
+                        Veja todas as edições agrupadas por década e ano, desde 1951.
                     </p>
                     <a
-                        href="https://catolicismo.com.br"
-                        target="_blank"
+                        href="{{ route('editions.gallery') }}"
                         class="inline-flex items-center gap-2 bg-red-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-900 transition-colors shadow-md text-sm"
                     >
-                        Ver Edições Anteriores
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                        </svg>
+                        Ir para galeria por década
                     </a>
                 </div>
             </div>

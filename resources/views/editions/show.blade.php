@@ -2,13 +2,16 @@
 
 @section('title', $edition->title . ' - Revista Catolicismo')
 
+@php
+    $hasPages = $edition->pages->isNotEmpty();
+    $hasArticles = $edition->articles->isNotEmpty();
+    $articlesByPage = $hasArticles ? $edition->articles->groupBy('page_label') : collect();
+    $canViewContent = $hasFullAccess;
+@endphp
+
 @section('content')
 <div class="relative min-h-screen bg-[#f5f0e6] py-12">
-    <img
-        src="{{ asset('img/textura.jpeg') }}"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-    >
+    <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
     <div class="relative z-10 container mx-auto px-4 lg:px-8">
         <div class="bg-white rounded-lg shadow-md p-8 md:p-12">
         {{-- Cabeçalho da Edição --}}
@@ -16,9 +19,9 @@
             <div class="flex flex-col md:flex-row gap-8">
                 {{-- Imagem da Capa --}}
                 <div class="flex-shrink-0">
-                    @if($edition->cover_image)
+                    @if($edition->cover_image_url)
                         <img
-                            src="{{ Storage::url($edition->cover_image) }}"
+                            src="{{ $edition->cover_image_url }}"
                             alt="{{ $edition->title }}"
                             class="w-full md:w-64 h-auto rounded-lg shadow-lg"
                         >
@@ -27,6 +30,9 @@
 
                 {{-- Informações --}}
                 <div class="flex-1">
+                    @if($edition->is_legacy)
+                        <span class="inline-block bg-amber-700 text-white text-xs font-bold uppercase tracking-wide px-2 py-1 rounded mb-3">Acervo histórico</span>
+                    @endif
                     <h1 class="text-4xl font-bold text-gray-900 font-serif mb-4">
                         {{ $edition->title }}
                     </h1>
@@ -36,72 +42,141 @@
                         @elseif($edition->published_at)
                             <span>Publicada em {{ $edition->published_at->format('d/m/Y') }}</span>
                         @endif
+                        @if($hasPages)
+                            <span>•</span>
+                            <span>{{ $edition->pages->count() }} páginas</span>
+                        @endif
+                        @if($hasArticles)
+                            <span>•</span>
+                            <span>{{ $edition->articles->count() }} matérias</span>
+                        @endif
                     </div>
                     <div class="text-lg text-gray-700 leading-relaxed mb-6">
                         {!! $edition->description !!}
                     </div>
 
                     {{-- Botões de Ação --}}
-                    @if($canDownload)
+                    @if($canViewContent)
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <a
-                                href="{{ route('editions.magazine', $edition->slug) }}"
-                                class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium text-center"
-                            >
-                                Visualizar Revista
-                            </a>
-                        <a
-                            href="{{ route('editions.download', $edition->slug) }}"
-                                class="inline-block bg-white text-red-800 border-2 border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium text-center"
-                        >
-                            Baixar PDF
-                        </a>
+                            @if($hasPages || $edition->pdf_file)
+                                <a
+                                    href="{{ route('editions.magazine', $edition->slug) }}"
+                                    class="inline-block bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium text-center"
+                                >
+                                    Visualizar Revista
+                                </a>
+                            @endif
+                            @if($canDownload)
+                                <a
+                                    href="{{ route('editions.download', $edition->slug) }}"
+                                    class="inline-block bg-white text-red-800 border-2 border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium text-center"
+                                >
+                                    Baixar PDF
+                                </a>
+                            @endif
                         </div>
                     @endif
                 </div>
             </div>
         </div>
 
-        {{-- Conteúdo Adicional --}}
-        <div class="prose prose-lg max-w-none">
-            @if($hasFullAccess)
-                <p class="text-gray-600">
-                    Esta edição está disponível para download em formato PDF. Clique no botão acima para baixar.
-                </p>
-            @elseif($requiresLoginOnly)
-                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Acesso Gratuito Disponível</h3>
-                    <p class="text-gray-600 mb-6">Esta edição está disponível gratuitamente para todos os usuários cadastrados. Faça login para visualizar e baixar o PDF.</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                            Fazer Login
-                        </a>
-                        <a href="{{ route('register') }}" class="bg-white text-red-800 border border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium">
-                            Criar Conta Grátis
-                        </a>
-                    </div>
-                </div>
-            @else
-                <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler esta edição completa?</h3>
-                    <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todas as edições em PDF, além de artigos exclusivos e conteúdo premium.</p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        @auth
-                            <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                                Assinar Agora
-                            </a>
-                        @else
+        {{-- Bloqueio de acesso (visitante ou não-assinante) --}}
+        @if(!$canViewContent)
+            <div class="mb-10">
+                @if($requiresLoginOnly)
+                    <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Acesso Gratuito Disponível</h3>
+                        <p class="text-gray-600 mb-6">Esta edição está disponível gratuitamente para todos os usuários cadastrados. Faça login para visualizar e baixar o conteúdo.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
                             <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
                                 Fazer Login
                             </a>
-                            <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
-                                Assinar Agora
+                            <a href="{{ route('register') }}" class="bg-white text-red-800 border border-red-800 px-8 py-3 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                                Criar Conta Grátis
                             </a>
-                        @endauth
+                        </div>
                     </div>
+                @else
+                    <div class="bg-gradient-to-b from-white via-white to-gray-50 rounded-lg p-8 text-center border border-gray-200">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 font-serif">Quer ler esta edição completa?</h3>
+                        <p class="text-gray-600 mb-6">Assine a Revista Catolicismo e tenha acesso a todas as edições, além de artigos exclusivos e conteúdo premium.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            @auth
+                                <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                    Assinar Agora
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                    Fazer Login
+                                </a>
+                                <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-8 py-3 rounded-lg hover:bg-red-900 transition-colors font-medium">
+                                    Assinar Agora
+                                </a>
+                            @endauth
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        {{-- Sumário --}}
+        @if($edition->table_of_contents)
+            <div class="mb-10 border-t border-gray-200 pt-8">
+                <h2 class="text-2xl font-bold text-gray-900 font-serif mb-4">Sumário</h2>
+                <div class="prose prose-lg max-w-none text-gray-800 sumario-legado">
+                    {!! $edition->table_of_contents !!}
                 </div>
-            @endif
-        </div>
+            </div>
+        @endif
+
+        {{-- Páginas (somente quando há acesso) --}}
+        @if($canViewContent && $hasPages)
+            <div class="mb-10 border-t border-gray-200 pt-8">
+                <h2 class="text-2xl font-bold text-gray-900 font-serif mb-4">Páginas</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    @foreach($edition->pages as $page)
+                        <a href="{{ route('editions.page', [$edition->slug, $page->label]) }}" class="group block border border-gray-200 rounded overflow-hidden hover:shadow-md transition-shadow">
+                            <div class="bg-gray-100 overflow-hidden">
+                                @if($page->image_url)
+                                    <img
+                                        src="{{ $page->image_url }}"
+                                        alt="Página {{ $page->label }}"
+                                        loading="lazy"
+                                        class="w-full h-auto group-hover:scale-105 transition-transform duration-300"
+                                    >
+                                @endif
+                            </div>
+                            <div class="text-center py-2">
+                                <p class="text-xs font-bold text-gray-700">{{ $page->label }}</p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Matérias --}}
+        @if($canViewContent && $hasArticles)
+            <div class="mb-10 border-t border-gray-200 pt-8">
+                <h2 class="text-2xl font-bold text-gray-900 font-serif mb-4">Matérias desta edição</h2>
+                <div class="space-y-4">
+                    @foreach($articlesByPage as $pageLabel => $articles)
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <p class="text-sm font-bold uppercase text-red-800 mb-3">Página {{ $pageLabel ?: '—' }}</p>
+                            <ul class="space-y-2">
+                                @foreach($articles as $article)
+                                    <li>
+                                        <a href="{{ route('editions.article', [$edition->slug, $article->slug]) }}" class="text-gray-800 hover:text-red-800 transition-colors font-serif">
+                                            {{ $article->title }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Outras Edições --}}
@@ -116,10 +191,11 @@
                         <div class="group">
                             <a href="{{ route('editions.show', $otherEdition->slug) }}" class="block">
                                 <div class="relative overflow-hidden rounded shadow-sm hover:shadow-lg transition-shadow aspect-[3/4]">
-                                    @if($otherEdition->cover_image)
+                                    @if($otherEdition->cover_image_url)
                                         <img
-                                            src="{{ Storage::url($otherEdition->cover_image) }}"
+                                            src="{{ $otherEdition->cover_image_url }}"
                                             alt="{{ $otherEdition->title }}"
+                                            loading="lazy"
                                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         >
                                     @else

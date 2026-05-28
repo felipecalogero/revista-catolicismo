@@ -129,20 +129,61 @@ class PdfCompressor
         // Criar caminho temporário para o arquivo comprimido
         $tempPath = $fullPath . '.compressed';
 
+        // Garantir que não exista um .compressed antigo bloqueando a operação
+        if (file_exists($tempPath)) {
+            @unlink($tempPath);
+        }
+
         // Comprimir
         $success = $this->compress($fullPath, $tempPath, $quality);
 
-        if ($success) {
-            // Substituir o arquivo original pelo comprimido
+        if (! $success) {
             if (file_exists($tempPath)) {
-                rename($tempPath, $fullPath);
-                return true;
+                @unlink($tempPath);
             }
-        } else {
-            // Limpar arquivo temporário se existir
-            if (file_exists($tempPath)) {
-                unlink($tempPath);
+
+            return false;
+        }
+
+        if (! file_exists($tempPath)) {
+            Log::error('PDF Compressor: arquivo temporário não encontrado após compressão', [
+                'temp_path' => $tempPath,
+            ]);
+
+            return false;
+        }
+
+        // Substituir atomicamente o original pelo comprimido. Se o rename falhar
+        // (ex.: filesystem que não permite sobrescrita), tentamos copy+unlink como
+        // fallback para evitar deixar o .compressed órfão no storage.
+        if (@rename($tempPath, $fullPath)) {
+            return true;
+        }
+
+        Log::warning('PDF Compressor: rename() falhou, tentando copy+unlink', [
+            'temp_path' => $tempPath,
+            'target_path' => $fullPath,
+            'last_error' => error_get_last(),
+        ]);
+
+        if (@copy($tempPath, $fullPath)) {
+            if (! @unlink($tempPath)) {
+                Log::warning('PDF Compressor: copy ok, mas falhou ao remover .compressed', [
+                    'temp_path' => $tempPath,
+                ]);
             }
+
+            return true;
+        }
+
+        Log::error('PDF Compressor: falha ao substituir original pelo comprimido', [
+            'temp_path' => $tempPath,
+            'target_path' => $fullPath,
+            'last_error' => error_get_last(),
+        ]);
+
+        if (file_exists($tempPath)) {
+            @unlink($tempPath);
         }
 
         return false;

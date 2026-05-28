@@ -4,11 +4,7 @@
 
 @section('content')
 <div class="relative flex-grow flex items-center justify-center bg-[#f5f0e6] py-20 px-4 sm:px-6 lg:px-8">
-    <img
-        src="{{ asset('img/textura.jpeg') }}"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-    >
+    <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
     <div class="relative z-10 max-w-md w-full space-y-8 mt-[-5rem]">
         <div>
             <h2 class="mt-6 text-center text-3xl font-bold text-gray-900 font-serif">

@@ -218,11 +218,7 @@
 
     {{-- Artigos Relacionados --}}
     <section class="relative py-16 border-t border-gray-200 overflow-hidden">
-        <img
-            src="{{ asset('img/textura.jpeg') }}"
-            alt=""
-            class="absolute inset-0 w-full h-full object-cover opacity-60"
-        >
+        <div class="absolute inset-0 bg-textura opacity-60" aria-hidden="true"></div>
         <div class="relative z-10 container mx-auto px-4 lg:px-8">
             <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
                 <div class="mb-10 pb-4 border-b-2 border-red-800">

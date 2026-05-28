@@ -232,6 +232,10 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        if ($edition->is_legacy && config('revista.legacy_counts_as_free_tier', true)) {
+            return true;
+        }
+
         // Não-assinantes só têm acesso a edições publicadas há mais de 5 meses
         return $edition->canBeAccessedByNonSubscribers();
     }

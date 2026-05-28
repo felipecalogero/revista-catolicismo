@@ -53,11 +53,7 @@
 
     {{-- Grid de Destaques --}}
     <section class="relative py-16 border-t border-gray-200">
-        <img
-            src="{{ asset('img/textura.jpeg') }}"
-            alt=""
-            class="absolute inset-0 w-full h-full object-cover"
-        >
+        <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
         <div class="relative z-10 container mx-auto px-4 lg:px-8">
             <div class="bg-white rounded-lg p-6 md:p-8">
                 <div class="mb-10">
@@ -187,11 +183,7 @@
         @foreach($categoriasMaisVisitadas as $index => $categoria)
         @if($index % 2 == 0)
             <section class="relative py-16 border-t border-gray-200">
-                <img
-                    src="{{ asset('img/textura.jpeg') }}"
-                    alt=""
-                    class="absolute inset-0 w-full h-full object-cover"
-                >
+                <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
                 <div class="relative z-10">
                     <div class="container mx-auto px-4 lg:px-8">
                         <div class="bg-white rounded-lg p-6 md:p-8">
