@@ -66,6 +66,7 @@
                             type="password"
                             id="password"
                             name="password"
+                            autocomplete="new-password"
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                             placeholder="Mínimo 8 caracteres"
@@ -108,6 +109,7 @@
                             type="password"
                             id="password_confirmation"
                             name="password_confirmation"
+                            autocomplete="new-password"
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                             placeholder="Confirme a senha"

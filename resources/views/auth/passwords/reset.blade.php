@@ -56,6 +56,7 @@
                         id="password" 
                         name="password" 
                         type="password" 
+                        autocomplete="new-password"
                         required 
                         class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent @error('password') border-red-500 @enderror"
                         placeholder="••••••••"
@@ -98,6 +99,7 @@
                         id="password_confirmation" 
                         name="password_confirmation" 
                         type="password" 
+                        autocomplete="new-password"
                         required 
                         class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800 focus:border-transparent"
                         placeholder="••••••••"

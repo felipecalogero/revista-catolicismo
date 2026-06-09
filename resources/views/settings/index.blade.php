@@ -121,7 +121,8 @@
                             <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2 text-red-800 italic">
                                 Senha Atual (necessária para qualquer alteração)
                             </label>
-                            <input type="password" id="current_password" name="current_password" 
+                            <input type="password" id="current_password" name="current_password"
+                                autocomplete="current-password"
                                 class="w-full px-4 py-2 border-2 border-red-100 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent shadow-sm"
                                 placeholder="Digite sua senha atual">
                             @error('current_password') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -130,7 +131,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50">
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Nova Senha</label>
-                                <input type="password" id="password" name="password" 
+                                <input type="password" id="password" name="password"
+                                    autocomplete="new-password"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                                     placeholder="Deixe em branco para não alterar">
                                 
@@ -162,7 +164,8 @@
 
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmar Nova Senha</label>
-                                <input type="password" id="password_confirmation" name="password_confirmation" 
+                                <input type="password" id="password_confirmation" name="password_confirmation"
+                                    autocomplete="new-password"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
                                     placeholder="Confirme a nova senha">
                                 <div id="password-match-message" class="mt-2 text-sm hidden"></div>
