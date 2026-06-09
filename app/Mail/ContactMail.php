@@ -3,12 +3,14 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ContactMail extends Mailable
+class ContactMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -29,6 +31,9 @@ class ContactMail extends Mailable
     {
         return new Envelope(
             subject: 'Catolicismo - Novo contato: ' . $this->data['subject'],
+            replyTo: [
+                new Address($this->data['email'], $this->data['name']),
+            ],
         );
     }
 
@@ -39,6 +44,7 @@ class ContactMail extends Mailable
     {
         return new Content(
             view: 'emails.contact_admin',
+            text: 'emails.contact_admin_text',
         );
     }
 

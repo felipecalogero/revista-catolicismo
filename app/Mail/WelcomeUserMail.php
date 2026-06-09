@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class WelcomeUserMail extends Mailable
+class WelcomeUserMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -41,6 +41,7 @@ class WelcomeUserMail extends Mailable
     {
         return new Content(
             view: 'emails.welcome',
+            text: 'emails.welcome_text',
         );
     }
 

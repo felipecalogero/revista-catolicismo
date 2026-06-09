@@ -20,7 +20,12 @@
         
         <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md border border-gray-200" action="{{ route('register') }}" method="POST">
             @csrf
-            
+            {{-- Honeypot anti-bot: campo invisível para humanos, mas frequentemente preenchido por bots --}}
+            <div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+                <label for="website">Não preencha este campo</label>
+                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" value="">
+            </div>
+
             @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
                     <ul class="list-disc list-inside text-sm">

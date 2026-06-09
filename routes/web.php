@@ -27,7 +27,9 @@ Route::get('/nossa-missao', [PageController::class, 'mission'])->name('pages.mis
 Route::get('/politica-de-privacidade', [PageController::class, 'privacy'])->name('pages.privacy');
 Route::get('/termos-de-uso', [PageController::class, 'terms'])->name('pages.terms');
 Route::get('/fale-conosco', [ContactController::class, 'index'])->name('contact.index');
-Route::post('/fale-conosco', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/fale-conosco', [ContactController::class, 'store'])
+    ->middleware('throttle:3,1')
+    ->name('contact.store');
 Route::get('/noticias', [ArticleController::class, 'index'])->name('articles.index');
 Route::get('/edicoes', [EditionController::class, 'index'])->name('editions.index');
 Route::get('/edicoes/galeria', [EditionController::class, 'gallery'])->name('editions.gallery');
@@ -51,17 +53,21 @@ Route::middleware('guest')->group(function () {
     Route::get('/entrar', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/entrar', [LoginController::class, 'login']);
     Route::get('/cadastro', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/cadastro', [RegisterController::class, 'register']);
+    Route::post('/cadastro', [RegisterController::class, 'register'])->middleware('throttle:5,10');
 
     // Password Reset Routes
     Route::get('/esqueci-minha-senha', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/esqueci-minha-senha', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::post('/esqueci-minha-senha', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->middleware('throttle:5,15')
+        ->name('password.email');
     Route::get('/redefinir-senha/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/redefinir-senha', [ResetPasswordController::class, 'reset'])->name('password.update');
 
     // First Access Flow
     Route::get('/primeiro-acesso', [\App\Http\Controllers\Auth\FirstAccessController::class, 'showForm'])->name('first-access');
-    Route::post('/primeiro-acesso', [\App\Http\Controllers\Auth\FirstAccessController::class, 'sendLink'])->name('first-access.send');
+    Route::post('/primeiro-acesso', [\App\Http\Controllers\Auth\FirstAccessController::class, 'sendLink'])
+        ->middleware('throttle:5,15')
+        ->name('first-access.send');
 });
 
 // Rotas autenticadas

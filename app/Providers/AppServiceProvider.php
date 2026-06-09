@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendWelcomeEmailAfterVerification;
 use App\Models\Category;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Verified::class, SendWelcomeEmailAfterVerification::class);
+
         // Configurar regras de senha padrão
         \Illuminate\Validation\Rules\Password::defaults(function () {
             return \Illuminate\Validation\Rules\Password::min(8)

@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewUserNotificationMail extends Mailable
+class NewUserNotificationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -41,6 +41,7 @@ class NewUserNotificationMail extends Mailable
     {
         return new Content(
             view: 'emails.new_user_notification',
+            text: 'emails.new_user_notification_text',
         );
     }
 

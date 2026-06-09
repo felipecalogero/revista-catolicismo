@@ -21,6 +21,15 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
+        if (filled($request->input('website'))) {
+            \Log::warning('Contato bloqueado por honeypot', [
+                'ip' => $request->ip(),
+                'ua' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Sua mensagem foi enviada com sucesso! Em breve entraremos em contato.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -29,7 +38,6 @@ class ContactController extends Controller
         ]);
 
         try {
-            // Envia o e-mail para o endereço de contato
             Mail::to('contato@catolicismo.com.br')->send(new ContactMail($validated));
 
             return back()->with('success', 'Sua mensagem foi enviada com sucesso! Em breve entraremos em contato.');

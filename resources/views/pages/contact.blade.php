@@ -63,6 +63,11 @@
 
                     <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
                         @csrf
+                        {{-- Honeypot anti-bot: campo invisível para humanos, mas frequentemente preenchido por bots --}}
+                        <div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+                            <label for="website">Não preencha este campo</label>
+                            <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" value="">
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
