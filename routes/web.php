@@ -115,6 +115,14 @@ Route::middleware(['auth'])->group(function () {
 // Webhook do PagBank (sem autenticação)
 Route::post('/webhook/pagbank', [PagBankWebhookController::class, 'handle'])->name('webhook.pagbank');
 
+// Endpoint HTTP para processar a fila (chamado por cron externo).
+// Hospedagem compartilhada não roda processo longo de queue:work com confiabilidade,
+// então delegamos para um pinger externo (ex.: cron-job.org) batendo aqui a cada minuto.
+// Protegido por token em config('app.queue_tick_token').
+Route::get('/internal/queue-tick/{token}', \App\Http\Controllers\Internal\QueueTickController::class)
+    ->middleware('throttle:120,1')
+    ->name('internal.queue-tick');
+
 // Rotas de administrador
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/painel', [AdminDashboardController::class, 'index'])->name('dashboard');

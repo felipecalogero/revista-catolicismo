@@ -123,4 +123,18 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Token do endpoint HTTP de processamento de fila
+    |--------------------------------------------------------------------------
+    |
+    | Usado pela rota /internal/queue-tick/{token}. O cron externo
+    | (cron-job.org ou similar) chama essa URL a cada minuto para processar
+    | jobs da fila sem precisar de worker rodando como processo no servidor.
+    | Mantenha em segredo - quem souber o token consegue forçar processamento.
+    |
+    */
+
+    'queue_tick_token' => env('QUEUE_TICK_TOKEN'),
+
 ];
