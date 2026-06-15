@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Edition;
 use App\Models\EditionArticle;
 use App\Models\EditionPage;
+use App\Models\EditionPageText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -20,8 +21,35 @@ class EditionController extends Controller
         $access = (string) $request->input('access', '');
         $year = $request->input('year');
         $source = (string) $request->input('source', '');
+        $mode = $request->input('mode', 'title') === 'content' ? 'content' : 'title';
 
-        $editions = Edition::query()
+        if ($mode === 'content' && $search !== '') {
+            // Aba "No conteúdo das matérias": paginar páginas que casam com o termo.
+            $textResults = $this->searchPageTexts($request, $search, $access, $year, $source);
+            $editions = $this->emptyEditionsPaginator($request);
+        } else {
+            $textResults = null;
+            $editions = $this->searchEditionsByTitle($request, $search, $access, $year, $source);
+        }
+
+        $editionYears = Edition::query()
+            ->where('published', true)
+            ->get(['release_date', 'published_at'])
+            ->map(fn ($e) => $e->release_date?->year ?? $e->published_at?->year)
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('editions.index', compact('editions', 'search', 'editionYears', 'mode', 'textResults'));
+    }
+
+    /**
+     * Busca tradicional por título/slug/descrição (modo padrão).
+     */
+    protected function searchEditionsByTitle(Request $request, string $search, string $access, $year, string $source)
+    {
+        return Edition::query()
             ->where('published', true)
             ->when($search !== '', function ($query) use ($search) {
                 $like = $this->searchLikePattern($search);
@@ -58,17 +86,88 @@ class EditionController extends Controller
             ->orderBy('published_at', 'desc')
             ->paginate(12)
             ->withQueryString();
+    }
 
-        $editionYears = Edition::query()
+    /**
+     * Busca por conteúdo das matérias: retorna paginação de EditionPageText
+     * com snippet em destaque e URL pronta pro visualizador na página exata.
+     *
+     * Aplica os mesmos filtros (access/source/year) via subquery em editions,
+     * reusando os scopes do model Edition em vez de duplicar regras.
+     */
+    protected function searchPageTexts(Request $request, string $search, string $access, $year, string $source)
+    {
+        $isMysql = \DB::connection()->getDriverName() === 'mysql';
+        $fullTextQuery = $this->buildFullTextQuery($search);
+        $like = $this->searchLikePattern($search);
+
+        // IDs das edições que satisfazem os filtros públicos de listagem.
+        $editionIdsQuery = Edition::query()
             ->where('published', true)
-            ->get(['release_date', 'published_at'])
-            ->map(fn ($e) => $e->release_date?->year ?? $e->published_at?->year)
-            ->filter()
-            ->unique()
-            ->sortDesc()
-            ->values();
+            ->when($access === 'free', fn ($q) => $q->accessibleByNonSubscribers())
+            ->when($access === 'subscribers', fn ($q) => $q->exclusiveForSubscribers())
+            ->when($source === 'nova', fn ($q) => $q->nonLegacy())
+            ->when($source === 'acervo', fn ($q) => $q->legacy())
+            ->when(
+                filled($year) && ctype_digit((string) $year) && (int) $year > 1900 && (int) $year <= (int) now()->format('Y') + 1,
+                function ($q) use ($year) {
+                    $y = (int) $year;
+                    $q->where(function ($qq) use ($y) {
+                        $qq->whereYear('release_date', $y)
+                            ->orWhere(function ($q2) use ($y) {
+                                $q2->whereNull('release_date')
+                                    ->whereYear('published_at', $y);
+                            });
+                    });
+                }
+            )
+            ->select('id');
 
-        return view('editions.index', compact('editions', 'search', 'editionYears'));
+        $query = EditionPageText::query()
+            ->select('edition_page_texts.*')
+            ->join('editions', 'editions.id', '=', 'edition_page_texts.edition_id')
+            ->whereIn('edition_page_texts.edition_id', $editionIdsQuery)
+            ->with([
+                'edition' => fn ($q) => $q->select('id', 'title', 'slug', 'cover_image', 'release_date', 'published_at', 'is_legacy', 'pdf_file', 'description'),
+            ]);
+
+        if ($isMysql && $fullTextQuery !== '') {
+            $query->whereRaw(
+                'MATCH(edition_page_texts.body_html) AGAINST (? IN BOOLEAN MODE)',
+                [$fullTextQuery]
+            );
+        } else {
+            $query->where('edition_page_texts.body_html', 'like', $like);
+        }
+
+        $query->orderByRaw('COALESCE(editions.release_date, editions.published_at) desc')
+            ->orderByRaw('COALESCE(edition_page_texts.page_number, 9999) asc')
+            ->orderBy('edition_page_texts.page_label', 'asc');
+
+        $paginator = $query->paginate(12)->withQueryString();
+
+        $paginator->getCollection()->transform(function (EditionPageText $pt) use ($search) {
+            $pt->snippet_html = $this->buildSnippet((string) $pt->body_html, $search);
+            $pt->open_url = $this->buildOpenAtPageUrl($pt, $search);
+
+            return $pt;
+        });
+
+        return $paginator;
+    }
+
+    /**
+     * Paginator vazio para que a view não quebre quando estiver no modo "content".
+     */
+    protected function emptyEditionsPaginator(Request $request)
+    {
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            collect(),
+            0,
+            12,
+            $request->input('page', 1),
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
     }
 
     /**
@@ -254,7 +353,7 @@ class EditionController extends Controller
         $edition->load(['pages', 'pageTexts']);
 
         $pageTexts = $edition->pageTexts
-            ->mapWithKeys(fn ($pt) => [$pt->page_label => $pt->body_html ?? ''])
+            ->mapWithKeys(fn ($pt) => [$pt->page_label => $this->stripInvalidCharRefs((string) ($pt->body_html ?? ''))])
             ->all();
 
         return view('editions.magazine', compact('edition', 'pageTexts'));
@@ -355,6 +454,204 @@ class EditionController extends Controller
             ->limit(5000)
             ->pluck('edition_id')
             ->all();
+    }
+
+    /**
+     * Gera um trecho ("snippet") do texto da página em torno do termo buscado,
+     * marcando o termo com <mark> para o front-end renderizar como destaque.
+     * Tudo é escapado contra XSS exceto o próprio <mark>.
+     *
+     * Funciona de forma case- e accent-insensitive: a posição é encontrada em
+     * um índice "normalizado" (sem acentos, em lowercase), mas o snippet
+     * retornado preserva o texto original (com acentos e capitalização).
+     */
+    protected function buildSnippet(string $html, string $term, int $contextChars = 140): string
+    {
+        $plain = trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $plain = $this->stripInvalidCharRefs($plain);
+        $plain = preg_replace('/\s+/u', ' ', $plain) ?? $plain;
+        if ($plain === '') {
+            return '';
+        }
+
+        $haystackNorm = $this->normalizeForSearch($plain);
+        $words = array_filter(preg_split('/\s+/u', trim($term)) ?: [], fn ($w) => $w !== '');
+
+        $pos = false;
+        $matchLen = 0;
+        foreach ($words as $w) {
+            $needle = $this->normalizeForSearch($w);
+            if ($needle === '') {
+                continue;
+            }
+            $found = mb_strpos($haystackNorm, $needle);
+            if ($found !== false) {
+                $pos = $found;
+                $matchLen = mb_strlen($needle);
+                break;
+            }
+        }
+
+        if ($pos === false) {
+            // Termo não localizado (raro, mas pode acontecer com FULLTEXT-only matches
+            // que casam por prefixo em outra palavra). Devolve o começo do texto.
+            $head = mb_substr($plain, 0, $contextChars * 2);
+            $head = e($head);
+            if (mb_strlen($plain) > $contextChars * 2) {
+                $head .= '…';
+            }
+
+            return $head;
+        }
+
+        $start = max(0, $pos - $contextChars);
+        $length = $matchLen + ($contextChars * 2);
+        $snippet = mb_substr($plain, $start, $length);
+
+        // Recorta nas bordas das palavras para não cortar pelo meio.
+        if ($start > 0) {
+            $firstSpace = mb_strpos($snippet, ' ');
+            if ($firstSpace !== false && $firstSpace < 30) {
+                $snippet = mb_substr($snippet, $firstSpace + 1);
+            }
+        }
+        $endsAtText = ($start + $length) >= mb_strlen($plain);
+        if (! $endsAtText) {
+            $lastSpace = mb_strrpos($snippet, ' ');
+            if ($lastSpace !== false && (mb_strlen($snippet) - $lastSpace) < 30) {
+                $snippet = mb_substr($snippet, 0, $lastSpace);
+            }
+        }
+
+        // Destaca cada palavra do termo (case/accent-insensitive) no snippet
+        // preservando o conteúdo original. Para isso, percorremos o snippet
+        // e o snippet normalizado em paralelo.
+        $highlighted = $this->highlightTermsInText($snippet, $words);
+
+        $prefix = $start > 0 ? '…' : '';
+        $suffix = $endsAtText ? '' : '…';
+
+        return $prefix.$highlighted.$suffix;
+    }
+
+    /**
+     * Destaca cada palavra do termo no texto (case/accent-insensitive),
+     * envolvendo cada ocorrência em <mark>. Retorna HTML escapado + <mark>.
+     *
+     * @param  array<int, string>  $words
+     */
+    protected function highlightTermsInText(string $text, array $words): string
+    {
+        $textNorm = $this->normalizeForSearch($text);
+        // Coleta intervalos a destacar (posição em UTF-8 char-index, length em chars).
+        $ranges = [];
+        foreach ($words as $w) {
+            $needle = $this->normalizeForSearch($w);
+            if ($needle === '') {
+                continue;
+            }
+            $needleLen = mb_strlen($needle);
+            $offset = 0;
+            while (($p = mb_strpos($textNorm, $needle, $offset)) !== false) {
+                $ranges[] = [$p, $needleLen];
+                $offset = $p + $needleLen;
+            }
+        }
+
+        if ($ranges === []) {
+            return e($text);
+        }
+
+        // Ordena e funde intervalos sobrepostos.
+        usort($ranges, fn ($a, $b) => $a[0] <=> $b[0]);
+        $merged = [];
+        foreach ($ranges as $r) {
+            if ($merged === []) {
+                $merged[] = $r;
+
+                continue;
+            }
+            $last = &$merged[count($merged) - 1];
+            if ($r[0] <= $last[0] + $last[1]) {
+                $last[1] = max($last[1], ($r[0] + $r[1]) - $last[0]);
+            } else {
+                $merged[] = $r;
+            }
+            unset($last);
+        }
+
+        // Reconstrói o snippet escapando o texto e inserindo <mark>...</mark>.
+        $out = '';
+        $cursor = 0;
+        foreach ($merged as [$p, $len]) {
+            $out .= e(mb_substr($text, $cursor, $p - $cursor));
+            $out .= '<mark>'.e(mb_substr($text, $p, $len)).'</mark>';
+            $cursor = $p + $len;
+        }
+        $out .= e(mb_substr($text, $cursor));
+
+        return $out;
+    }
+
+    /**
+     * Remove referências numéricas de caracteres inválidas (fora do intervalo
+     * Unicode 0..0x10FFFF) que o smalot/pdfparser emite para ligaduras de
+     * fontes embutidas no PDF (ex.: "f&#6684777;m" → "fm" no lugar de "fim").
+     *
+     * Isso evita aparecer "&#6684780;" como lixo visível nos snippets/painel
+     * de texto. A limpeza definitiva (ao extrair) pode ser feita depois;
+     * aqui só sanitizamos para exibição.
+     */
+    protected function stripInvalidCharRefs(string $text): string
+    {
+        return preg_replace_callback(
+            '/&#(\d+);/',
+            fn ($m) => ((int) $m[1]) > 0x10FFFF ? '' : $m[0],
+            $text
+        ) ?? $text;
+    }
+
+    /**
+     * Normaliza string para busca insensível a caixa e acentos.
+     */
+    protected function normalizeForSearch(string $text): string
+    {
+        $text = mb_strtolower($text, 'UTF-8');
+        $text = strtr($text, [
+            'á' => 'a', 'à' => 'a', 'ã' => 'a', 'â' => 'a', 'ä' => 'a',
+            'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'õ' => 'o', 'ô' => 'o', 'ö' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+            'ç' => 'c', 'ñ' => 'n',
+        ]);
+
+        return $text;
+    }
+
+    /**
+     * URL do visualizador da revista posicionado na página onde o termo aparece,
+     * preservando o termo de busca para destaque no painel de texto.
+     */
+    protected function buildOpenAtPageUrl(EditionPageText $pt, string $term): string
+    {
+        if (! $pt->relationLoaded('edition') || ! $pt->edition) {
+            return '#';
+        }
+
+        $params = [];
+
+        // Prioriza page_number (índice numérico do PDF/legacy) e cai pra page_label.
+        if ($pt->page_number !== null) {
+            $params['page'] = $pt->page_number;
+        } else {
+            $params['page'] = $pt->page_label;
+        }
+        if ($term !== '') {
+            $params['q'] = $term;
+        }
+
+        return route('editions.magazine', $pt->edition->slug).'?'.http_build_query($params);
     }
 
     /**

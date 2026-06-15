@@ -49,6 +49,14 @@
         <script>
             window.PAGE_TEXTS = @json($pageTexts);
             window.HAS_ANY_PAGE_TEXT = @json($hasAnyPageText);
+            (function () {
+                var params = new URLSearchParams(window.location.search);
+                var rawPage = params.get('page');
+                window.MAGAZINE_TARGET_PAGE = rawPage !== null && /^\d+$/.test(rawPage)
+                    ? parseInt(rawPage, 10)
+                    : null;
+                window.MAGAZINE_HIGHLIGHT = (params.get('q') || '').trim();
+            })();
         </script>
         <div id="magazine-viewer" class="bg-white rounded-lg shadow-lg p-4">
             @if($hasPages)
@@ -97,6 +105,17 @@
 
                         let index = 0;
                         let zoom = 1.0;
+
+                        // Auto-jump para a página vinda da busca (?page=N).
+                        // Casa pelo prefixo numérico do label ("P01", "P02-03" → 1, 2).
+                        const targetPage = window.MAGAZINE_TARGET_PAGE;
+                        if (targetPage != null) {
+                            const idx = pages.findIndex(function (p) {
+                                const m = String(p.label || '').match(/^P?(\d+)/i);
+                                return m && parseInt(m[1], 10) === targetPage;
+                            });
+                            if (idx >= 0) index = idx;
+                        }
 
                         const img = document.getElementById('magazine-page-img');
                         const labelEl = document.getElementById('current-page-label');
@@ -301,6 +320,15 @@
                         pdfDoc = pdf;
                         document.getElementById('page-count').textContent = pdf.numPages;
                         scaleType = 'width';
+
+                        // Auto-jump para a página vinda da busca (?page=N). O viewer
+                        // mostra spreads (par/ímpar), então alinhamos no número ímpar.
+                        var target = window.MAGAZINE_TARGET_PAGE;
+                        if (target != null && target >= 1 && target <= pdf.numPages) {
+                            pageNum = target % 2 === 0 ? target - 1 : target;
+                            if (pageNum < 1) pageNum = 1;
+                        }
+
                         renderPages();
                     }).catch(function(error) {
                         console.error('Erro ao carregar PDF:', error);
@@ -334,9 +362,11 @@
                 (function () {
                     var PAGE_TEXTS = window.PAGE_TEXTS || {};
                     var HAS_ANY = !!window.HAS_ANY_PAGE_TEXT;
+                    var HIGHLIGHT = window.MAGAZINE_HIGHLIGHT || '';
                     var contentEl = document.getElementById('page-text-content');
                     var labelEl = document.getElementById('page-text-label');
                     if (!contentEl) return;
+                    var didInitialScroll = false;
 
                     function fallbackHtml(label) {
                         if (!HAS_ANY) {
@@ -352,6 +382,75 @@
                             if (typeof v === 'string' && v.trim() !== '') return v;
                         }
                         return null;
+                    }
+
+                    function stripAccents(s) {
+                        return s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
+                    }
+
+                    // Destaca cada palavra do termo dentro de cada nó de texto do
+                    // elemento (case/accent-insensitive). Não toca em nodes que já
+                    // estão dentro de <mark>, e não quebra estrutura HTML existente.
+                    function highlightInElement(root, term) {
+                        if (!root || !term) return 0;
+                        var words = term.split(/\s+/).filter(function (w) { return w.length >= 2; });
+                        if (!words.length) return 0;
+
+                        var normalizedNeedles = words.map(function (w) { return stripAccents(w).toLowerCase(); });
+                        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+                            acceptNode: function (n) {
+                                if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                                if (n.parentNode && n.parentNode.nodeName === 'MARK') return NodeFilter.FILTER_REJECT;
+                                return NodeFilter.FILTER_ACCEPT;
+                            },
+                        });
+                        var nodes = [];
+                        var n;
+                        while ((n = walker.nextNode())) nodes.push(n);
+
+                        var hits = 0;
+                        nodes.forEach(function (textNode) {
+                            var raw = textNode.nodeValue;
+                            var normalized = stripAccents(raw).toLowerCase();
+                            var matches = [];
+                            normalizedNeedles.forEach(function (needle) {
+                                var idx = 0;
+                                while ((idx = normalized.indexOf(needle, idx)) !== -1) {
+                                    matches.push([idx, idx + needle.length]);
+                                    idx += needle.length;
+                                }
+                            });
+                            if (!matches.length) return;
+                            matches.sort(function (a, b) { return a[0] - b[0]; });
+                            // funde sobreposições
+                            var merged = [matches[0]];
+                            for (var i = 1; i < matches.length; i++) {
+                                var last = merged[merged.length - 1];
+                                if (matches[i][0] <= last[1]) {
+                                    last[1] = Math.max(last[1], matches[i][1]);
+                                } else {
+                                    merged.push(matches[i]);
+                                }
+                            }
+                            var frag = document.createDocumentFragment();
+                            var cursor = 0;
+                            merged.forEach(function (r) {
+                                if (r[0] > cursor) {
+                                    frag.appendChild(document.createTextNode(raw.slice(cursor, r[0])));
+                                }
+                                var mark = document.createElement('mark');
+                                mark.textContent = raw.slice(r[0], r[1]);
+                                frag.appendChild(mark);
+                                cursor = r[1];
+                                hits++;
+                            });
+                            if (cursor < raw.length) {
+                                frag.appendChild(document.createTextNode(raw.slice(cursor)));
+                            }
+                            textNode.parentNode.replaceChild(frag, textNode);
+                        });
+
+                        return hits;
                     }
 
                     window.updatePageText = function (left, right) {
@@ -379,6 +478,19 @@
 
                         if (labelEl) {
                             labelEl.textContent = labels.length ? ('Página ' + labels.join(' / ')) : '';
+                        }
+
+                        if (HIGHLIGHT) {
+                            var hits = highlightInElement(contentEl, HIGHLIGHT);
+                            if (hits > 0 && !didInitialScroll) {
+                                didInitialScroll = true;
+                                setTimeout(function () {
+                                    var firstMark = contentEl.querySelector('mark');
+                                    if (firstMark) {
+                                        firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                }, 250);
+                            }
                         }
                     };
 
