@@ -388,15 +388,22 @@
                         return s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
                     }
 
+                    function isWordChar(ch) {
+                        return ch != null && /[a-z0-9]/.test(ch);
+                    }
+
                     // Destaca cada palavra do termo dentro de cada nó de texto do
-                    // elemento (case/accent-insensitive). Não toca em nodes que já
-                    // estão dentro de <mark>, e não quebra estrutura HTML existente.
+                    // elemento (case/accent-insensitive). Só casa em borda de
+                    // palavra e estende o match até o fim da palavra (prefix-mode),
+                    // ignora palavras com menos de 3 caracteres. Não toca em nós
+                    // dentro de <mark> e preserva a estrutura HTML.
                     function highlightInElement(root, term) {
                         if (!root || !term) return 0;
-                        var words = term.split(/\s+/).filter(function (w) { return w.length >= 2; });
-                        if (!words.length) return 0;
+                        var normalizedNeedles = term.split(/\s+/)
+                            .map(function (w) { return stripAccents(w).toLowerCase(); })
+                            .filter(function (w) { return w.length >= 3; });
+                        if (!normalizedNeedles.length) return 0;
 
-                        var normalizedNeedles = words.map(function (w) { return stripAccents(w).toLowerCase(); });
                         var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
                             acceptNode: function (n) {
                                 if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
@@ -415,9 +422,21 @@
                             var matches = [];
                             normalizedNeedles.forEach(function (needle) {
                                 var idx = 0;
-                                while ((idx = normalized.indexOf(needle, idx)) !== -1) {
-                                    matches.push([idx, idx + needle.length]);
-                                    idx += needle.length;
+                                while (idx <= normalized.length - needle.length) {
+                                    var found = normalized.indexOf(needle, idx);
+                                    if (found === -1) break;
+                                    // borda inicial: começo da string ou char não-letra antes
+                                    if (found > 0 && isWordChar(normalized.charAt(found - 1))) {
+                                        idx = found + 1;
+                                        continue;
+                                    }
+                                    // estende até o fim da palavra (prefix match)
+                                    var end = found + needle.length;
+                                    while (end < normalized.length && isWordChar(normalized.charAt(end))) {
+                                        end++;
+                                    }
+                                    matches.push([found, end]);
+                                    idx = end;
                                 }
                             });
                             if (!matches.length) return;

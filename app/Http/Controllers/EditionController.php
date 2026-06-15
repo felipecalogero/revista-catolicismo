@@ -475,19 +475,23 @@ class EditionController extends Controller
         }
 
         $haystackNorm = $this->normalizeForSearch($plain);
-        $words = array_filter(preg_split('/\s+/u', trim($term)) ?: [], fn ($w) => $w !== '');
+        // Mantém só palavras significativas (>= 3 chars), igual à regra do FULLTEXT
+        // do MySQL (innodb_ft_min_token_size = 3). Palavras como "a", "o", "de" são
+        // descartadas para não destacar todo o texto.
+        $words = array_values(array_filter(
+            preg_split('/\s+/u', trim($term)) ?: [],
+            fn ($w) => mb_strlen($this->normalizeForSearch($w)) >= 3
+        ));
 
         $pos = false;
         $matchLen = 0;
         foreach ($words as $w) {
             $needle = $this->normalizeForSearch($w);
-            if ($needle === '') {
-                continue;
-            }
-            $found = mb_strpos($haystackNorm, $needle);
+            $found = $this->findWordStart($haystackNorm, $needle, 0);
             if ($found !== false) {
                 $pos = $found;
-                $matchLen = mb_strlen($needle);
+                // Estende até o fim da palavra para o snippet ficar centrado nela.
+                $matchLen = $this->wordRunLength($haystackNorm, $found, mb_strlen($needle));
                 break;
             }
         }
@@ -536,25 +540,28 @@ class EditionController extends Controller
 
     /**
      * Destaca cada palavra do termo no texto (case/accent-insensitive),
-     * envolvendo cada ocorrência em <mark>. Retorna HTML escapado + <mark>.
+     * envolvendo cada ocorrência em <mark>. Casa só em borda de palavra
+     * (não destaca "a" dentro de "casa") e faz prefix matching estendendo
+     * o match até o fim da palavra ("perfei" → destaca "perfeição" inteiro).
      *
      * @param  array<int, string>  $words
      */
     protected function highlightTermsInText(string $text, array $words): string
     {
         $textNorm = $this->normalizeForSearch($text);
-        // Coleta intervalos a destacar (posição em UTF-8 char-index, length em chars).
         $ranges = [];
+
         foreach ($words as $w) {
             $needle = $this->normalizeForSearch($w);
-            if ($needle === '') {
+            if (mb_strlen($needle) < 3) {
                 continue;
             }
             $needleLen = mb_strlen($needle);
             $offset = 0;
-            while (($p = mb_strpos($textNorm, $needle, $offset)) !== false) {
-                $ranges[] = [$p, $needleLen];
-                $offset = $p + $needleLen;
+            while (($p = $this->findWordStart($textNorm, $needle, $offset)) !== false) {
+                $runLen = $this->wordRunLength($textNorm, $p, $needleLen);
+                $ranges[] = [$p, $runLen];
+                $offset = $p + $runLen;
             }
         }
 
@@ -609,6 +616,54 @@ class EditionController extends Controller
             fn ($m) => ((int) $m[1]) > 0x10FFFF ? '' : $m[0],
             $text
         ) ?? $text;
+    }
+
+    /**
+     * Encontra a próxima ocorrência de $needle em $haystack que comece em borda
+     * de palavra (não-letra/dígito antes, ou no início da string). Retorna o
+     * char-index UTF-8 ou false.
+     *
+     * Premissa: $haystack e $needle já estão normalizados (lowercase + sem
+     * acentos), então "letra" pode ser detectada com a classe ASCII a-z0-9.
+     */
+    protected function findWordStart(string $haystack, string $needle, int $offset)
+    {
+        if ($needle === '') {
+            return false;
+        }
+        while (($p = mb_strpos($haystack, $needle, $offset)) !== false) {
+            if ($p === 0) {
+                return $p;
+            }
+            $prev = mb_substr($haystack, $p - 1, 1);
+            // Borda de palavra: char anterior não é letra/dígito.
+            if (! preg_match('/[a-z0-9]/i', $prev)) {
+                return $p;
+            }
+            $offset = $p + 1;
+        }
+
+        return false;
+    }
+
+    /**
+     * A partir de uma posição que começa em borda de palavra, retorna o tamanho
+     * "run" (em chars) da palavra inteira para fazer prefix matching — i.e.
+     * busca "perfei" passa a destacar "perfeicao" inteiro.
+     */
+    protected function wordRunLength(string $haystack, int $start, int $minLen): int
+    {
+        $len = mb_strlen($haystack);
+        $end = $start + $minLen;
+        while ($end < $len) {
+            $ch = mb_substr($haystack, $end, 1);
+            if (! preg_match('/[a-z0-9]/i', $ch)) {
+                break;
+            }
+            $end++;
+        }
+
+        return $end - $start;
     }
 
     /**
