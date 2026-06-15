@@ -25,26 +25,16 @@ class EditionController extends Controller
             ->where('published', true)
             ->when($search !== '', function ($query) use ($search) {
                 $like = $this->searchLikePattern($search);
-                $fullTextQuery = $this->buildFullTextQuery($search);
-                $isMysql = $query->getConnection()->getDriverName() === 'mysql';
+                $matchingEditionIds = $this->editionIdsMatchingPageText($search, $query);
 
-                $query->where(function ($q) use ($like, $fullTextQuery, $isMysql) {
+                $query->where(function ($q) use ($like, $matchingEditionIds) {
                     $q->where('title', 'like', $like)
                         ->orWhere('slug', 'like', $like)
-                        ->orWhere('description', 'like', $like)
-                        ->orWhereExists(function ($sub) use ($like, $fullTextQuery, $isMysql) {
-                            $sub->from('edition_page_texts')
-                                ->whereColumn('edition_page_texts.edition_id', 'editions.id');
-                            if ($isMysql && $fullTextQuery !== '') {
-                                $sub->whereRaw(
-                                    'MATCH(edition_page_texts.body_html) AGAINST (? IN BOOLEAN MODE)',
-                                    [$fullTextQuery]
-                                );
-                            } else {
-                                // Fallback (driver não-MySQL ou termo muito curto para FULLTEXT).
-                                $sub->where('edition_page_texts.body_html', 'like', $like);
-                            }
-                        });
+                        ->orWhere('description', 'like', $like);
+
+                    if ($matchingEditionIds !== []) {
+                        $q->orWhereIn('id', $matchingEditionIds);
+                    }
                 });
             })
             ->when($access === 'free', fn ($q) => $q->accessibleByNonSubscribers())
@@ -330,6 +320,41 @@ class EditionController extends Controller
         }
 
         return [false, false, false];
+    }
+
+    /**
+     * Retorna a lista de edition_ids cujo texto de página casa com o termo
+     * informado. Executa apenas UMA consulta (não correlacionada), usando o
+     * índice FULLTEXT no MySQL ou caindo para LIKE em outros drivers.
+     *
+     * Limitado a 5000 ids para proteger a query principal — termos genéricos
+     * (ex.: "Deus") podem casar em centenas de edições, e isso é o suficiente
+     * para a paginação.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Models\Edition>  $query
+     * @return array<int, int>
+     */
+    protected function editionIdsMatchingPageText(string $search, $query): array
+    {
+        $isMysql = $query->getConnection()->getDriverName() === 'mysql';
+        $fullTextQuery = $this->buildFullTextQuery($search);
+
+        $base = \App\Models\EditionPageText::query()->select('edition_id');
+
+        if ($isMysql && $fullTextQuery !== '') {
+            $base->whereRaw(
+                'MATCH(body_html) AGAINST (? IN BOOLEAN MODE)',
+                [$fullTextQuery]
+            );
+        } else {
+            $base->where('body_html', 'like', $this->searchLikePattern($search));
+        }
+
+        return $base
+            ->distinct()
+            ->limit(5000)
+            ->pluck('edition_id')
+            ->all();
     }
 
     /**
