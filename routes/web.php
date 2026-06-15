@@ -136,6 +136,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('usuarios', \App\Http\Controllers\Admin\UserController::class)->names('users');
     Route::post('/edicoes/{id}/publicar', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
     Route::post('/edicoes/{id}/despublicar', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');
+
+    // Texto por página (extração / edição manual)
+    Route::get('/edicoes/{id}/texto', [\App\Http\Controllers\Admin\EditionController::class, 'pageTexts'])->name('editions.page-texts');
+    Route::post('/edicoes/{id}/texto/extrair', [\App\Http\Controllers\Admin\EditionController::class, 'extractText'])->name('editions.extract-text');
+    Route::post('/edicoes/{id}/texto/paginas', [\App\Http\Controllers\Admin\EditionController::class, 'storePageText'])->name('editions.page-texts.create');
+    Route::put('/edicoes/{id}/texto/paginas/{label}', [\App\Http\Controllers\Admin\EditionController::class, 'updatePageText'])
+        ->where('label', '[A-Za-z0-9_\-]+')
+        ->name('editions.page-texts.update');
+    Route::put('/edicoes/{id}/texto/paginas/{label}/reset', [\App\Http\Controllers\Admin\EditionController::class, 'resetPageText'])
+        ->where('label', '[A-Za-z0-9_\-]+')
+        ->name('editions.page-texts.reset');
 });
 
 // Rota de categorias (deve vir antes da rota de artigos)

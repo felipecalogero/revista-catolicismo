@@ -34,7 +34,7 @@
                 <x-admin.filter-bar
                     :formAction="route('editions.index')"
                     modalId="publicEditionsFilterModal"
-                    searchPlaceholder="Título, slug ou descrição…"
+                    searchPlaceholder="Título, descrição ou conteúdo das matérias…"
                     :clearUrl="route('editions.index')"
                 >
                     <x-slot name="modal">

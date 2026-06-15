@@ -161,16 +161,16 @@
                 </div>
 
                 {{-- Publicado --}}
-                <div class="flex items-center">
+                <div class="flex items-center gap-2 pt-6 mt-2 border-t border-gray-200">
                     <input
                         type="checkbox"
                         id="published"
                         name="published"
                         value="1"
                         {{ old('published') ? 'checked' : '' }}
-                        class="w-4 h-4 text-red-800 border-gray-300 rounded focus:ring-red-800"
+                        class="w-5 h-5 text-red-800 border-gray-300 rounded focus:ring-red-800"
                     >
-                    <label for="published" class="ml-2 text-sm font-medium text-gray-700">
+                    <label for="published" class="text-base font-medium text-gray-700 cursor-pointer">
                         Publicar imediatamente
                     </label>
                 </div>

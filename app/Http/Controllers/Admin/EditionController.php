@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Edition;
+use App\Models\EditionPageText;
+use App\Services\EditionPdfTextExtractor;
 use App\Services\ImageService;
 use App\Services\PdfCompressor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Edition as EditionModel;
@@ -152,6 +155,8 @@ class EditionController extends Controller
             'release_date' => $validated['release_year'].'-'.str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT).'-01',
         ]);
 
+        $this->safeExtractPdfText($edition);
+
         // Se for requisição AJAX, retornar JSON
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -273,6 +278,11 @@ class EditionController extends Controller
             'release_date' => $validated['release_year'].'-'.str_pad($validated['release_month'], 2, '0', STR_PAD_LEFT).'-01',
         ]);
 
+        // Se o PDF foi substituído, reextrai o texto.
+        if ($request->hasFile('pdf_file')) {
+            $this->safeExtractPdfText($edition);
+        }
+
         // Se for requisição AJAX, retornar JSON
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -346,5 +356,167 @@ class EditionController extends Controller
 
         return redirect()->route('admin.editions.index')
             ->with('success', 'Edição deletada com sucesso!');
+    }
+
+    /**
+     * Aciona a extração do texto do PDF de forma defensiva.
+     * Erros nunca devem interromper o fluxo de criação/atualização da edição.
+     */
+    protected function safeExtractPdfText(Edition $edition, bool $force = false): void
+    {
+        if (! $edition->pdf_file || Edition::isAbsoluteUrl($edition->pdf_file)) {
+            return;
+        }
+
+        try {
+            app(EditionPdfTextExtractor::class)->extractFromEdition($edition, $force);
+        } catch (\Throwable $e) {
+            Log::warning('Admin\\EditionController: falha ao extrair texto do PDF.', [
+                'edition_id' => $edition->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Endpoint para re-extrair o texto do PDF de uma edição existente (botão no admin).
+     */
+    public function extractText(string $id, EditionPdfTextExtractor $extractor)
+    {
+        $edition = Edition::findOrFail($id);
+
+        if ($edition->is_legacy) {
+            try {
+                $count = app(\App\Services\LegacyEditionImportService::class)
+                    ->syncPageTextsFromArticles($edition, force: true);
+            } catch (\Throwable $e) {
+                Log::warning('Admin\\EditionController::extractText: falha legado.', [
+                    'edition_id' => $edition->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return redirect()->route('admin.editions.page-texts', $edition->id)
+                    ->with('error', 'Falha ao reagrupar o texto do acervo: '.$e->getMessage());
+            }
+
+            return redirect()->route('admin.editions.page-texts', $edition->id)
+                ->with('success', "Texto reagrupado a partir das matérias. {$count} páginas atualizadas.");
+        }
+
+        if (! $edition->pdf_file) {
+            return redirect()->route('admin.editions.page-texts', $edition->id)
+                ->with('error', 'Esta edição não tem PDF associado.');
+        }
+
+        try {
+            $extractor->extractFromEdition($edition, force: true);
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.editions.page-texts', $edition->id)
+                ->with('error', 'Falha ao extrair texto do PDF: '.$e->getMessage());
+        }
+
+        $summary = $extractor->lastSummary;
+        $msg = "Extração concluída: {$summary['pages_with_text']} de {$summary['pages_total']} páginas com texto.";
+        if (! $summary['has_text_layer'] && $summary['pages_total'] > 0) {
+            $msg .= ' O PDF não parece ter camada de texto (provavelmente é digitalizado); use a edição manual abaixo.';
+        }
+        if ($summary['skipped_manual'] > 0) {
+            $msg .= " {$summary['skipped_manual']} páginas marcadas como manualmente editadas foram sobrescritas.";
+        }
+
+        return redirect()->route('admin.editions.page-texts', $edition->id)
+            ->with('success', $msg);
+    }
+
+    /**
+     * Exibe a tela de edição manual do texto de cada página.
+     */
+    public function pageTexts(string $id)
+    {
+        $edition = Edition::with('pageTexts')->findOrFail($id);
+
+        return view('admin.editions.page-texts', compact('edition'));
+    }
+
+    /**
+     * Cria manualmente um registro de texto para uma nova página (label informado no form).
+     */
+    public function storePageText(Request $request, string $id)
+    {
+        $edition = Edition::findOrFail($id);
+
+        $validated = $request->validate([
+            'page_label' => 'required|string|max:32',
+            'body_html' => 'nullable|string',
+        ]);
+
+        $label = trim($validated['page_label']);
+        $body = trim((string) ($validated['body_html'] ?? ''));
+
+        $pageText = EditionPageText::firstOrNew([
+            'edition_id' => $edition->id,
+            'page_label' => $label,
+        ]);
+
+        if (! $pageText->exists) {
+            if (ctype_digit($label)) {
+                $pageText->page_number = (int) $label;
+            } else {
+                $digits = preg_replace('/[^0-9]/', '', $label);
+                $pageText->page_number = $digits !== '' ? (int) $digits : null;
+            }
+        }
+
+        $pageText->body_html = $body !== '' ? $body : null;
+        $pageText->manually_edited = true;
+        $pageText->save();
+
+        return redirect()->route('admin.editions.page-texts', $edition->id)
+            ->with('success', 'Página '.$label.' adicionada/atualizada manualmente.');
+    }
+
+    /**
+     * Atualiza manualmente o body_html de uma página específica.
+     */
+    public function updatePageText(Request $request, string $id, string $label)
+    {
+        $edition = Edition::findOrFail($id);
+
+        $validated = $request->validate([
+            'body_html' => 'nullable|string',
+        ]);
+
+        $body = trim((string) ($validated['body_html'] ?? ''));
+
+        $pageText = EditionPageText::firstOrNew([
+            'edition_id' => $edition->id,
+            'page_label' => $label,
+        ]);
+
+        if (! $pageText->exists) {
+            $pageText->page_number = ctype_digit($label) ? (int) $label : null;
+        }
+
+        $pageText->body_html = $body !== '' ? $body : null;
+        $pageText->manually_edited = true;
+        $pageText->save();
+
+        return redirect()->route('admin.editions.page-texts', $edition->id)
+            ->with('success', 'Texto da página '.$label.' salvo com sucesso.');
+    }
+
+    /**
+     * Remove a flag manually_edited de uma página, permitindo nova extração automática.
+     */
+    public function resetPageText(string $id, string $label)
+    {
+        $edition = Edition::findOrFail($id);
+
+        EditionPageText::where('edition_id', $edition->id)
+            ->where('page_label', $label)
+            ->update(['manually_edited' => false]);
+
+        return redirect()->route('admin.editions.page-texts', $edition->id)
+            ->with('success', 'Flag de edição manual da página '.$label.' removida. Na próxima extração ela poderá ser sobrescrita.');
     }
 }

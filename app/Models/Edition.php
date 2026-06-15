@@ -60,6 +60,16 @@ class Edition extends Model
         return $this->hasMany(EditionArticle::class)->orderBy('sort_order');
     }
 
+    /**
+     * Texto de cada página (1 linha por página/spread), unificado para o viewer.
+     * Alimentado pela extração de PDF (edições novas) ou pelo agrupamento
+     * dos EditionArticle por page_label (edições legado).
+     */
+    public function pageTexts(): HasMany
+    {
+        return $this->hasMany(EditionPageText::class)->orderByRaw('COALESCE(page_number, 9999) asc')->orderBy('page_label');
+    }
+
     public static function isAbsoluteUrl(?string $value): bool
     {
         return (bool) $value && Str::startsWith($value, ['http://', 'https://']);

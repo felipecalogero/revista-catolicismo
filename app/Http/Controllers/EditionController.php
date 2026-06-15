@@ -25,10 +25,26 @@ class EditionController extends Controller
             ->where('published', true)
             ->when($search !== '', function ($query) use ($search) {
                 $like = $this->searchLikePattern($search);
-                $query->where(function ($q) use ($like) {
+                $fullTextQuery = $this->buildFullTextQuery($search);
+                $isMysql = $query->getConnection()->getDriverName() === 'mysql';
+
+                $query->where(function ($q) use ($like, $fullTextQuery, $isMysql) {
                     $q->where('title', 'like', $like)
                         ->orWhere('slug', 'like', $like)
-                        ->orWhere('description', 'like', $like);
+                        ->orWhere('description', 'like', $like)
+                        ->orWhereExists(function ($sub) use ($like, $fullTextQuery, $isMysql) {
+                            $sub->from('edition_page_texts')
+                                ->whereColumn('edition_page_texts.edition_id', 'editions.id');
+                            if ($isMysql && $fullTextQuery !== '') {
+                                $sub->whereRaw(
+                                    'MATCH(edition_page_texts.body_html) AGAINST (? IN BOOLEAN MODE)',
+                                    [$fullTextQuery]
+                                );
+                            } else {
+                                // Fallback (driver não-MySQL ou termo muito curto para FULLTEXT).
+                                $sub->where('edition_page_texts.body_html', 'like', $like);
+                            }
+                        });
                 });
             })
             ->when($access === 'free', fn ($q) => $q->accessibleByNonSubscribers())
@@ -245,9 +261,13 @@ class EditionController extends Controller
             return $this->redirectFromBlockedAccess($edition);
         }
 
-        $edition->load('pages');
+        $edition->load(['pages', 'pageTexts']);
 
-        return view('editions.magazine', compact('edition'));
+        $pageTexts = $edition->pageTexts
+            ->mapWithKeys(fn ($pt) => [$pt->page_label => $pt->body_html ?? ''])
+            ->all();
+
+        return view('editions.magazine', compact('edition', 'pageTexts'));
     }
 
     /**
@@ -310,6 +330,38 @@ class EditionController extends Controller
         }
 
         return [false, false, false];
+    }
+
+    /**
+     * Sanitiza o termo informado pelo usuário e o transforma em uma expressão
+     * para FULLTEXT MATCH...AGAINST em BOOLEAN MODE, com prefix-wildcard.
+     *
+     * Exemplo: "Thomas Morus" -> "+Thomas* +Morus*"
+     *          "Halloween"    -> "+Halloween*"
+     *
+     * Retorna string vazia quando não há termo utilizável (ex.: só caracteres especiais
+     * ou palavras menores que innodb_ft_min_token_size, padrão 3 chars).
+     */
+    protected function buildFullTextQuery(string $search): string
+    {
+        // Remove caracteres especiais reservados pelo BOOLEAN MODE do MySQL.
+        $sanitized = preg_replace('/[+\-><()~*"@]/u', ' ', $search);
+        $sanitized = trim(preg_replace('/\s+/u', ' ', (string) $sanitized));
+        if ($sanitized === '') {
+            return '';
+        }
+
+        $words = array_filter(
+            explode(' ', $sanitized),
+            // FULLTEXT do InnoDB ignora tokens com menos de 3 caracteres por padrão.
+            fn ($w) => mb_strlen($w) >= 3
+        );
+
+        if ($words === []) {
+            return '';
+        }
+
+        return implode(' ', array_map(fn ($w) => '+'.$w.'*', $words));
     }
 
     protected function respondPdfDownload(Edition $edition): BinaryFileResponse|\Illuminate\Http\RedirectResponse

@@ -6,6 +6,10 @@
     $fileUrl = $edition->pdf_file_url;
     $hasPages = $edition->pages->isNotEmpty();
     $pages = $edition->pages;
+    $pageTexts = collect($pageTexts ?? [])
+        ->filter(fn ($html) => trim(strip_tags((string) $html)) !== '')
+        ->all();
+    $hasAnyPageText = ! empty($pageTexts);
 @endphp
 
 @section('content')
@@ -42,6 +46,10 @@
 
     {{-- Visualizador --}}
     <div class="container mx-auto px-4 lg:px-8 py-8">
+        <script>
+            window.PAGE_TEXTS = @json($pageTexts);
+            window.HAS_ANY_PAGE_TEXT = @json($hasAnyPageText);
+        </script>
         <div id="magazine-viewer" class="bg-white rounded-lg shadow-lg p-4">
             @if($hasPages)
                 {{-- Visualizador de imagens (acervo legado) --}}
@@ -108,6 +116,9 @@
                             zoomEl.textContent = Math.round(zoom * 100);
                             prevBtn.disabled = index === 0;
                             nextBtn.disabled = index === pages.length - 1;
+                            if (typeof window.updatePageText === 'function') {
+                                window.updatePageText(p.label, null);
+                            }
                         }
 
                         prevBtn.addEventListener('click', function () {
@@ -219,22 +230,25 @@
                             canvasRight.width = 0;
                             canvasRight.height = 0;
                         }
-                        Promise.all(promises).then(function() {
-                            pageRendering = false;
-                            document.getElementById('page-num-left').textContent = leftPage;
-                            if (rightPage) {
-                                document.getElementById('page-num-right').textContent = rightPage;
-                                canvasRight.style.display = 'block';
-                            } else {
-                                document.getElementById('page-num-right').textContent = leftPage;
-                                canvasRight.style.display = 'none';
-                            }
-                            if (pageNumPending !== null) {
-                                pageNum = pageNumPending;
-                                pageNumPending = null;
-                                renderPages();
-                            }
-                        });
+                    Promise.all(promises).then(function() {
+                        pageRendering = false;
+                        document.getElementById('page-num-left').textContent = leftPage;
+                        if (rightPage) {
+                            document.getElementById('page-num-right').textContent = rightPage;
+                            canvasRight.style.display = 'block';
+                        } else {
+                            document.getElementById('page-num-right').textContent = leftPage;
+                            canvasRight.style.display = 'none';
+                        }
+                        if (typeof window.updatePageText === 'function') {
+                            window.updatePageText(leftPage, rightPage);
+                        }
+                        if (pageNumPending !== null) {
+                            pageNum = pageNumPending;
+                            pageNumPending = null;
+                            renderPages();
+                        }
+                    });
                     }
 
                     function queueRenderPages(num) {
@@ -299,6 +313,82 @@
                 </p>
             @endif
         </div>
+
+        {{-- Texto sincronizado com a página atual do visualizador --}}
+        @if($hasPages || $fileUrl)
+            <aside id="page-text-panel" class="bg-white rounded-lg shadow-lg p-6 md:p-10 mt-6 w-full">
+                <div class="flex items-center justify-between flex-wrap gap-3 mb-4 pb-3 border-b border-gray-200">
+                    <h2 class="font-serif text-2xl text-gray-900">Texto desta página</h2>
+                    <span id="page-text-label" class="text-xs uppercase tracking-wide text-gray-500"></span>
+                </div>
+                <div id="page-text-content" class="quill-content w-full text-gray-800 text-base md:text-lg leading-relaxed">
+                    @if($hasAnyPageText)
+                        <p class="text-gray-500 italic">Carregando texto…</p>
+                    @else
+                        <p class="text-gray-500 italic">O texto desta edição ainda não está disponível em formato digital. Use o visualizador acima para ler as páginas escaneadas.</p>
+                    @endif
+                </div>
+            </aside>
+
+            <script>
+                (function () {
+                    var PAGE_TEXTS = window.PAGE_TEXTS || {};
+                    var HAS_ANY = !!window.HAS_ANY_PAGE_TEXT;
+                    var contentEl = document.getElementById('page-text-content');
+                    var labelEl = document.getElementById('page-text-label');
+                    if (!contentEl) return;
+
+                    function fallbackHtml(label) {
+                        if (!HAS_ANY) {
+                            return '<p class="text-gray-500 italic">O texto desta edição ainda não está disponível em formato digital.</p>';
+                        }
+                        return '<p class="text-gray-500 italic">Texto desta página ainda não disponível.</p>';
+                    }
+
+                    function getText(key) {
+                        if (key == null) return null;
+                        if (Object.prototype.hasOwnProperty.call(PAGE_TEXTS, key)) {
+                            var v = PAGE_TEXTS[key];
+                            if (typeof v === 'string' && v.trim() !== '') return v;
+                        }
+                        return null;
+                    }
+
+                    window.updatePageText = function (left, right) {
+                        if (right === undefined) right = null;
+                        var labels = [];
+                        var parts = [];
+
+                        var leftText = getText(String(left));
+                        if (leftText) {
+                            parts.push('<section data-page="' + left + '">' + leftText + '</section>');
+                        }
+                        if (left != null) labels.push(String(left));
+
+                        if (right != null && String(right) !== String(left)) {
+                            var rightText = getText(String(right));
+                            if (rightText) {
+                                parts.push('<section data-page="' + right + '">' + rightText + '</section>');
+                            }
+                            labels.push(String(right));
+                        }
+
+                        contentEl.innerHTML = parts.length
+                            ? parts.join('<hr class="my-8 border-gray-200">')
+                            : fallbackHtml(labels.join(', '));
+
+                        if (labelEl) {
+                            labelEl.textContent = labels.length ? ('Página ' + labels.join(' / ')) : '';
+                        }
+                    };
+
+                    if (!HAS_ANY) {
+                        // Garante mensagem padrão antes do viewer iniciar.
+                        contentEl.innerHTML = fallbackHtml('');
+                    }
+                })();
+            </script>
+        @endif
     </div>
 </div>
 </div>

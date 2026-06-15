@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Edition;
 use App\Models\EditionArticle;
 use App\Models\EditionPage;
+use App\Models\EditionPageText;
 use App\Models\User;
 use Carbon\Carbon;
 use DOMDocument;
@@ -221,6 +222,7 @@ class LegacyEditionImportService
 
         $pages = $this->syncPages($edition, $dir, $padded, $skipExistingAssets);
         $articles = $this->syncArticles($edition, $dir);
+        $this->syncPageTextsFromArticles($edition);
 
         return [
             'edition' => $edition->refresh(),
@@ -230,6 +232,81 @@ class LegacyEditionImportService
             'pages' => $pages,
             'articles' => $articles,
         ];
+    }
+
+    /**
+     * Agrupa os EditionArticle por page_label e popula edition_page_texts.
+     * Preserva entradas marcadas como manually_edited, exceto quando $force=true.
+     *
+     * @return int número de páginas com texto sincronizadas
+     */
+    public function syncPageTextsFromArticles(Edition $edition, bool $force = false): int
+    {
+        $articles = EditionArticle::where('edition_id', $edition->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        if ($articles->isEmpty()) {
+            return 0;
+        }
+
+        $existing = EditionPageText::where('edition_id', $edition->id)
+            ->get()
+            ->keyBy('page_label');
+
+        $seenLabels = [];
+        $synced = 0;
+
+        foreach ($articles->groupBy('page_label') as $label => $group) {
+            $label = (string) ($label ?: '');
+            if ($label === '') {
+                continue;
+            }
+            $seenLabels[] = $label;
+
+            $current = $existing->get($label);
+            if ($current && $current->manually_edited && ! $force) {
+                continue;
+            }
+
+            $bodyHtml = $group
+                ->map(function (EditionArticle $article) {
+                    $title = trim((string) $article->title);
+                    $body = (string) ($article->body_html ?? '');
+                    if ($title !== '') {
+                        return '<h3 class="mt-6 mb-3 font-serif text-xl text-red-900">'.e($title).'</h3>'."\n".$body;
+                    }
+
+                    return $body;
+                })
+                ->filter(fn ($html) => trim(strip_tags((string) $html)) !== '')
+                ->implode("\n<hr class=\"my-6 border-gray-200\">\n");
+
+            EditionPageText::updateOrCreate(
+                [
+                    'edition_id' => $edition->id,
+                    'page_label' => $label,
+                ],
+                [
+                    'page_number' => $this->labelToSortOrder($label),
+                    'body_html' => $bodyHtml ?: null,
+                    'manually_edited' => false,
+                ]
+            );
+
+            if ($bodyHtml !== '') {
+                $synced++;
+            }
+        }
+
+        // Limpa labels obsoletos (não retornados pelo agrupamento atual),
+        // preservando entradas manualmente editadas.
+        EditionPageText::where('edition_id', $edition->id)
+            ->whereNotIn('page_label', $seenLabels)
+            ->where('manually_edited', false)
+            ->delete();
+
+        return $synced;
     }
 
     /**
