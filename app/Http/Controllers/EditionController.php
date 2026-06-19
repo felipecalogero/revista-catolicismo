@@ -6,6 +6,7 @@ use App\Models\Edition;
 use App\Models\EditionArticle;
 use App\Models\EditionPage;
 use App\Models\EditionPageText;
+use App\Support\MagazineViewerUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -321,7 +322,7 @@ class EditionController extends Controller
         $user = auth()->user();
 
         if (! $user) {
-            return redirect()->route('login')
+            return redirect()->guest(route('login'))
                 ->with('error', 'Você precisa estar logado para baixar esta edição.');
         }
 
@@ -384,7 +385,7 @@ class EditionController extends Controller
     protected function redirectFromBlockedAccess(Edition $edition)
     {
         if (! auth()->check()) {
-            return redirect()->route('login')
+            return redirect()->guest(route('login'))
                 ->with('error', 'Você precisa estar logado para acessar esta edição.');
         }
 
@@ -694,19 +695,12 @@ class EditionController extends Controller
             return '#';
         }
 
-        $params = [];
-
-        // Prioriza page_number (índice numérico do PDF/legacy) e cai pra page_label.
-        if ($pt->page_number !== null) {
-            $params['page'] = $pt->page_number;
-        } else {
-            $params['page'] = $pt->page_label;
-        }
-        if ($term !== '') {
-            $params['q'] = $term;
-        }
-
-        return route('editions.magazine', $pt->edition->slug).'?'.http_build_query($params);
+        return MagazineViewerUrl::build(
+            $pt->edition,
+            $term,
+            $pt->page_number,
+            $pt->page_label,
+        );
     }
 
     /**

@@ -173,7 +173,7 @@
                                 });
                             </script>
                         @else
-                            <a href="{{ route('login') }}" 
+                            <a href="{{ login_url() }}" 
                                 class="w-full bg-red-800 text-white px-6 py-4 rounded-lg text-lg font-bold hover:bg-red-900 transition-colors shadow-md hover:shadow-lg text-center block">
                                 Fazer Login para Assinar
                             </a>

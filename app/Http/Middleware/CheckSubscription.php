@@ -24,7 +24,7 @@ class CheckSubscription
 
         // Verifica se o usuário está autenticado
         if (!$user) {
-            return redirect()->route('login')
+            return redirect()->guest(route('login'))
                 ->with('error', 'Você precisa estar logado para acessar este conteúdo.');
         }
 

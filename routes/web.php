@@ -19,9 +19,11 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PagBankWebhookController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\SearchController;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/busca', [SearchController::class, 'index'])->name('search.index');
 Route::get('/sobre-nos', [PageController::class, 'about'])->name('pages.about');
 Route::get('/nossa-missao', [PageController::class, 'mission'])->name('pages.mission');
 Route::get('/politica-de-privacidade', [PageController::class, 'privacy'])->name('pages.privacy');

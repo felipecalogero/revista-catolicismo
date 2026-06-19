@@ -64,6 +64,16 @@
                         </div>
                     </div>
                 @endif
+                <a
+                    href="{{ route('search.index') }}"
+                    class="hidden lg:inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-red-300 hover:text-red-800"
+                    title="Buscar no site"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Buscar
+                </a>
                 @auth
                     <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300">
                         @if(Auth::user()->isAdmin())
@@ -83,7 +93,7 @@
                         </form>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                    <a href="{{ login_url() }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
                     </a>
                     <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
@@ -106,7 +116,13 @@
 
         {{-- Mobile Menu --}}
         <div id="mobile-menu" class="hidden lg:hidden pb-4 border-t border-gray-200 mt-2">
-            <nav class="flex flex-col space-y-3 pt-4">
+            <div class="pt-4 pb-2">
+                <a href="{{ route('search.index') }}" class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-red-300 hover:text-red-800">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Buscar no site
+                </a>
+            </div>
+            <nav class="flex flex-col space-y-3 pt-2">
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
@@ -172,7 +188,7 @@
                         </form>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                    <a href="{{ login_url() }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
                     </a>
                     <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm text-center mt-2">

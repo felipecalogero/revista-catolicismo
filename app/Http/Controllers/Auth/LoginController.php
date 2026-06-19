@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\LoginRedirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -12,8 +13,10 @@ class LoginController extends Controller
     /**
      * Mostra o formulário de login
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        LoginRedirect::rememberFromRequest($request);
+
         return view('auth.login');
     }
 

@@ -17,7 +17,7 @@ class EnsureUserIsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         if (!Auth::user()->isAdmin()) {

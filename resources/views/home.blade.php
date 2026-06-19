@@ -36,6 +36,18 @@
         </div>
     </section>
 
+    {{-- Busca global --}}
+    <section class="relative border-b border-gray-200 py-10">
+        <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
+        <div class="relative z-10 container mx-auto px-4 lg:px-8">
+            <div class="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+                <h2 class="mb-1 text-center font-serif text-2xl font-bold text-gray-900">Buscar no site</h2>
+                <p class="mb-5 text-center text-sm text-gray-600">Matérias, edições da revista e acervo histórico</p>
+                <x-site-search-form size="large" :showHint="true" />
+            </div>
+        </div>
+    </section>
+
     {{-- Informativo de Acesso --}}
     <div class="bg-gray-100 py-4 border-b border-gray-200">
         <div class="container mx-auto px-4 lg:px-8 flex items-center gap-3 text-gray-700">
