@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Edition;
 use App\Models\EditionPageText;
+use App\Support\PdfExtractedTextSanitizer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
@@ -113,8 +114,6 @@ class EditionPdfTextExtractor
             );
         }
 
-        // Limpa páginas obsoletas (ex: PDF substituído por versão com menos páginas),
-        // preservando entradas marcadas como manualmente editadas.
         EditionPageText::where('edition_id', $edition->id)
             ->whereNotIn('page_label', $seenLabels)
             ->where('manually_edited', false)
@@ -126,7 +125,7 @@ class EditionPdfTextExtractor
     }
 
     /**
-     * Converte o texto de uma página do PDF em HTML simples (1 parágrafo por bloco de texto).
+     * Converte o texto de uma página do PDF em HTML simples (um parágrafo por bloco).
      */
     protected function extractPageHtml($page): ?string
     {
@@ -141,17 +140,14 @@ class EditionPdfTextExtractor
         }
 
         $text = $this->cleanPageText($text);
+        $text = PdfExtractedTextSanitizer::sanitize($text);
         $text = trim($text);
         if ($text === '') {
             return null;
         }
 
-        // Normaliza quebras de linha e separa em parágrafos por linha em branco.
-        $normalized = str_replace(["\r\n", "\r"], "\n", $text);
-        $blocks = preg_split("/\n{2,}/u", $normalized) ?: [];
-
         $paragraphs = [];
-        foreach ($blocks as $block) {
+        foreach ($this->splitIntoParagraphs($text) as $block) {
             $block = $this->reflowBlock($block);
             if ($block === '') {
                 continue;
@@ -163,23 +159,97 @@ class EditionPdfTextExtractor
     }
 
     /**
-     * Reflui um bloco de texto extraído do PDF (que vem com quebras de linha
-     * nas larguras da coluna original) em texto corrido, juntando linhas e
-     * desfazendo hifenizações de fim de linha.
+     * Agrupa linhas do PDF em parágrafos.
+     *
+     * O extrator emite quebras simples no fim de cada linha da coluna; parágrafos
+     * reais só aparecem como linha em branco ou quando uma frase termina e a
+     * próxima começa com letra maiúscula.
+     *
+     * @return array<int, string>
+     */
+    protected function splitIntoParagraphs(string $text): array
+    {
+        $text = str_replace(["\r\n", "\r"], "\n", $text);
+        $lines = explode("\n", $text);
+        $paragraphs = [];
+        $current = '';
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                if ($current !== '') {
+                    $paragraphs[] = $current;
+                    $current = '';
+                }
+
+                continue;
+            }
+
+            if ($current === '') {
+                $current = $line;
+
+                continue;
+            }
+
+            if ($this->shouldStartNewParagraph($current, $line)) {
+                $paragraphs[] = $current;
+                $current = $line;
+            } else {
+                $current = $this->joinContinuationLine($current, $line);
+            }
+        }
+
+        if ($current !== '') {
+            $paragraphs[] = $current;
+        }
+
+        return $paragraphs;
+    }
+
+    protected function shouldStartNewParagraph(string $previous, string $next): bool
+    {
+        $previous = rtrim($previous);
+        $next = ltrim($next);
+
+        if ($next === '' || $previous === '') {
+            return false;
+        }
+
+        if (preg_match('/^(\d+[\.\)]|[-•●▪*])\s+\p{L}/u', $next)) {
+            return true;
+        }
+
+        if (
+            mb_strlen($next) <= 80
+            && preg_match('/^\p{Lu}/u', $next)
+            && mb_strtoupper($next, 'UTF-8') === $next
+            && preg_match('/\p{L}/u', $next)
+            && preg_match('/[.!?:…"\'»”\')]\s*$/u', $previous)
+        ) {
+            return true;
+        }
+
+        if (preg_match('/[.!?:…]["\'»”\')]*\s*$/u', $previous) && preg_match('/^["\'«“(]?\p{Lu}/u', $next)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function joinContinuationLine(string $previous, string $next): string
+    {
+        if (preg_match('/(\p{L})[ \t]*-[ \t]*$/u', $previous) && preg_match('/^\p{Ll}/u', $next)) {
+            return preg_replace('/[ \t]*-[ \t]*$/u', '', $previous).$next;
+        }
+
+        return rtrim($previous).' '.ltrim($next);
+    }
+
+    /**
+     * Normaliza espaços em um parágrafo já montado (reflow final).
      */
     protected function reflowBlock(string $block): string
     {
-        // Junta hifenizações de fim de linha. O PDF emite a hifenização de duas formas:
-        //   - "inú-\nmeras"   (sem whitespace ao redor do hífen)
-        //   - "per\t-\nguntou" (whitespace antes do hífen por justificação da linha)
-        // Em ambos os casos, a próxima linha começa com letra MINÚSCULA (continuação da palavra).
-        // Não interfere em em-dash (U+2014) usado entre frases.
-        $block = preg_replace("/(\p{L})[ \t]*-[ \t]*\n[ \t]*(\p{Ll})/u", '$1$2', $block);
-
-        // Junta linhas que pertencem ao mesmo parágrafo (separadas por \n simples).
-        $block = preg_replace("/\s*\n+\s*/u", ' ', $block);
-
-        // Normaliza múltiplos espaços.
         $block = preg_replace("/[ \t]+/u", ' ', $block);
 
         return trim($block);

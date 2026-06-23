@@ -243,11 +243,7 @@ class SearchHighlighter
 
     public function stripInvalidCharRefs(string $text): string
     {
-        return preg_replace_callback(
-            '/&#(\d+);/',
-            fn ($m) => ((int) $m[1]) > 0x10FFFF ? '' : $m[0],
-            $text
-        ) ?? $text;
+        return PdfExtractedTextSanitizer::sanitize($text);
     }
 
     public function normalizeForSearch(string $text): string

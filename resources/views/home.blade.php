@@ -14,17 +14,13 @@
                 </div>
                 <div class="flex items-center gap-3">
                     @auth
-                        @if(Auth::user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
-                                Admin
-                            </a>
-                        @else
+                        @unless(Auth::user()->isAdmin())
                             <a href="{{ route('dashboard') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
                                 Dashboard
                             </a>
-                        @endif
+                        @endunless
                     @else
-                        <a href="{{ route('login') }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
+                        <a href="{{ login_url() }}" class="bg-white/10 text-white px-6 py-2 rounded font-medium hover:bg-white/20 transition-colors whitespace-nowrap border border-white/30">
                             Entrar
                         </a>
                     @endauth
@@ -32,18 +28,6 @@
                         ASSINE AGORA
                     </a>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- Busca global --}}
-    <section class="relative border-b border-gray-200 py-10">
-        <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
-        <div class="relative z-10 container mx-auto px-4 lg:px-8">
-            <div class="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm md:p-8">
-                <h2 class="mb-1 text-center font-serif text-2xl font-bold text-gray-900">Buscar no site</h2>
-                <p class="mb-5 text-center text-sm text-gray-600">Matérias, edições da revista e acervo histórico</p>
-                <x-site-search-form size="large" :showHint="true" />
             </div>
         </div>
     </section>
@@ -59,6 +43,19 @@
             </p>
         </div>
     </div>
+
+    {{-- Busca global --}}
+    <section class="relative border-b border-gray-200 py-8 md:py-10">
+        <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
+        <div class="relative z-10 container mx-auto flex flex-col items-center justify-center px-4 lg:px-8">
+            <div class="w-full max-w-3xl">
+                <x-site-search-form size="large" subtle :showHint="false" />
+                <p class="mt-2.5 text-center text-xs text-gray-500">
+                    Matérias, edições da revista e acervo histórico
+                </p>
+            </div>
+        </div>
+    </section>
 
     {{-- Slider de Revistas Compacto --}}
     <x-revista-slider :revistas="$revistas ?? []" />

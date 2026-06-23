@@ -7,6 +7,7 @@ use App\Models\EditionArticle;
 use App\Models\EditionPage;
 use App\Models\EditionPageText;
 use App\Support\MagazineViewerUrl;
+use App\Support\PdfExtractedTextSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -601,22 +602,9 @@ class EditionController extends Controller
         return $out;
     }
 
-    /**
-     * Remove referências numéricas de caracteres inválidas (fora do intervalo
-     * Unicode 0..0x10FFFF) que o smalot/pdfparser emite para ligaduras de
-     * fontes embutidas no PDF (ex.: "f&#6684777;m" → "fm" no lugar de "fim").
-     *
-     * Isso evita aparecer "&#6684780;" como lixo visível nos snippets/painel
-     * de texto. A limpeza definitiva (ao extrair) pode ser feita depois;
-     * aqui só sanitizamos para exibição.
-     */
     protected function stripInvalidCharRefs(string $text): string
     {
-        return preg_replace_callback(
-            '/&#(\d+);/',
-            fn ($m) => ((int) $m[1]) > 0x10FFFF ? '' : $m[0],
-            $text
-        ) ?? $text;
+        return PdfExtractedTextSanitizer::sanitize($text);
     }
 
     /**
