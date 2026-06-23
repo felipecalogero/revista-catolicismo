@@ -45,12 +45,11 @@
     </div>
 
     {{-- Busca global --}}
-    <section class="relative border-b border-gray-200 py-8 md:py-10">
-        <div class="absolute inset-0 bg-textura" aria-hidden="true"></div>
-        <div class="relative z-10 container mx-auto flex flex-col items-center justify-center px-4 lg:px-8">
-            <div class="w-full max-w-3xl">
+    <section class="bg-[#f5f0e6] py-6 md:py-8">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="mx-auto w-full max-w-3xl">
                 <x-site-search-form size="large" subtle :showHint="false" />
-                <p class="mt-2.5 text-center text-xs text-gray-500">
+                <p class="mt-2 text-center text-xs text-gray-500">
                     Matérias, edições da revista e acervo histórico
                 </p>
             </div>

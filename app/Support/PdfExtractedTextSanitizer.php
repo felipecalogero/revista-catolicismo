@@ -57,6 +57,24 @@ class PdfExtractedTextSanitizer
             $text
         );
 
+        $text = self::normalizeInlineWhitespace($text);
+
         return $text ?? '';
+    }
+
+    /**
+     * Converte espaços Unicode (nbsp, thin space, etc.) em espaço comum e
+     * colapsa sequências na mesma linha. Preserva quebras de linha.
+     *
+     * PDFs com texto posicionado (subtítulos alinhados à direita na mesma linha)
+     * costumam emitir dezenas de U+00A0 entre fragmentos — o HTML não os colapsa.
+     */
+    public static function normalizeInlineWhitespace(string $text): string
+    {
+        $text = str_replace("\u{00AD}", '', $text);
+        $text = preg_replace('/[^\S\n]+/u', ' ', $text) ?? $text;
+        $text = preg_replace('/ *(\n *)+/u', "\n", $text) ?? $text;
+
+        return preg_replace('/ {2,}/', ' ', $text) ?? $text;
     }
 }

@@ -1,6 +1,6 @@
 <header class="bg-[#fdfcfb] border-b border-gray-200 sticky top-0 z-50 shadow-sm">
     <div class="container mx-auto px-4 lg:px-8">
-        <div class="flex items-center justify-between h-20">
+        <div class="flex items-center justify-between gap-4 h-20">
             {{-- Logo --}}
             <div class="flex items-center">
                 <a href="{{ route('home') }}" class="flex items-center">
@@ -13,16 +13,16 @@
             </div>
 
             {{-- Menu Desktop --}}
-            <nav class="hidden lg:flex items-center space-x-6">
-                <a href="{{ route('home') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+            <nav class="hidden lg:flex min-w-0 flex-1 items-center justify-end gap-x-4 xl:gap-x-5">
+                <a href="{{ route('home') }}" class="shrink-0 whitespace-nowrap text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Início
                 </a>
-                <a href="{{ route('pages.about') }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                <a href="{{ route('pages.about') }}" class="shrink-0 whitespace-nowrap text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                     Sobre nós
                 </a>
                 {{-- Dropdown de Edições --}}
-                <div class="relative group">
-                    <button class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
+                <div class="relative shrink-0 group">
+                    <button class="whitespace-nowrap text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
                         Edições
                         <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -39,24 +39,19 @@
                         </div>
                     </div>
                 </div>
-                @foreach($mainCategories ?? [] as $category)
-                    <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                        {{ $category->name }}
-                    </a>
-                @endforeach
-                @if(isset($moreCategories) && $moreCategories->count() > 0)
-                    {{-- Dropdown de Mais Categorias --}}
-                    <div class="relative group">
-                        <button class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
-                            Mais
+                @if(isset($categories) && $categories->count() > 0)
+                    {{-- Categorias em dropdown: evita nomes longos quebrando na barra --}}
+                    <div class="relative shrink-0 group">
+                        <button class="whitespace-nowrap text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1">
+                            Seções
                             <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="absolute top-full left-0 mt-2 w-56 bg-[#fdfcfb] rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="absolute top-full left-0 mt-2 max-h-[70vh] w-64 overflow-y-auto bg-[#fdfcfb] rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="py-2">
-                                @foreach($moreCategories as $category)
-                                    <a href="{{ route('categories.show', $category->slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
+                                @foreach($categories as $category)
+                                    <a href="{{ route('categories.show', $category->slug) }}" class="block px-4 py-2 text-sm leading-snug text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors">
                                         {{ $category->name }}
                                     </a>
                                 @endforeach
@@ -66,7 +61,7 @@
                 @endif
                 <a
                     href="{{ route('search.index') }}"
-                    class="hidden lg:inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-red-300 hover:text-red-800"
+                    class="hidden shrink-0 whitespace-nowrap lg:inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-red-300 hover:text-red-800"
                     title="Buscar no site"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -75,7 +70,7 @@
                     Buscar
                 </a>
                 @auth
-                    <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300">
+                    <div class="flex shrink-0 items-center gap-2 border-l border-gray-300 pl-3 ml-1">
                         @if(Auth::user()->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" class="bg-red-800 text-white px-3 py-1.5 rounded-md hover:bg-red-900 font-medium text-sm transition-colors shadow-sm">
                                 Admin
@@ -93,10 +88,10 @@
                         </form>
                     </div>
                 @else
-                    <a href="{{ login_url() }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
+                    <a href="{{ login_url() }}" class="shrink-0 whitespace-nowrap text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
                         Entrar
                     </a>
-                    <a href="{{ route('subscriptions.plans') }}" class="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
+                    <a href="{{ route('subscriptions.plans') }}" class="shrink-0 whitespace-nowrap bg-red-800 text-white px-5 py-2 rounded hover:bg-red-900 transition-colors font-medium text-sm">
                         Assinar
                     </a>
                 @endauth
@@ -146,23 +141,17 @@
                         </a>
                     </div>
                 </div>
-                @foreach($mainCategories ?? [] as $category)
-                    <a href="{{ route('categories.show', $category->slug) }}" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors">
-                        {{ $category->name }}
-                    </a>
-                @endforeach
-                @if(isset($moreCategories) && $moreCategories->count() > 0)
-                    {{-- Dropdown Mobile --}}
+                @if(isset($categories) && $categories->count() > 0)
                     <div>
-                        <button id="more-categories-btn" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1 w-full">
-                            Mais Categorias
-                            <svg id="more-categories-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="sections-mobile-btn" class="text-gray-700 hover:text-red-800 font-medium text-sm transition-colors flex items-center gap-1 w-full">
+                            Seções
+                            <svg id="sections-mobile-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div id="more-categories-menu" class="hidden pl-4 mt-2 space-y-2">
-                            @foreach($moreCategories as $category)
-                                <a href="{{ route('categories.show', $category->slug) }}" class="block text-gray-600 hover:text-red-800 font-medium text-sm transition-colors">
+                        <div id="sections-mobile-menu" class="hidden pl-4 mt-2 space-y-2">
+                            @foreach($categories as $category)
+                                <a href="{{ route('categories.show', $category->slug) }}" class="block text-gray-600 hover:text-red-800 font-medium text-sm leading-snug transition-colors">
                                     {{ $category->name }}
                                 </a>
                             @endforeach
@@ -206,10 +195,10 @@
         menu.classList.toggle('hidden');
     });
 
-    // Toggle dropdown de categorias no mobile
-    document.getElementById('more-categories-btn')?.addEventListener('click', function() {
-        const menu = document.getElementById('more-categories-menu');
-        const icon = document.getElementById('more-categories-icon');
+    // Toggle dropdown de Seções no mobile
+    document.getElementById('sections-mobile-btn')?.addEventListener('click', function() {
+        const menu = document.getElementById('sections-mobile-menu');
+        const icon = document.getElementById('sections-mobile-icon');
         if (menu && icon) {
             menu.classList.toggle('hidden');
             icon.classList.toggle('rotate-180');

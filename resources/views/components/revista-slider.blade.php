@@ -1,9 +1,9 @@
 @props(['revistas'])
 
-<section class="bg-[#f5f0e6] py-16 border-b border-gray-200">
+<section class="bg-[#f5f0e6] pb-16">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="bg-white rounded-lg p-6 md:p-8">
-            <div class="mb-10 pb-4 border-b-2 border-red-800">
+            <div class="mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 font-serif mb-2">Edições</h2>
                 <p class="text-gray-600 text-sm">Nossas últimas publicações</p>
             </div>

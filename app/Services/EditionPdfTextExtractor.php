@@ -250,9 +250,7 @@ class EditionPdfTextExtractor
      */
     protected function reflowBlock(string $block): string
     {
-        $block = preg_replace("/[ \t]+/u", ' ', $block);
-
-        return trim($block);
+        return trim(PdfExtractedTextSanitizer::normalizeInlineWhitespace($block));
     }
 
     /**
