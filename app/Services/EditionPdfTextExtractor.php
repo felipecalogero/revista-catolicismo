@@ -146,6 +146,10 @@ class EditionPdfTextExtractor
             return null;
         }
 
+        if ($this->isTableOfContentsPage($text)) {
+            return $this->formatTableOfContentsHtml($text);
+        }
+
         $paragraphs = [];
         foreach ($this->splitIntoParagraphs($text) as $block) {
             $block = $this->reflowBlock($block);
@@ -253,6 +257,73 @@ class EditionPdfTextExtractor
         return trim(PdfExtractedTextSanitizer::normalizeInlineWhitespace($block));
     }
 
+    protected function isTableOfContentsPage(string $text): bool
+    {
+        $normalized = PdfExtractedTextSanitizer::normalizeInlineWhitespace($text);
+
+        if (preg_match('/\bSUM[ÁA]RIO\b/ui', $normalized)) {
+            return true;
+        }
+
+        return preg_match_all(
+            '/\b\d{1,3}\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][A-ZÁÉÍÓÚÂÊÔÃÕÇA-Záéíóúâêôãõç\s\-–—\.]{2,}/u',
+            $normalized
+        ) >= 4;
+    }
+
+    protected function formatTableOfContentsHtml(string $text): ?string
+    {
+        $text = $this->stripAdobeAnnotationJunk($text);
+        $text = PdfExtractedTextSanitizer::normalizeInlineWhitespace($text);
+        $parts = [];
+
+        if (preg_match('/^(.*?)\bSUM[ÁA]RIO\b\s*(.*)$/ui', $text, $headingMatch)) {
+            $before = trim($headingMatch[1]);
+            if ($before !== '') {
+                $parts[] = '<p>'.e($before).'</p>';
+            }
+            $parts[] = '<h3 class="font-serif text-xl text-red-900 mb-4">Sumário</h3>';
+            $text = trim($headingMatch[2]);
+        }
+
+        preg_match_all(
+            '/(\d{1,3})\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇ][A-ZÁÉÍÓÚÂÊÔÃÕÇA-Záéíóúâêôãõç\s\-–—\.\']+?)(?=\s\d{1,3}\s+[A-ZÁÉÍÓÚ]|$)/u',
+            $text,
+            $matches,
+            PREG_SET_ORDER
+        );
+
+        if (count($matches) >= 3) {
+            $items = [];
+            foreach ($matches as $match) {
+                $page = trim($match[1]);
+                $title = trim(PdfExtractedTextSanitizer::normalizeInlineWhitespace($match[2]));
+                if ($title !== '') {
+                    $items[] = '<li class="flex gap-3"><span class="shrink-0 font-medium tabular-nums">'.$page.'</span><span>'.e($title).'</span></li>';
+                }
+            }
+            if ($items !== []) {
+                $parts[] = '<ul class="list-none space-y-1.5">'.implode("\n", $items).'</ul>';
+            }
+        } else {
+            foreach ($this->splitIntoParagraphs($text) as $block) {
+                $block = $this->reflowBlock($block);
+                if ($block !== '') {
+                    $parts[] = '<p>'.e($block).'</p>';
+                }
+            }
+        }
+
+        return $parts === [] ? null : implode("\n", $parts);
+    }
+
+    protected function stripAdobeAnnotationJunk(string $text): string
+    {
+        $text = preg_replace('/\bID\s+DA\s+ANOTA[ÇC][ÃA]O\b.*$/ius', '', $text) ?? $text;
+
+        return trim($text);
+    }
+
     /**
      * Remove "informativos" comuns das edições da Revista Catolicismo que aparecem
      * misturados no texto extraído (expediente, cabeçalhos/rodapés de página, etc.).
@@ -327,7 +398,10 @@ class EditionPdfTextExtractor
         // 4) Remove número de página solto no início (ex.: "3" sozinho, possivelmente seguido de URL/cabeçalho).
         $text = preg_replace("/^\s*\d{1,3}\s*\n/u", '', $text);
 
-        // 5) Normaliza múltiplas linhas em branco.
+        // 5) Remove lixo de anotações Adobe colado no texto.
+        $text = $this->stripAdobeAnnotationJunk($text);
+
+        // 6) Normaliza múltiplas linhas em branco.
         $text = preg_replace("/\n{3,}/u", "\n\n", $text);
 
         return trim($text);

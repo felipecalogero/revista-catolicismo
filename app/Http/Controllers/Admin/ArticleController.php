@@ -9,6 +9,7 @@ use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
@@ -81,9 +82,10 @@ class ArticleController extends Controller
             'description' => 'required|string',
             'content' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_caption' => 'required|string|max:1000',
             'video_url' => 'nullable|url',
-            'category_id' => 'nullable|exists:categories,id',
-            'new_category' => 'nullable|string|max:255',
+            'category_id' => 'required_without:new_category|nullable|exists:categories,id',
+            'new_category' => 'required_without:category_id|nullable|string|max:255',
             'author' => 'nullable|string|max:255',
             'published' => 'boolean',
             'free_access' => 'boolean',
@@ -95,7 +97,7 @@ class ArticleController extends Controller
         // Processar Imagem (Comprimir e Converter para WebP)
         try {
             $imageService = new ImageService;
-            $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
+            $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true, 1920, 1920);
             if ($newImagePath) {
                 $imagePath = $newImagePath;
             }
@@ -140,6 +142,7 @@ class ArticleController extends Controller
             'description' => $validated['description'],
             'content' => $validated['content'],
             'image' => $imagePath,
+            'image_caption' => $validated['image_caption'],
             'video_url' => $validated['video_url'] ?? null,
             'category_id' => $categoryId,
             'category' => $categoryId ? \App\Models\Category::find($categoryId)->name : null, // Manter para compatibilidade
@@ -186,9 +189,15 @@ class ArticleController extends Controller
             'description' => 'required|string',
             'content' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_caption' => [
+                Rule::requiredIf(fn () => $request->hasFile('image') || $article->image),
+                'nullable',
+                'string',
+                'max:1000',
+            ],
             'video_url' => 'nullable|url',
-            'category_id' => 'nullable|exists:categories,id',
-            'new_category' => 'nullable|string|max:255',
+            'category_id' => 'required_without:new_category|nullable|exists:categories,id',
+            'new_category' => 'required_without:category_id|nullable|string|max:255',
             'author' => 'nullable|string|max:255',
             'published' => 'boolean',
             'free_access' => 'boolean',
@@ -205,7 +214,7 @@ class ArticleController extends Controller
             // Processar Imagem (Comprimir e Converter para WebP)
             try {
                 $imageService = new ImageService;
-                $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true);
+                $newImagePath = $imageService->processStorageImage($imagePath, 'public', 80, true, 1920, 1920);
                 if ($newImagePath) {
                     $imagePath = $newImagePath;
                 }
@@ -255,6 +264,7 @@ class ArticleController extends Controller
             'description' => $validated['description'],
             'content' => $validated['content'],
             'image' => $imagePath,
+            'image_caption' => $validated['image_caption'] ?? null,
             'video_url' => $validated['video_url'] ?? null,
             'category_id' => $categoryId,
             'category' => $categoryId ? \App\Models\Category::find($categoryId)->name : null, // Manter para compatibilidade

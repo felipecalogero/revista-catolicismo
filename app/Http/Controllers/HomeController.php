@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Edition;
-use Illuminate\Support\Str;
+use App\Support\ArticleUrl;
 
 class HomeController extends Controller
 {
@@ -36,6 +36,7 @@ class HomeController extends Controller
         // Buscar artigos em destaque: artigos recentes (últimos 30 dias) com mais visualizações
         // Se não houver artigos recentes suficientes, complementa com os mais visualizados
         $destaques = Article::where('published', true)
+            ->with('categoryRelation')
             ->where('published_at', '>=', now()->subDays(30))
             ->orderBy('views', 'desc')
             ->orderBy('published_at', 'desc')
@@ -45,6 +46,7 @@ class HomeController extends Controller
         // Se não houver 4 artigos dos últimos 30 dias, complementa com os mais visualizados de todos os tempos
         if ($destaques->count() < 4) {
             $destaquesAntigos = Article::where('published', true)
+                ->with('categoryRelation')
                 ->where(function ($query) {
                     $query->where('published_at', '<', now()->subDays(30))
                         ->orWhereNull('published_at');
@@ -59,53 +61,31 @@ class HomeController extends Controller
         }
         
         $destaques = $destaques->take(4)
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'excerpt' => $article->description,
-                    'image' => $article->image_url,
-                    'category' => $article->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $article->author,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
-                ];
-            })->toArray();
+            ->map(fn ($article) => $this->formatArticleForCard($article))
+            ->filter(fn ($item) => ! empty($item['category_slug']))
+            ->values()
+            ->toArray();
 
         $noticias = Article::where('published', true)
+            ->with('categoryRelation')
             ->orderBy('published_at', 'desc')
             ->limit(16)
             ->get()
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'excerpt' => $article->description,
-                    'image' => $article->image_url,
-                    'category' => $article->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $article->author,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
-                ];
-            })->toArray();
+            ->map(fn ($article) => $this->formatArticleForCard($article))
+            ->filter(fn ($item) => ! empty($item['category_slug']))
+            ->values()
+            ->toArray();
 
         $maisLidas = Article::where('published', true)
+            ->with('categoryRelation')
             ->orderBy('views', 'desc')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get()
-            ->map(function ($article) {
-                $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                return [
-                    'title' => $article->title,
-                    'image' => $article->image_url,
-                    'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                    'slug' => $article->slug,
-                    'category_slug' => $categorySlug,
-                ];
-            })->toArray();
+            ->map(fn ($article) => $this->formatArticleForCard($article))
+            ->filter(fn ($item) => ! empty($item['category_slug']))
+            ->values()
+            ->toArray();
 
         // Buscar as 3 categorias mais visitadas (baseado na soma de views dos artigos)
         $topCategories = Category::withCount(['articles' => function ($query) {
@@ -123,6 +103,7 @@ class HomeController extends Controller
         $categoriasMaisVisitadas = [];
         foreach ($topCategories as $category) {
             $artigos = Article::where('published', true)
+                ->with('categoryRelation')
                 ->where(function ($query) use ($category) {
                     $query->where('category_id', $category->id)
                         ->orWhere('category', $category->name);
@@ -130,19 +111,10 @@ class HomeController extends Controller
                 ->orderBy('published_at', 'desc')
                 ->limit(4)
                 ->get()
-                ->map(function ($article) {
-                    $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-                    return [
-                        'title' => $article->title,
-                        'excerpt' => $article->description,
-                        'image' => $article->image_url,
-                        'category' => $article->category_name,
-                        'category_slug' => $categorySlug,
-                        'author' => $article->author,
-                        'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
-                        'slug' => $article->slug,
-                    ];
-                })->toArray();
+                ->map(fn ($article) => $this->formatArticleForCard($article))
+                ->filter(fn ($item) => ! empty($item['category_slug']))
+                ->values()
+                ->toArray();
 
             if (count($artigos) > 0) {
                 $categoriasMaisVisitadas[] = [
@@ -171,5 +143,22 @@ class HomeController extends Controller
             'categoriasMaisVisitadas',
             'categorias'
         ));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function formatArticleForCard(Article $article): array
+    {
+        return [
+            'title' => $article->title,
+            'excerpt' => $article->description,
+            'image' => $article->image_url,
+            'category' => $article->category_name,
+            'category_slug' => ArticleUrl::resolveCategorySlug($article),
+            'author' => $article->author,
+            'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
+            'slug' => $article->slug,
+        ];
     }
 }

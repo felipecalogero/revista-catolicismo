@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Support\ArticleUrl;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -56,6 +56,7 @@ class ArticleController extends Controller
 
         // Buscar artigos relacionados (mesma categoria, excluindo o artigo atual)
         $relatedArticles = Article::where('published', true)
+            ->with('categoryRelation')
             ->where('id', '!=', $article->id)
             ->where(function ($query) use ($category, $categoryModel) {
                 if ($categoryModel) {
@@ -71,24 +72,21 @@ class ArticleController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->get()
-            ->map(function ($relatedArticle) {
-                $categorySlug = $relatedArticle->categoryRelation ? $relatedArticle->categoryRelation->slug : Str::slug($relatedArticle->category);
-
-                return [
-                    'title' => $relatedArticle->title,
-                    'excerpt' => $relatedArticle->description,
-                    'image' => $relatedArticle->image_url ?? $relatedArticle->image,
-                    'category' => $relatedArticle->category_name,
-                    'category_slug' => $categorySlug,
-                    'author' => $relatedArticle->author,
-                    'date' => $relatedArticle->published_at ? $relatedArticle->published_at->format('d/m/Y') : $relatedArticle->created_at->format('d/m/Y'),
-                    'slug' => $relatedArticle->slug,
-                ];
-            })
+            ->map(fn ($relatedArticle) => [
+                'title' => $relatedArticle->title,
+                'excerpt' => $relatedArticle->description,
+                'image' => $relatedArticle->image_url ?? $relatedArticle->image,
+                'category' => $relatedArticle->category_name,
+                'category_slug' => ArticleUrl::resolveCategorySlug($relatedArticle),
+                'author' => $relatedArticle->author,
+                'date' => $relatedArticle->published_at ? $relatedArticle->published_at->format('d/m/Y') : $relatedArticle->created_at->format('d/m/Y'),
+                'slug' => $relatedArticle->slug,
+            ])
+            ->filter(fn ($item) => ! empty($item['category_slug']))
+            ->values()
             ->toArray();
 
-        // Obter o slug da categoria para o botão "Ver mais"
-        $categorySlug = $categoryModel ? $categoryModel->slug : Str::slug($article->category ?? $category);
+        $categorySlug = ArticleUrl::resolveCategorySlug($article) ?? ($categoryModel?->slug);
 
         return view('articles.show', compact('article', 'hasFullAccess', 'relatedArticles', 'categorySlug', 'requiresLoginOnly'));
     }
@@ -146,14 +144,12 @@ class ArticleController extends Controller
 
         // Formatar artigos
         $articles->getCollection()->transform(function ($article) {
-            $categorySlug = $article->categoryRelation ? $article->categoryRelation->slug : Str::slug($article->category);
-
             return [
                 'title' => $article->title,
                 'excerpt' => $article->description,
                 'image' => $article->image_url ?? $article->image,
                 'category' => $article->category_name,
-                'category_slug' => $categorySlug,
+                'category_slug' => ArticleUrl::resolveCategorySlug($article),
                 'author' => $article->author,
                 'date' => $article->published_at ? $article->published_at->format('d/m/Y') : $article->created_at->format('d/m/Y'),
                 'slug' => $article->slug,

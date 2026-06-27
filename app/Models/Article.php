@@ -20,6 +20,7 @@ class Article extends Model
         'description',
         'content',
         'image',
+        'image_caption',
         'video_url',
         'category', // Mantido para compatibilidade
         'author',

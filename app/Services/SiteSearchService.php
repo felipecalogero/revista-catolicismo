@@ -7,11 +7,12 @@ use App\Models\Edition;
 use App\Models\EditionArticle;
 use App\Models\EditionPageText;
 use App\Support\MagazineViewerUrl;
+use App\Support\ArticleUrl;
 use App\Support\SearchHighlighter;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class SiteSearchService
 {
@@ -71,12 +72,20 @@ class SiteSearchService
 
         if ($paginate && $type === 'articles') {
             $paginator = $query->paginate($perPage)->withQueryString();
-            $paginator->getCollection()->transform(fn ($a) => $this->formatArticle($a, $term));
+            $paginator->setCollection(
+                $paginator->getCollection()
+                    ->map(fn ($a) => $this->formatArticle($a, $term))
+                    ->filter()
+                    ->values()
+            );
 
             return $paginator;
         }
 
-        return $query->limit($previewLimit)->get()->map(fn ($a) => $this->formatArticle($a, $term));
+        return $query->limit($previewLimit)->get()
+            ->map(fn ($a) => $this->formatArticle($a, $term))
+            ->filter()
+            ->values();
     }
 
     /**
@@ -288,18 +297,24 @@ class SiteSearchService
             ->all();
     }
 
-    protected function formatArticle(Article $article, string $term): array
+    protected function formatArticle(Article $article, string $term): ?array
     {
-        $categorySlug = $article->categoryRelation
-            ? $article->categoryRelation->slug
-            : Str::slug($article->category ?? '');
+        $url = ArticleUrl::showUrl($article);
+        if ($url === null) {
+            Log::warning('SiteSearchService: artigo omitido da busca por falta de categoria.', [
+                'article_id' => $article->id,
+                'slug' => $article->slug,
+            ]);
+
+            return null;
+        }
 
         $snippetSource = $article->description ?: $article->content;
 
         return [
             'type' => 'article',
             'title' => $article->title,
-            'url' => route('articles.show', [$categorySlug, $article->slug]),
+            'url' => $url,
             'image' => $article->image_url,
             'meta' => collect([
                 $article->category_name,

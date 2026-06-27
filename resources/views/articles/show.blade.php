@@ -7,14 +7,21 @@
     <article class="relative z-10">
     {{-- Imagem Principal --}}
     @if($article->image_url)
-        <div class="w-full h-[500px] md:h-[600px] relative overflow-hidden">
-            <img
-                src="{{ $article->image_url }}"
-                alt="{{ $article->title }}"
-                class="w-full h-full object-cover"
-            >
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        </div>
+        <figure class="w-full bg-gray-900">
+            <div class="relative mx-auto aspect-[16/9] max-h-[70vh] w-full overflow-hidden">
+                <img
+                    src="{{ $article->image_url }}"
+                    alt="{{ $article->image_caption ?: $article->title }}"
+                    class="h-full w-full object-contain"
+                >
+                <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            </div>
+            @if($article->image_caption)
+                <figcaption class="bg-[#f5f0e6] px-4 py-3 text-center text-sm italic text-gray-600 md:px-8">
+                    {{ $article->image_caption }}
+                </figcaption>
+            @endif
+        </figure>
     @endif
 
     <div class="container mx-auto px-4 lg:px-8 py-12">
