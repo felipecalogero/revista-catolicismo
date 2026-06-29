@@ -8,6 +8,23 @@
     <div class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
             <div class="p-8 md:p-12">
+            {{-- Breadcrumbs --}}
+            <nav class="mb-6 flex min-w-0 items-center gap-x-2 overflow-hidden text-sm text-gray-600 whitespace-nowrap" aria-label="Breadcrumb">
+                <a href="{{ route('home') }}" class="shrink-0 hover:text-red-800 transition-colors">Início</a>
+                <span class="shrink-0 text-gray-400" aria-hidden="true">/</span>
+                @if($article->categoryRelation)
+                    <a href="{{ route('categories.show', $article->categoryRelation->slug) }}" class="shrink-0 hover:text-red-800 transition-colors">
+                        {{ $article->categoryRelation->name }}
+                    </a>
+                @elseif($article->category)
+                    <span class="shrink-0 text-gray-900 font-medium">{{ $article->category }}</span>
+                @endif
+                @if($article->categoryRelation || $article->category)
+                    <span class="shrink-0 text-gray-400" aria-hidden="true">/</span>
+                @endif
+                <span class="min-w-0 truncate text-gray-900 font-medium">{{ $article->title }}</span>
+            </nav>
+
             @if($article->image_url)
                 <figure class="mb-8">
                     <img
@@ -22,21 +39,6 @@
                     @endif
                 </figure>
             @endif
-
-            {{-- Breadcrumbs --}}
-            <nav class="text-sm text-gray-600 mb-4">
-                <a href="{{ route('home') }}" class="hover:text-red-800 transition-colors">Início</a>
-                <span class="mx-2">/</span>
-                @if($article->categoryRelation)
-                    <a href="{{ route('categories.show', $article->categoryRelation->slug) }}" class="hover:text-red-800 transition-colors">
-                        {{ $article->categoryRelation->name }}
-                    </a>
-                @elseif($article->category)
-                    <span class="text-gray-900 font-medium">{{ $article->category }}</span>
-                @endif
-                <span class="mx-2">/</span>
-                <span class="text-gray-900 font-medium line-clamp-1">{{ $article->title }}</span>
-            </nav>
 
             {{-- Cabeçalho do Artigo --}}
             <header class="mb-8">
