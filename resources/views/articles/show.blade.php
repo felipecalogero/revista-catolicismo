@@ -7,14 +7,13 @@
     <article class="relative z-10">
     {{-- Imagem Principal --}}
     @if($article->image_url)
-        <figure class="w-full bg-[#f5f0e6]">
+        <figure class="w-full bg-gradient-to-b from-white to-[#f5f0e6]">
             <div class="relative mx-auto aspect-[16/9] max-h-[70vh] w-full overflow-hidden">
                 <img
                     src="{{ $article->image_url }}"
                     alt="{{ $article->image_caption ?: $article->title }}"
                     class="h-full w-full object-contain"
                 >
-                <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
             </div>
             @if($article->image_caption)
                 <figcaption class="bg-[#f5f0e6] px-4 py-3 text-center text-sm italic text-gray-600 md:px-8">
