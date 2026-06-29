@@ -7,7 +7,7 @@
     <article class="relative z-10">
     {{-- Imagem Principal --}}
     @if($article->image_url)
-        <figure class="w-full bg-gray-900">
+        <figure class="w-full bg-[#f5f0e6]">
             <div class="relative mx-auto aspect-[16/9] max-h-[70vh] w-full overflow-hidden">
                 <img
                     src="{{ $article->image_url }}"
