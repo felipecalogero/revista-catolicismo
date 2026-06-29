@@ -5,26 +5,26 @@
 @section('content')
 <div class="relative min-h-screen bg-[#f5f0e6]">
     <article class="relative z-10">
-    {{-- Imagem Principal --}}
-    @if($article->image_url)
-        <figure class="w-full bg-gradient-to-b from-white to-[#f5f0e6]">
-            <div class="relative mx-auto aspect-[16/9] max-h-[70vh] w-full overflow-hidden">
-                <img
-                    src="{{ $article->image_url }}"
-                    alt="{{ $article->image_caption ?: $article->title }}"
-                    class="h-full w-full object-contain"
-                >
-            </div>
-            @if($article->image_caption)
-                <figcaption class="bg-[#f5f0e6] px-4 py-3 text-center text-sm italic text-gray-600 md:px-8">
-                    {{ $article->image_caption }}
-                </figcaption>
+    <div class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            @if($article->image_url)
+                <figure>
+                    <div class="flex items-center justify-center bg-[#f5f0e6]">
+                        <img
+                            src="{{ $article->image_url }}"
+                            alt="{{ $article->image_caption ?: $article->title }}"
+                            class="w-full max-h-[min(70vh,32rem)] object-contain"
+                        >
+                    </div>
+                    @if($article->image_caption)
+                        <figcaption class="border-b border-gray-100 bg-white px-6 py-3 text-center text-sm italic text-gray-600 md:px-10">
+                            {{ $article->image_caption }}
+                        </figcaption>
+                    @endif
+                </figure>
             @endif
-        </figure>
-    @endif
 
-    <div class="container mx-auto px-4 lg:px-8 py-12">
-        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
+            <div class="p-8 md:p-12">
             {{-- Breadcrumbs --}}
             <nav class="text-sm text-gray-600 mb-4">
                 <a href="{{ route('home') }}" class="hover:text-red-800 transition-colors">Início</a>
@@ -218,6 +218,7 @@
                         <span>WhatsApp</span>
                     </a>
                 </div>
+            </div>
             </div>
         </div>
     </div>
