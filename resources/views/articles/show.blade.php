@@ -6,25 +6,23 @@
 <div class="relative min-h-screen bg-[#f5f0e6]">
     <article class="relative z-10">
     <div class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
-        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+            <div class="p-8 md:p-12">
             @if($article->image_url)
-                <figure>
-                    <div class="flex items-center justify-center bg-[#f5f0e6]">
-                        <img
-                            src="{{ $article->image_url }}"
-                            alt="{{ $article->image_caption ?: $article->title }}"
-                            class="w-full max-h-[min(70vh,32rem)] object-contain"
-                        >
-                    </div>
+                <figure class="mb-8">
+                    <img
+                        src="{{ $article->image_url }}"
+                        alt="{{ $article->image_caption ?: $article->title }}"
+                        class="w-full max-h-[min(70vh,32rem)] rounded-lg object-contain"
+                    >
                     @if($article->image_caption)
-                        <figcaption class="border-b border-gray-100 bg-white px-6 py-3 text-center text-sm italic text-gray-600 md:px-10">
+                        <figcaption class="mt-3 text-center text-sm italic text-gray-600">
                             {{ $article->image_caption }}
                         </figcaption>
                     @endif
                 </figure>
             @endif
 
-            <div class="p-8 md:p-12">
             {{-- Breadcrumbs --}}
             <nav class="text-sm text-gray-600 mb-4">
                 <a href="{{ route('home') }}" class="hover:text-red-800 transition-colors">Início</a>
