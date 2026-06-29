@@ -9,7 +9,7 @@
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
             <div class="p-8 md:p-12">
             {{-- Breadcrumbs --}}
-            <nav class="mb-6 flex min-w-0 items-center gap-x-2 overflow-hidden text-sm text-gray-600 whitespace-nowrap" aria-label="Breadcrumb">
+            <nav class="mb-8 flex min-w-0 items-center gap-x-4 overflow-hidden text-sm text-gray-600 whitespace-nowrap md:gap-x-5" aria-label="Breadcrumb">
                 <a href="{{ route('home') }}" class="shrink-0 hover:text-red-800 transition-colors">Início</a>
                 <span class="shrink-0 text-gray-400" aria-hidden="true">/</span>
                 @if($article->categoryRelation)
