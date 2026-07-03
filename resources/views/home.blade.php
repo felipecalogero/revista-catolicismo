@@ -124,11 +124,13 @@
                                     <article class="group cursor-pointer pb-5 {{ !$loop->last ? 'border-b border-gray-100' : '' }}">
                                         <a href="{{ isset($artigo['slug']) && isset($artigo['category_slug']) ? route('articles.show', [$artigo['category_slug'], $artigo['slug']]) : '#' }}" class="block">
                                             <div class="flex gap-4">
-                                                <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+                                                <div class="article-card-image-wrap article-card-image-wrap--square shadow-sm">
                                                     <img
                                                         src="{{ $artigo['image'] ?? 'https://via.placeholder.com/150?text=Revista+Catolicismo' }}"
                                                         alt="{{ $artigo['title'] ?? '' }}"
-                                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                        class="article-card-image transition-transform duration-300 group-hover:scale-[1.03]"
+                                                        loading="lazy"
+                                                        decoding="async"
                                                     >
                                                 </div>
                                                 <div class="flex-1">

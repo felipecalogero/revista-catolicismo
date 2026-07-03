@@ -29,10 +29,10 @@
         'horizontal' => 'flex flex-row gap-3',
     ];
     
-    $imageClasses = [
-        'default' => 'w-full h-32 object-cover',
-        'large' => 'w-full h-48 object-cover',
-        'horizontal' => 'w-24 h-24 object-cover flex-shrink-0 rounded',
+    $imageWrapperClasses = [
+        'default' => 'article-card-image-wrap',
+        'large' => 'article-card-image-wrap article-card-image-wrap--large',
+        'horizontal' => 'article-card-image-wrap article-card-image-wrap--square',
     ];
     
     $titleClasses = [
@@ -50,11 +50,13 @@
 
 <article class="{{ $sizeClasses[$size] }} {{ $cardClasses[$size] }} group cursor-pointer">
     <a href="{{ $href }}" class="block h-full flex flex-col">
-        <div class="relative overflow-hidden {{ $size === 'horizontal' ? '' : 'rounded-t-lg' }}">
-            <img 
-                src="{{ $imageUrl }}" 
+        <div class="{{ $imageWrapperClasses[$size] }} {{ $size !== 'horizontal' ? 'rounded-t-lg' : '' }}">
+            <img
+                src="{{ $imageUrl }}"
                 alt="{{ $title ?? '' }}"
-                class="{{ $imageClasses[$size] }} transition-transform duration-300 group-hover:scale-105"
+                class="article-card-image transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="lazy"
+                decoding="async"
             >
             @if($categoryLabel)
                 <span class="absolute top-1.5 left-1.5 bg-red-800 text-white px-1.5 py-0.5 text-xs font-medium rounded">

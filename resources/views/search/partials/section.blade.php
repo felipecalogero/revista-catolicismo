@@ -28,11 +28,12 @@
                                 <img
                                     src="{{ $item['image'] }}"
                                     alt=""
-                                    class="h-32 w-24 rounded object-cover shadow sm:h-36 sm:w-28"
+                                    class="search-result-image shadow"
                                     loading="lazy"
+                                    decoding="async"
                                 >
                             @else
-                                <div class="flex h-32 w-24 items-center justify-center rounded bg-gray-100 text-xs text-gray-400 sm:h-36 sm:w-28">
+                                <div class="search-result-image flex items-center justify-center text-xs text-gray-400">
                                     Sem imagem
                                 </div>
                             @endif
