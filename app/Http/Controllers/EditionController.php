@@ -11,6 +11,7 @@ use App\Support\PdfExtractedTextSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditionController extends Controller
 {
@@ -723,7 +724,7 @@ class EditionController extends Controller
         return implode(' ', array_map(fn ($w) => '+'.$w.'*', $words));
     }
 
-    protected function respondPdfDownload(Edition $edition): BinaryFileResponse|\Illuminate\Http\RedirectResponse
+    protected function respondPdfDownload(Edition $edition): BinaryFileResponse|StreamedResponse|\Illuminate\Http\RedirectResponse
     {
         if (! $edition->pdf_file) {
             abort(404, 'Arquivo PDF não disponível para esta edição.');
