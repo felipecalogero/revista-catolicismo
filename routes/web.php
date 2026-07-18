@@ -1,25 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\LogoutController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditionController;
-use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PagBankWebhookController;
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SubscriptionController;
+use Illuminate\Support\Facades\Route;
 
 // Rotas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -134,7 +133,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('edicoes', \App\Http\Controllers\Admin\EditionController::class)->names('editions');
     Route::get('/usuarios/importar', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
     Route::post('/usuarios/importar', [\App\Http\Controllers\Admin\UserController::class, 'storeImport'])->name('users.storeImport');
-    Route::get('/usuarios/importar/progresso', [\App\Http\Controllers\Admin\UserController::class, 'importProgress'])->name('users.importProgress');
     Route::resource('usuarios', \App\Http\Controllers\Admin\UserController::class)->names('users');
     Route::post('/edicoes/{id}/publicar', [\App\Http\Controllers\Admin\EditionController::class, 'publish'])->name('editions.publish');
     Route::post('/edicoes/{id}/despublicar', [\App\Http\Controllers\Admin\EditionController::class, 'unpublish'])->name('editions.unpublish');

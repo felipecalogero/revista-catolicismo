@@ -1,0 +1,4 @@
+Nome,E-mail,CPF,Telefone,Endereço,Bairro,Cidade,UF,CEP,Produto,Status,Valor,Início,Fim,Profissão
+Ana Teste,ana.teste@import.local,39053344705,11987654321,Rua A 100,Centro,São Paulo,SP,01310100,NOVO PREÇO - FISICO,active,245.81,2026-01-01,2027-01-01,Advogada
+Bruno Digital,bruno.digital@import.local,39053344706,21988776655,,,,RJ,,Assinatura Digital,active,50.00,2026-02-01,2027-02-01,
+Cancelado User,cancelado@import.local,39053344707,31999887766,Rua B 50,Savassi,Belo Horizonte,MG,30130110,NOVO PREÇO - FISICO,canceled,245.81,2026-01-01,2027-01-01,

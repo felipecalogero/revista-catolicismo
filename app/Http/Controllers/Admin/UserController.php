@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\UserImport\ImportOptions;
+use App\Services\UserImport\UserImportService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
@@ -323,72 +324,88 @@ class UserController extends Controller
     /**
      * Process the user import (CSV, XLSX, XLS).
      */
-    public function storeImport(Request $request)
+    public function storeImport(Request $request, UserImportService $service)
     {
-        $mode = strtolower(trim((string) $request->input('import_mode', '')));
-        if ($mode === 'digital') {
-            $mode = 'virtual';
-        }
-        if ($mode !== '') {
-            $request->merge(['import_mode' => $mode]);
-        }
-
         $request->validate([
             'file' => 'required|file|mimes:csv,txt,xlsx,xls',
-            'job_id' => 'required|string',
-            'import_mode' => 'required|in:physical,virtual',
         ]);
 
-        $jobId = $request->input('job_id');
-        $import = new \App\Imports\UsersImport(
-            $jobId,
-            (string) $request->input('import_mode'),
-            $request->boolean('extend_expired_vigence'),
+        $uploaded = $request->file('file');
+        $path = $uploaded->getRealPath() ?: $uploaded->getPathname();
+
+        $options = new ImportOptions(
+            updateExisting: true,
+            extendExpiredVigence: $request->boolean('extend_expired_vigence'),
         );
 
-        // Inicializar progresso caso demore
-        Cache::put('import_progress_'.$jobId, ['current' => 0, 'total' => 0, 'status' => 'starting'], 300);
-
         try {
-            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+            $result = $service->import($path, $options);
 
-            $message = "{$import->count} usuários importados com sucesso!";
+            if ($result->processed() === 0 && $result->failed > 0 && $result->created === 0 && $result->updated === 0) {
+                $fatal = $result->errors[0] ?? 'Falha na importação.';
 
-            if (! empty($import->errors)) {
-                $errorMsg = count($import->errors) > 5
-                    ? implode(' ', array_slice($import->errors, 0, 5)).' ... e mais '.(count($import->errors) - 5).' erros.'
-                    : implode(' ', $import->errors);
-
-                return redirect()->route('admin.users.index')->with('success', $message)->with('warning', 'Alguns registros falharam: '.$errorMsg);
+                return $this->importFinishedResponse($request, null, null, $fatal, $result->errors);
             }
 
-            return redirect()->route('admin.users.index')->with('success', $message);
+            $message = $result->successMessage();
+            $warning = $result->warningMessage();
+
+            return $this->importFinishedResponse($request, $message, $warning, null, $result->errors);
         } catch (\Exception $e) {
-            if (isset($jobId)) {
-                Cache::put('import_progress_'.$jobId, ['status' => 'error', 'message' => $e->getMessage()], 300);
-            }
-
-            return redirect()->route('admin.users.index')->with('error', 'Erro fatal na importação: '.$e->getMessage());
+            return $this->importFinishedResponse($request, null, null, 'Erro fatal na importação: '.$e->getMessage());
         }
     }
 
     /**
-     * Endpoint for AJAX progress tracking
+     * Resposta da importação: flash na sessão e JSON no AJAX.
+     *
+     * @param  list<string>  $importErrors
      */
-    public function importProgress(Request $request)
-    {
-        $jobId = $request->query('job_id');
-        if (! $jobId) {
-            return response()->json(['status' => 'error', 'message' => 'Job ID não fornecido.'], 400);
+    protected function importFinishedResponse(
+        Request $request,
+        ?string $success = null,
+        ?string $warning = null,
+        ?string $error = null,
+        array $importErrors = [],
+    ) {
+        if ($success !== null) {
+            session()->flash('success', $success);
+        }
+        if ($warning !== null) {
+            session()->flash('warning', $warning);
+        }
+        if ($error !== null) {
+            session()->flash('error', $error);
+        }
+        if ($importErrors !== []) {
+            session()->flash('import_errors', $importErrors);
         }
 
-        $progress = Cache::get('import_progress_'.$jobId, [
-            'current' => 0,
-            'total' => 0,
-            'status' => 'pending',
-        ]);
+        $redirect = route('admin.users.index');
 
-        return response()->json($progress);
+        if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'redirect' => $redirect,
+                'success' => $success,
+                'warning' => $warning,
+                'error' => $error,
+            ]);
+        }
+
+        $response = redirect($redirect);
+        if ($success !== null) {
+            $response->with('success', $success);
+        }
+        if ($warning !== null) {
+            $response->with('warning', $warning);
+        }
+        if ($error !== null) {
+            $response->with('error', $error);
+        }
+        if ($importErrors !== []) {
+            $response->with('import_errors', $importErrors);
+        }
+
+        return $response;
     }
-
 }

@@ -74,6 +74,29 @@
                 </div>
             @endif
 
+            @if(session('warning') || session('import_errors'))
+                <div class="mb-6 bg-amber-50 border border-amber-300 text-amber-900 px-4 py-3 rounded">
+                    @if(session('warning'))
+                        <p class="font-medium">{{ session('warning') }}</p>
+                    @endif
+                    @if(session('import_errors'))
+                        @php
+                            $importErrors = session('import_errors');
+                            $shown = array_slice($importErrors, 0, 10);
+                            $extra = count($importErrors) - count($shown);
+                        @endphp
+                        <ul class="mt-2 list-disc list-inside space-y-1 text-sm max-h-48 overflow-y-auto">
+                            @foreach($shown as $importError)
+                                <li>{{ $importError }}</li>
+                            @endforeach
+                        </ul>
+                        @if($extra > 0)
+                            <p class="mt-2 text-sm text-amber-800">… e mais {{ $extra }} {{ $extra === 1 ? 'erro' : 'erros' }}.</p>
+                        @endif
+                    @endif
+                </div>
+            @endif
+
             @if(session('error'))
                 <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                     {{ session('error') }}
